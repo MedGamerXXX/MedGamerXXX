@@ -1,16 +1,17 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
   "name": "Agenda ENARM",
-  "orientation": "any",
-  "scope": "/",
-  "short_name": "ENARM",
-  "start_url": "/",
-  "theme_color": "#ffffff",
-  "id": "agenda-enarm-app",
-  "description": "Agenda de estudio ENARM y proyectos",
-  "categories": [
-    "education"
+  "short_name": "Agenda ENARM",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%232563eb'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='sans-serif' font-size='220' font-weight='bold'%3EEN%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }
