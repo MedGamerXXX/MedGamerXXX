@@ -1,0 +1,16 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Agenda ENARM",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "ENARM",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "agenda-enarm-app",
+  "description": "Agenda de estudio ENARM y proyectos",
+  "categories": [
+    "education"
+  ]
+}

@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Agenda ENARM" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Agenda Médica ENARM & Proyectos</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Librería de Muestras Reales de Guitarra Eléctrica (Soundfont MusyngKite) -->
+  <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b1120;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      70% { transform: scale(1.1); opacity: 0; }
+      100% { transform: scale(0.95); opacity: 0; }
+    }
+    .animate-pulse-ring {
+      animation: pulse-ring 1.8s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Barra Superior -->
+  <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">Agenda ENARM & Proyectos</h1>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">v1.1</span>
+          </div>
+          <p id="header-subtitle" class="text-xs text-slate-400">Rutina 06:30 – 17:30 · 9h productivas</p>
+        </div>
+      </div>
+
+      <!-- Controles de Alarma en Tiempo Real, Actualización y Ajustes -->
+      <div class="flex items-center gap-2">
+        <div class="hidden md:flex flex-col items-end mr-1">
+          <span id="live-clock" class="text-sm font-mono font-bold text-cyan-400">00:00:00</span>
+          <span id="next-block-hint" class="text-[11px] text-slate-400">Sincronizado</span>
+        </div>
+
+        <button id="toggle-alarm-btn" onclick="toggleScheduleAlarms()"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200">
+          <span id="alarm-dot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+          <span id="alarm-btn-text">Alarmas: OFF</span>
+        </button>
+
+        <button onclick="testAlarmSound()" title="Probar sonido de alarma"
+          class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition" aria-label="Probar alarma">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+        </button>
+
+        <button onclick="checkAppUpdate()" title="Buscar actualización / Recargar caché sin borrar avances"
+          class="flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold transition" aria-label="Actualizar app">
+          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span class="hidden sm:inline">Actualizar</span>
+        </button>
+
+        <button onclick="openSettingsModal()" title="Ajustes, Editor y Respaldos"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold transition" aria-label="Ajustes y Editor">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Editor</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner de Alarma Activa (Modal/Toast persistente cuando suena) -->
+  <div id="alarm-banner" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-cyan-500 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl shadow-cyan-500/20">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center relative">
+        <div class="absolute inset-0 rounded-full border-2 border-cyan-400 animate-pulse-ring"></div>
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <p class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-1">Cambio de Bloque</p>
+      <h2 id="alarm-banner-title" class="text-xl font-extrabold text-white mb-2">¡Hora de iniciar!</h2>
+      <p id="alarm-banner-desc" class="text-sm text-slate-300 mb-6">Es momento de pasar a tu siguiente bloque de trabajo.</p>
+      <button onclick="dismissAlarm()"
+        class="w-full py-3.5 px-5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg transition">
+        Detener Alarma y Continuar
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5 space-y-6">
+
+    <!-- Tarjetas de Estadísticas Rápidas -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Progreso ENARM</p>
+        <div class="flex items-baseline gap-1.5 mt-1">
+          <span id="stat-enarm-days" class="text-xl font-extrabold text-cyan-400">0/30</span>
+          <span class="text-xs text-slate-500">días</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Horas ENARM</p>
+        <div class="flex items-baseline gap-1.5 mt-1">
+          <span id="stat-hours-enarm" class="text-xl font-extrabold text-emerald-400">0h</span>
+          <span class="text-xs text-slate-500">/ 90h</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Horas Libro</p>
+        <div class="flex items-baseline gap-1.5 mt-1">
+          <span id="stat-hours-book" class="text-xl font-extrabold text-indigo-400">0h</span>
+          <span class="text-xs text-slate-500">/ 60h</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Ankis & Ventas</p>
+        <div class="flex items-baseline gap-1.5 mt-1">
+          <span id="stat-hours-ankis" class="text-xl font-extrabold text-amber-400">0h</span>
+          <span class="text-xs text-slate-500">/ 60h</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Videos Página</p>
+        <div class="flex items-baseline gap-1.5 mt-1">
+          <span id="stat-hours-videos" class="text-xl font-extrabold text-rose-400">0h</span>
+          <span class="text-xs text-slate-500">/ 60h</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Fin Estimado</p>
+        <div class="mt-1">
+          <span id="stat-end-date" class="text-sm font-bold text-slate-200">24 Dic 2026</span>
+          <p id="stat-postponed-count" class="text-[11px] text-slate-500">0 días recorridos</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navegación por Pestañas -->
+    <nav class="flex gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+      <button id="tab-btn-today" onclick="switchTab('today')"
+        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+        Agenda del Día
+      </button>
+      <button id="tab-btn-grid" onclick="switchTab('grid')"
+        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-400 hover:text-slate-200">
+        Cuadritos de Seguimiento
+      </button>
+      <button id="tab-btn-syllabus" onclick="switchTab('syllabus')"
+        class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-400 hover:text-slate-200">
+        Temario 30 Días
+      </button>
+    </nav>
+
+    <!-- VISTA 1: AGENDA DEL DÍA -->
+    <div id="view-today" class="space-y-5">
+
+      <!-- Selector de Fecha y Botón Posponer / Recorrer -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="flex items-center justify-between sm:justify-start gap-3">
+          <button onclick="changeSelectedDate(-1)"
+            class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition" aria-label="Día anterior">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <div class="text-center sm:text-left min-w-[200px]">
+            <div class="flex items-center justify-center sm:justify-start gap-2">
+              <h2 id="selected-date-label" class="text-base sm:text-lg font-bold text-white capitalize">Miércoles, 25 Nov 2026</h2>
+              <span id="selected-day-badge" class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                Día 1 / 30
+              </span>
+            </div>
+            <p id="selected-date-status" class="text-xs text-slate-400 mt-0.5">Jornada activa · 0 de 4 bloques clave completados</p>
+          </div>
+
+          <button onclick="changeSelectedDate(1)"
+            class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition" aria-label="Día siguiente">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <button onclick="goToPlanStartOrToday()"
+            class="hidden sm:inline-flex px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 transition">
+            Ir a Hoy / Inicio
+          </button>
+        </div>
+
+        <!-- Botón de Posponer / Recorrer Calendario -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="postpone-day-btn" onclick="openPostponeModal()"
+            class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-semibold text-xs sm:text-sm transition">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+            <span id="postpone-btn-label">Posponer día al mañana (+1 día)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Temporizador Activo (si hay uno corriendo) -->
+      <div id="active-timer-card" class="hidden bg-gradient-to-r from-slate-900 via-cyan-950/40 to-slate-900 border border-cyan-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6 animate-spin" style="animation-duration: 8s;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-cyan-400">Temporizador en curso</p>
+            <h3 id="timer-block-name" class="text-sm sm:text-base font-bold text-white">Estudio ENARM</h3>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span id="timer-display" class="text-2xl sm:text-3xl font-mono font-extrabold text-white tracking-wider">03:00:00</span>
+          <button id="timer-pause-btn" onclick="togglePauseTimer()"
+            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-white transition">
+            Pausar
+          </button>
+          <button onclick="stopTimer()"
+            class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-xs font-semibold text-rose-300 transition">
+            Detener
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjeta del Tema ENARM del Día -->
+      <div id="enarm-topic-card" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+        <!-- Renderizado dinámicamente -->
+      </div>
+
+      <!-- Tareas Arrastradas de Días Anteriores (si existen) -->
+      <div id="carried-over-section" class="hidden bg-amber-950/20 border border-amber-500/30 rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <h3 class="text-sm font-bold text-amber-300">Tareas arrastradas de días anteriores</h3>
+          </div>
+          <span class="text-xs text-amber-400/80">Marca los cuadritos al ponerte al corriente</span>
+        </div>
+        <div id="carried-over-list" class="space-y-2"></div>
+      </div>
+
+      <!-- Lista de Bloques Horarios (06:30 a 17:30) -->
+      <div class="space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Horario Corrido & Tareas del Día</h3>
+            <span class="text-xs text-slate-500">Marca cada cuadrito al completar o edita bloques desde tu teléfono</span>
+          </div>
+          <button onclick="openAddBlockModal()"
+            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 text-xs font-bold transition">
+            <span>+ Agregar bloque / tarea</span>
+          </button>
+        </div>
+        <div id="blocks-container" class="space-y-2.5">
+          <!-- Bloques generados por JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA 2: CUADRITOS DE SEGUIMIENTO (HABIT TRACKER VISUAL) -->
+    <div id="view-grid" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-white">Mapa de Cumplimiento (30 Días + Pospuestos)</h2>
+            <p class="text-xs text-slate-400">Toca cualquier cuadrito para ir a ese día o marcar bloques directamente.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 text-[11px] font-medium text-slate-300">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span> Completo</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500/70 inline-block"></span> Parcial</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-sky-500/40 border border-sky-400 inline-block"></span> Pospuesto (+1d)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-800 border border-slate-700 inline-block"></span> Pendiente</span>
+          </div>
+        </div>
+
+        <!-- Cuadrícula Global de Días -->
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Progreso Global por Jornada</h3>
+          <div id="global-squares-grid" class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-2">
+            <!-- Generado por JS -->
+          </div>
+        </div>
+
+        <!-- Cuadrícula Detallada por Proyecto / Hábito -->
+        <div class="pt-4 border-t border-slate-800 space-y-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Cuadritos por Bloque Productivo</h3>
+          <div class="space-y-3 overflow-x-auto pb-2" id="habit-matrix-container">
+            <!-- Generado por JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA 3: TEMARIO COMPLETO DE 30 DÍAS -->
+    <div id="view-syllabus" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-white">Temario ENARM Reprogramable (30 Días)</h2>
+          <p class="text-xs text-slate-400">Las fechas mostradas ya reflejan los días que hayas pospuesto.</p>
+        </div>
+        <input id="syllabus-search" type="text" oninput="renderSyllabus()" placeholder="Buscar tema o especialidad..."
+          class="w-full sm:w-64 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500" />
+      </div>
+      <div id="syllabus-list" class="space-y-2.5">
+        <!-- Generado por JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Opciones al Posponer un Día -->
+  <div id="postpone-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">Reprogramar / Posponer Jornada</h3>
+          <p id="postpone-modal-date" class="text-xs text-slate-400 mt-0.5">Miércoles, 25 Nov 2026</p>
+        </div>
+        <button onclick="closePostponeModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Elige cómo quieres ajustar tu calendario si hoy tuviste un imprevisto, guardia o compromiso:
+      </p>
+
+      <div class="space-y-2.5">
+        <button onclick="confirmPostponeFullDay()"
+          class="w-full text-left p-3.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 transition space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-amber-300">1. Recorrer todo el calendario (+1 día)</span>
+            <span class="text-xs font-mono text-amber-400">Recomendado</span>
+          </div>
+          <p class="text-xs text-slate-300">
+            Marca hoy como día libre/pausa y recorre el tema ENARM de hoy y todos los días siguientes una fecha hacia adelante sin perder ningún tema.
+          </p>
+        </button>
+
+        <button onclick="confirmCarryOverTasks()"
+          class="w-full text-left p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition space-y-1">
+          <span class="text-sm font-bold text-cyan-300 block">2. Solo arrastrar bloques no marcados a mañana</span>
+          <p class="text-xs text-slate-400">
+            Mantiene la fecha del temario ENARM intacta, pero envía tus bloques sin marcar de hoy como tareas extra pendientes para mañana.
+          </p>
+        </button>
+
+        <div id="undo-postpone-box" class="hidden pt-2 border-t border-slate-800">
+          <button onclick="undoPostponeDay()"
+            class="w-full py-2.5 px-4 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-xs font-semibold text-rose-300 transition">
+            Deshacer pausa en esta fecha (Regresar calendario -1 día)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Agregar / Editar Bloque o Tarea Personalizada -->
+  <div id="block-editor-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 id="block-editor-title" class="text-base font-bold text-white">Agregar Bloque / Tarea</h3>
+          <p id="block-editor-subtitle" class="text-xs text-slate-400 mt-0.5">Personaliza tu agenda móvil</p>
+        </div>
+        <button onclick="closeBlockEditorModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <form id="block-editor-form" onsubmit="saveBlockFromModal(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="edit-block-id" />
+        <input type="hidden" id="edit-block-scope" value="daily" />
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Nombre del bloque o tarea</label>
+          <input id="edit-block-name" type="text" required placeholder="Ej. Repaso ECG / Consulta / Guion medicoX"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Hora inicio</label>
+            <input id="edit-block-start" type="time" required value="17:30"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500" />
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Hora fin</label>
+            <input id="edit-block-end" type="time" required value="18:30"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500" />
+          </div>
+        </div>
+
+        <div id="edit-scope-selector-box">
+          <label class="block font-semibold text-slate-300 mb-1">Aplicar a:</label>
+          <select id="edit-block-apply-to"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500">
+            <option value="single">Solo este día seleccionado</option>
+            <option value="all">Todos los días (Horario base recurrente)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Color de etiqueta</label>
+          <select id="edit-block-color"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500">
+            <option value="cyan">Cian (Estudio / ENARM)</option>
+            <option value="indigo">Índigo (Libro Fisiología)</option>
+            <option value="amber">Ámbar (Ankis / Resúmenes)</option>
+            <option value="rose">Rosa (Videos medicoX)</option>
+            <option value="slate">Gris neutro (Rutina / Pendiente)</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeBlockEditorModal()"
+            class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition">
+            Cancelar
+          </button>
+          <button type="submit"
+            class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold shadow-lg transition">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Editar Tema ENARM del Día -->
+  <div id="topic-editor-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">Editar Tema ENARM del Día</h3>
+          <p id="topic-editor-subtitle" class="text-xs text-slate-400 mt-0.5">Ajusta título, páginas o enfoque</p>
+        </div>
+        <button onclick="closeTopicEditorModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <form onsubmit="saveTopicFromModal(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="edit-topic-daynum" />
+        <div class="grid grid-cols-3 gap-3">
+          <div class="col-span-2">
+            <label class="block font-semibold text-slate-300 mb-1">Especialidad / Título</label>
+            <input id="edit-topic-title" type="text" required
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500" />
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Páginas</label>
+            <input id="edit-topic-pages" type="text" required
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Temas incluidos</label>
+          <textarea id="edit-topic-topics" rows="3" required
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Enfoque de estudio</label>
+          <textarea id="edit-topic-focus" rows="2" required
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeTopicEditorModal()"
+            class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition">
+            Cancelar
+          </button>
+          <button type="submit"
+            class="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition">
+            Guardar Tema
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Panel de Ajustes, Actualización y Respaldo Móvil -->
+  <div id="settings-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-bold text-white">Ajustes, Editor y Actualizaciones</h3>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300">v1.1</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">Gestiona tu app instalada en el teléfono sin perder tus cuadritos</p>
+        </div>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <!-- Sección Actualización de Código -->
+        <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
+          <p class="font-bold text-cyan-300">1. Buscar actualización de la App (v1.1)</p>
+          <p class="text-slate-400 leading-relaxed">
+            Limpia la caché del navegador/Service Worker y recarga la última versión disponible <strong>conservando intactos todos tus cuadritos marcados y ediciones</strong>.
+          </p>
+          <button onclick="checkAppUpdate()"
+            class="w-full py-2.5 px-4 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold transition">
+            Buscar actualización / Recargar caché ahora
+          </button>
+        </div>
+
+        <!-- Sección Archivos para Generar .APK en PWABuilder -->
+        <div class="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 space-y-2">
+          <p class="font-bold text-indigo-300">2. Archivos para compilar .APK (PWABuilder)</p>
+          <p class="text-slate-400 leading-relaxed">
+            Descarga estos 2 archivos y ponlos junto a tu <code>index.html</code> dentro de la carpeta que subas a Netlify para habilitar el paquete Android en PWABuilder:
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="downloadPWAManifest()"
+              class="py-2 px-3 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-200 font-bold transition text-center">
+              Descargar manifest.json
+            </button>
+            <button onclick="downloadPWAServiceWorker()"
+              class="py-2 px-3 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-200 font-bold transition text-center">
+              Descargar sw.js
+            </button>
+          </div>
+        </div>
+
+        <!-- Sección Audio MP3 Real Personalizado para la Alarma -->
+        <div class="p-3.5 rounded-xl bg-rose-950/30 border border-rose-500/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="font-bold text-rose-300">2B. Ajustes de Alarma y Canción Personalizada</p>
+            <button onclick="testAlarmSound()"
+              class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 font-bold text-[11px] transition">
+              ▶ Probar / Detener
+            </button>
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Elige cualquier canción o tono (<strong>.mp3 / .m4a / .wav / .ogg</strong>) desde tu teléfono o PC. Se guarda permanentemente en la app para sonar en cada cambio de bloque:
+          </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="flex-1 py-2.5 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 font-bold transition text-center cursor-pointer">
+              🎵 Elegir canción / audio
+              <input type="file" accept="audio/*" class="hidden" onchange="loadCustomAlarmMP3(event)" />
+            </label>
+            <button onclick="clearCustomAlarmMP3()"
+              class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold transition">
+              Quitar audio
+            </button>
+          </div>
+          <div class="pt-1">
+            <label for="alarm-repeat-select" class="block font-semibold text-slate-300 mb-1">Veces que se repite la canción al sonar:</label>
+            <select id="alarm-repeat-select" onchange="updateAlarmRepeatCount(this.value)"
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-rose-500">
+              <option value="1">1 vez (solo una reproducción)</option>
+              <option value="2">2 veces</option>
+              <option value="3" selected>3 veces</option>
+              <option value="5">5 veces</option>
+              <option value="0">Infinito (hasta que presiones Detener Alarma)</option>
+            </select>
+          </div>
+          <p id="custom-mp3-status" class="text-[11px] text-rose-200/80 font-medium">Estado: Sin canción personalizada (usando guitarra eléctrica)</p>
+        </div>
+
+        <!-- Sección Respaldo y Restauración -->
+        <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2.5">
+          <p class="font-bold text-emerald-300">3. Respaldo y Restauración de Progreso</p>
+          <p class="text-slate-400 leading-relaxed">
+            Descarga una copia de seguridad con todos tus cuadritos marcados, rachas, bloques personalizados y temas editados.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button onclick="exportJSON()"
+              class="py-2.5 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold transition text-center">
+              Exportar respaldo (.json)
+            </button>
+            <label class="py-2.5 px-3 rounded-xl bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white font-bold transition text-center cursor-pointer">
+              Importar respaldo (.json)
+              <input type="file" accept=".json" class="hidden" onchange="importJSON(event)" />
+            </label>
+          </div>
+          <button onclick="exportICS()"
+            class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-950 border border-slate-700 text-slate-300 font-semibold transition">
+            Descargar Calendario Actualizado (.ics para Google)
+          </button>
+        </div>
+
+        <!-- Sección Restaurar Horario Base -->
+        <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
+          <p class="font-bold text-amber-300">4. Restaurar Horario y Temario Originales</p>
+          <p class="text-slate-400 leading-relaxed">
+            Si editaste horarios o temas y quieres volver a la rutina original de 06:30 a 17:30 (sin borrar tus cuadritos marcados):
+          </p>
+          <button onclick="resetCustomEditsOnly()"
+            class="w-full py-2 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-semibold transition">
+            Restaurar horarios y temas por defecto
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de Notificación -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-800 border border-slate-700 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl"></div>
+
+  <script>
+    const APP_VERSION = "1.1";
+    const STORAGE_KEY = "agenda_enarm_proyectos_v1";
+    const PLAN_START_DATE = "2026-11-25";
+
+    const ENARM_SYLLABUS = [
+      { dayNum: 1, title: "Cardiología I", pages: "1–20", topics: "Hipertensión arterial sistémica; angina de pecho y cardiopatía isquémica estable; síndromes coronarios agudos sin elevación del ST; infarto agudo de miocardio con elevación del ST.", focus: "Prioriza diagnóstico, estratificación de riesgo, ECG, biomarcadores y tratamiento inicial." },
+      { dayNum: 2, title: "Cardiología II", pages: "21–33", topics: "Arritmias supraventriculares; síndromes de preexcitación; arritmias ventriculares; valvulopatías.", focus: "Haz cuadros de taquicardias, bradicardias, soplos y criterios de intervención." },
+      { dayNum: 3, title: "Cardiología III", pages: "34–48", topics: "Fiebre reumática; pericarditis; insuficiencia cardiaca crónica y aguda; cor pulmonale crónico; síndrome cardiorrenal; cardiomiopatías.", focus: "Compara IC aguda vs. crónica y repasa criterios diagnósticos." },
+      { dayNum: 4, title: "Dermatología I", pages: "49–57", topics: "Acné; rosácea; urticaria; dermatitis atópica; dermatitis por contacto; dermatitis seborreica.", focus: "Aprende lesiones elementales, desencadenantes y tratamiento de primera línea." },
+      { dayNum: 5, title: "Dermatología II", pages: "58–77", topics: "Psoriasis; farmacodermias; eritema multiforme; Stevens-Johnson y NET; pénfigo; infecciones bacterianas; hidradenitis; ectima gangrenoso; lepra; escabiosis; pediculosis; dermatofitosis; pitiriasis; cromomicosis; micetoma; cáncer cutáneo; Kaposi.", focus: "Día denso: divide en bloques y usa imágenes clínicas para diferenciar lesiones." },
+      { dayNum: 6, title: "Endocrinología I", pages: "79–103", topics: "Sobrepeso y obesidad; síndrome metabólico; diabetes mellitus.", focus: "En diabetes: diagnóstico, metas, complicaciones, tratamiento y situaciones especiales." },
+      { dayNum: 7, title: "Endocrinología II", pages: "104–116", topics: "Hipotiroidismo; tirotoxicosis; nódulo tiroideo; cáncer tiroideo; dislipidemias y riesgo cardiovascular; hiperparatiroidismo; hipoparatiroidismo.", focus: "Haz algoritmo de abordaje del nódulo tiroideo y tabla de trastornos del calcio." },
+      { dayNum: 8, title: "Endocrinología III + Geriatría I", pages: "117–130", topics: "Síndrome de Cushing; hiperprolactinemia; acromegalia; hiperaldosteronismo; Addison; feocromocitoma; SIHAD; diabetes insípida. Evaluación geriátrica integral; nutrición del adulto mayor.", focus: "Repasa pruebas hormonales y patrones de laboratorio." },
+      { dayNum: 9, title: "Geriatría II + Gastro I", pages: "131–158", topics: "Fragilidad; sarcopenia; caídas; demencia; delirium; depresión; insomnio; úlceras por presión; IAM en adulto mayor. Acalasia; Zenker; ERGE; esofagitis eosinofílica; cáncer esofágico; dispepsia; úlcera péptica; Zollinger-Ellison; cáncer gástrico.", focus: "Distingue delirium vs. demencia y organiza el abordaje de dispepsia/ERGE." },
+      { dayNum: 10, title: "Gastroenterología II", pages: "159–179", topics: "EII; enfermedad celíaca; esprúe tropical; SII; cáncer colorrectal; hepatopatía alcohólica y grasa; hepatitis autoinmune; hemocromatosis; Wilson; cirrosis; carcinoma hepatocelular; pancreatitis crónica; cáncer pancreático.", focus: "Compara Crohn vs. CUCI, causas de hepatopatía y complicaciones de cirrosis." },
+      { dayNum: 11, title: "Hematología I", pages: "180–202", topics: "Anemias; neoplasias mieloproliferativas; síndromes mielodisplásicos; LMA; LLA; neoplasias linfoides de células B maduras; macroglobulinemia de Waldenström.", focus: "Construye un cuadro de anemias y otro de leucemias." },
+      { dayNum: 12, title: "Hematología II", pages: "203–217", topics: "Mieloma múltiple; linfoma no Hodgkin; linfoma de Hodgkin; trombocitopenia; enfermedad de von Willebrand; hemofilia; coagulación intravascular diseminada; síndrome antifosfolípidos.", focus: "Repasa frotis, pruebas de coagulación y datos que diferencian cada entidad." },
+      { dayNum: 13, title: "Infectología I", pages: "218–245", topics: "Staphylococcus; Streptococcus; Corynebacterium diphtheriae; Listeria; Nocardia; Actinomyces; Tropheryma whipplei; Mycobacterium tuberculosis; MAC; Neisseria; E. coli; Salmonella; Shigella; Vibrio cholerae.", focus: "Para cada agente: transmisión, cuadro típico, diagnóstico y antibiótico de elección." },
+      { dayNum: 14, title: "Infectología II", pages: "246–264", topics: "Campylobacter; H. pylori; Pseudomonas; H. influenzae; Bordetella pertussis; Brucella; Clostridium; Treponema pallidum; Borrelia; Leptospira; Mycoplasma; Legionella; Chlamydia; Rickettsia; VPH; poxvirus.", focus: "Haz una tabla de microorganismo–enfermedad–prueba diagnóstica–tratamiento." },
+      { dayNum: 15, title: "Infectología III: Virus", pages: "264–303", topics: "Virus herpes humanos; parvovirus B19; poliovirus; paramixoviridae; influenza; SARS-CoV-2; rabia; dengue; Zika; chikungunya; rubéola; VIH; hepatitis virales.", focus: "Enfócate en transmisión, incubación, clínica, pruebas y prevención/vacunas." },
+      { dayNum: 16, title: "Infectología IV: Hongos y Parásitos", pages: "304–326", topics: "Sporothrix; Coccidioides; Histoplasma; Cryptococcus; Pneumocystis jirovecii; Aspergillus; mucormicosis; Candida; Entamoeba; Giardia; Trichomonas; Toxoplasma; Plasmodium; Leishmania; Trypanosoma cruzi; nemátodos; Taenia solium.", focus: "Diferencia micosis por exposición, huésped y patrón clínico; repasa ciclos parasitarios." },
+      { dayNum: 17, title: "Infectología Clínica I", pages: "327–341", topics: "Sepsis; infección del tracto urinario; neumonía; absceso pulmonar; infecciones del sistema nervioso central; endocarditis infecciosa.", focus: "Practica reconocimiento de gravedad, cultivos, antibiótico empírico y control del foco." },
+      { dayNum: 18, title: "Infectología Clínica II + Nefrología I", pages: "342–356", topics: "Diarrea aguda en adultos; úlceras genitales; fascitis necrosante; artritis séptica; osteomielitis; angina de Ludwig. Lesión renal aguda; enfermedad renal crónica.", focus: "Repasa indicaciones de hospitalización y urgencias quirúrgicas; clasifica lesión renal." },
+      { dayNum: 19, title: "Nefrología II + Neumología I", pages: "357–371", topics: "Peritonitis asociada a diálisis peritoneal; síndrome nefrótico; síndrome nefrítico; síndrome de Goodpasture. Asma; EPOC.", focus: "Compara síndromes glomerulares y tratamiento escalonado de asma/EPOC." },
+      { dayNum: 20, title: "Neumología II", pages: "372–392", topics: "SAHOS; nódulo pulmonar solitario; derrame pleural; cáncer pulmonar; mesotelioma; neumonitis eosinofílica; fibrosis quística; neumopatías ocupacionales; embolismo pulmonar.", focus: "Haz algoritmos de nódulo pulmonar, derrame pleural y tromboembolia pulmonar." },
+      { dayNum: 21, title: "Neurología", pages: "393–433", topics: "Cefalea; parálisis de Bell; crisis convulsivas y epilepsia; Parkinson; enfermedad vascular cerebral; miastenia gravis y Lambert-Eaton; Guillain-Barré; esclerosis múltiple; ELA; tumores del SNC.", focus: "Prioriza ventanas terapéuticas, criterios diagnósticos y manejo inicial de urgencias neurológicas." },
+      { dayNum: 22, title: "Psiquiatría", pages: "434–450", topics: "Esquizofrenia; depresión mayor; trastorno bipolar; trastornos de ansiedad; TOC; TDAH; trastornos de la conducta alimentaria; tabaquismo; alcoholismo.", focus: "Compara criterios clínicos, duración, escalas y tratamiento de primera línea." },
+      { dayNum: 23, title: "Reumatología", pages: "451–477", topics: "Artritis reumatoide; AIJ; espondilitis anquilosante; espondiloartropatías seronegativas; lupus; Sjögren; gota; osteoartritis; miopatías inflamatorias; vasculitis; esclerosis sistémica; fibromialgia.", focus: "Usa tablas de autoanticuerpos, manifestaciones extraarticulares y criterios de clasificación." },
+      { dayNum: 24, title: "Urgencias I", pages: "478–499", topics: "RCP; sistema de priorización de pacientes; choque; sangrado de tubo digestivo proximal y distal; anafilaxia; daño pulmonar agudo; taponamiento cardiaco; neumotórax; hemotórax; rabdomiólisis.", focus: "Memoriza secuencias, dosis críticas, criterios de gravedad y manejo de los primeros minutos." },
+      { dayNum: 25, title: "Toxicología I", pages: "500–508", topics: "Generalidades del paciente intoxicado; corrosivos; hidrocarburos; monóxido de carbono; raticidas; salicilatos; paracetamol; etanol; etilenglicol y metanol.", focus: "Aprende toxíndromes, antídotos, indicaciones de carbón activado y criterios de referencia." },
+      { dayNum: 26, title: "Toxicología II", pages: "509–517", topics: "Toxíndromes sedativo-hipnótico, opioide, simpaticomimético, anticolinesterásico, anticolinérgico, serotoninérgico, extrapiramidal; antidepresivos; neuroléptico maligno; antihistamínicos; hipoglucemiantes; alacrán; serpientes y arañas.", focus: "Crea una tabla de toxíndrome–hallazgos–antídoto/tratamiento." },
+      { dayNum: 27, title: "Repaso Activo I", pages: "1–124", topics: "Repaso de cardiología, dermatología y endocrinología. Rehacer algoritmos y preguntas de los temas fallados.", focus: "No releas todo: recuperación activa, tarjetas y 40–60 preguntas mixtas." },
+      { dayNum: 28, title: "Repaso Activo II", pages: "125–217", topics: "Repaso de geriatría, gastroenterología y hematología. Enfócate en diferenciales y valores de laboratorio.", focus: "Haz 40–60 preguntas y registra cada error con su explicación." },
+      { dayNum: 29, title: "Repaso Activo III", pages: "218–392", topics: "Repaso de infectología, nefrología y neumología. Repasa antibióticos, pruebas diagnósticas y algoritmos.", focus: "Simula casos clínicos y repasa únicamente los errores y conceptos débiles." },
+      { dayNum: 30, title: "Repaso Activo IV + Simulacro", pages: "393–517", topics: "Repaso de neurología, psiquiatría, reumatología, urgencias y toxicología. Realiza un simulacro global y analiza resultados.", focus: "Haz un simulacro cronometrado; dedica más tiempo a analizar errores que a revisar aciertos." }
+    ];
+
+    const DEFAULT_DAILY_BLOCKS = [
+      { id: "wake", start: "06:30", end: "07:00", durationMin: 30, hours: 0.5, title: "Despertar, café y arranque", category: "routine", isCore: false, color: "slate" },
+      { id: "enarm", start: "07:00", end: "10:00", durationMin: 180, hours: 3, title: "Estudio ENARM (Tema del día)", category: "enarm", isCore: true, color: "cyan" },
+      { id: "breakfast", start: "10:00", end: "10:30", durationMin: 30, hours: 0.5, title: "Desayuno y estiramiento", category: "routine", isCore: false, color: "slate" },
+      { id: "book", start: "10:30", end: "12:30", durationMin: 120, hours: 2, title: "Libro Fisiología Cardiovascular", category: "book", isCore: true, color: "indigo" },
+      { id: "ankis", start: "12:30", end: "14:30", durationMin: 120, hours: 2, title: "Ankis y Resúmenes (Venta)", category: "ankis", isCore: true, color: "amber" },
+      { id: "lunch", start: "14:30", end: "15:30", durationMin: 60, hours: 1, title: "Comida y descanso visual", category: "routine", isCore: false, color: "slate" },
+      { id: "videos", start: "15:30", end: "17:30", durationMin: 120, hours: 2, title: "Grabar Videos (medicoX)", category: "videos", isCore: true, color: "rose" }
+    ];
+
+    let appState = {
+      selectedDate: PLAN_START_DATE,
+      completedBlocks: {},
+      postponedDates: [],
+      carriedOverTasks: {},
+      customBaseBlocks: null,
+      customDayBlocks: {},
+      editedSyllabus: {},
+      alarmsEnabled: false,
+      alarmRepeatCount: 3,
+      lastTriggeredMinute: ""
+    };
+
+    function getActiveSyllabus() {
+      return ENARM_SYLLABUS.map(item => {
+        const edits = appState.editedSyllabus && appState.editedSyllabus[item.dayNum];
+        return edits ? { ...item, ...edits } : item;
+      });
+    }
+
+    function getBaseBlocks() {
+      return Array.isArray(appState.customBaseBlocks) && appState.customBaseBlocks.length > 0
+        ? appState.customBaseBlocks
+        : DEFAULT_DAILY_BLOCKS;
+    }
+
+    function getBlocksForDate(dateStr) {
+      const base = getBaseBlocks();
+      const extra = (appState.customDayBlocks && appState.customDayBlocks[dateStr]) || [];
+      return [...base, ...extra].sort((a, b) => a.start.localeCompare(b.start));
+    }
+
+    function calcDurationFromTimes(startStr, endStr) {
+      const [sh, sm] = startStr.split(":").map(Number);
+      const [eh, em] = endStr.split(":").map(Number);
+      let diff = (eh * 60 + em) - (sh * 60 + sm);
+      if (diff <= 0) diff = 30;
+      return {
+        durationMin: diff,
+        hours: Math.round((diff / 60) * 10) / 10
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          appState = { ...appState, ...parsed };
+        }
+      } catch (e) {
+        console.error("Error leyendo localStorage:", e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.error("Error guardando localStorage:", e);
+      }
+    }
+
+    // =========================================================================
+    // 4. MOTOR DE GUITARRA ELÉCTRICA REAL (MUESTRAS GRABADAS + SOPORTE MP3)
+    // =========================================================================
+    let audioCtx = null;
+    let alarmInterval = null;
+    let isSoloPlaying = false;
+    let activeSoloNodes = [];
+    let soloStopTimeout = null;
+    let realGuitarInstrument = null;
+    let realBassInstrument = null;
+    let isLoadingSoundfont = false;
+    let customAudioUrl = null;
+    let customAudioPlayer = null;
+    const AUDIO_DB_NAME = "AgendaEnarmAudioDB";
+    const AUDIO_STORE_NAME = "customAlarms";
+
+    function openAudioDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(AUDIO_DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          req.result.createObjectStore(AUDIO_STORE_NAME);
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function saveAudioBlobToDB(file) {
+      const db = await openAudioDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(AUDIO_STORE_NAME, "readwrite");
+        tx.objectStore(AUDIO_STORE_NAME).put({ blob: file, name: file.name }, "mainAlarm");
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function restoreSavedAudioFromDB() {
+      try {
+        const db = await openAudioDB();
+        const tx = db.transaction(AUDIO_STORE_NAME, "readonly");
+        const req = tx.objectStore(AUDIO_STORE_NAME).get("mainAlarm");
+        req.onsuccess = () => {
+          const data = req.result;
+          if (data && data.blob) {
+            if (customAudioUrl) URL.revokeObjectURL(customAudioUrl);
+            customAudioUrl = URL.createObjectURL(data.blob);
+            const statusEl = document.getElementById("custom-mp3-status");
+            if (statusEl) statusEl.textContent = `Audio guardado activo: ${data.name}`;
+          }
+        };
+      } catch (e) {
+        console.warn("No se pudo restaurar audio de IndexedDB:", e);
+      }
+    }
+
+    async function loadCustomAlarmMP3(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        await saveAudioBlobToDB(file);
+        if (customAudioUrl) URL.revokeObjectURL(customAudioUrl);
+        customAudioUrl = URL.createObjectURL(file);
+        const statusEl = document.getElementById("custom-mp3-status");
+        if (statusEl) statusEl.textContent = `Audio guardado activo: ${file.name}`;
+        showToast(`Guardado permanentemente: ${file.name}`);
+      } catch (e) {
+        showToast("No se pudo guardar el archivo de audio.");
+      }
+    }
+
+    async function clearCustomAlarmMP3() {
+      if (customAudioUrl) {
+        URL.revokeObjectURL(customAudioUrl);
+        customAudioUrl = null;
+      }
+      stopGuitarSolo();
+      try {
+        const db = await openAudioDB();
+        const tx = db.transaction(AUDIO_STORE_NAME, "readwrite");
+        tx.objectStore(AUDIO_STORE_NAME).delete("mainAlarm");
+      } catch (_) {}
+      const statusEl = document.getElementById("custom-mp3-status");
+      if (statusEl) statusEl.textContent = "Estado: Sin canción personalizada (usando guitarra eléctrica)";
+      showToast("Audio personalizado eliminado.");
+    }
+
+    function updateAlarmRepeatCount(val) {
+      appState.alarmRepeatCount = Number(val);
+      saveState();
+      const label = Number(val) === 0 ? "infinitas veces hasta detenerla" : `${val} vez/veces`;
+      showToast(`La alarma se repetirá ${label}.`);
+    }
+
+    function stopGuitarSolo() {
+      isSoloPlaying = false;
+      if (soloStopTimeout) {
+        clearTimeout(soloStopTimeout);
+        soloStopTimeout = null;
+      }
+      if (customAudioPlayer) {
+        try {
+          customAudioPlayer.onended = null;
+          customAudioPlayer.pause();
+          customAudioPlayer.currentTime = 0;
+        } catch (_) {}
+        customAudioPlayer = null;
+      }
+      if (realGuitarInstrument && typeof realGuitarInstrument.stop === "function") {
+        try { realGuitarInstrument.stop(); } catch (_) {}
+      }
+      if (realBassInstrument && typeof realBassInstrument.stop === "function") {
+        try { realBassInstrument.stop(); } catch (_) {}
+      }
+      activeSoloNodes.forEach(node => {
+        try { node.stop(); } catch (_) {}
+        try { node.disconnect(); } catch (_) {}
+      });
+      activeSoloNodes = [];
+    }
+
+    async function ensureRealGuitarLoaded() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+      if (realGuitarInstrument) return true;
+      if (typeof Soundfont === "undefined") return false;
+
+      if (!isLoadingSoundfont) {
+        isLoadingSoundfont = true;
+        showToast("Cargando muestras reales de guitarra eléctrica (1 sola vez)...");
+        try {
+          const [guitar, bass] = await Promise.all([
+            Soundfont.instrument(audioCtx, "overdriven_guitar", {
+              soundfont: "MusyngKite",
+              gain: 1.6
+            }),
+            Soundfont.instrument(audioCtx, "electric_bass_finger", {
+              soundfont: "MusyngKite",
+              gain: 0.75
+            })
+          ]);
+          realGuitarInstrument = guitar;
+          realBassInstrument = bass;
+          isLoadingSoundfont = false;
+          return true;
+        } catch (err) {
+          console.warn("Error cargando soundfont:", err);
+          isLoadingSoundfont = false;
+          return false;
+        }
+      }
+      return false;
+    }
+
+    function fretToMidi(stringNum, fret) {
+      const openMidi = { 1: 64, 2: 59, 3: 55, 4: 50, 5: 45, 6: 40 };
+      return openMidi[stringNum] + fret;
+    }
+
+    async function playBeepPattern() {
+      try {
+        stopGuitarSolo();
+
+        const maxRepeats = Number(appState.alarmRepeatCount ?? 3);
+
+        // Si el usuario cargó una canción en Ajustes, reproducirla las veces configuradas
+        if (customAudioUrl) {
+          isSoloPlaying = true;
+          let playCounter = 1;
+          customAudioPlayer = new Audio(customAudioUrl);
+
+          customAudioPlayer.onended = () => {
+            if (!isSoloPlaying) return;
+            if (maxRepeats === 0 || playCounter < maxRepeats) {
+              playCounter++;
+              customAudioPlayer.currentTime = 0;
+              customAudioPlayer.play().catch(() => {});
+            } else {
+              isSoloPlaying = false;
+            }
+          };
+
+          await customAudioPlayer.play();
+          return;
+        }
+
+        const loaded = await ensureRealGuitarLoaded();
+        if (!loaded || !realGuitarInstrument) {
+          showToast("No se pudo conectar al banco de audio; verifica tu internet.");
+          return;
+        }
+
+        isSoloPlaying = true;
+        const now = audioCtx.currentTime + 0.05;
+        const beat = 60 / 71;
+
+        // Tablatura exacta de los 10 compases (cuerda, traste, inicio_beat, duracion_beats, bend_traste_destino)
+        const tabEvents = [
+          // Compás 1
+          [4, 9, 0.0, 0.28], [4, 11, 0.25, 0.55], [3, 9, 0.75, 0.38], [3, 11, 1.1, 0.65],
+
+          // Compás 2
+          [4, 11, 1.75, 1.3],
+          [3, 9, 3.0, 0.38], [3, 11, 3.35, 0.5],
+          [4, 9, 3.8, 0.24], [4, 11, 4.0, 0.38],
+          [4, 9, 4.35, 0.4], [4, 11, 4.75, 0.4],
+          [4, 7, 5.1, 0.5],
+
+          // Compás 3
+          [4, 9, 5.6, 0.5],
+          [5, 7, 6.05, 0.5],
+          [5, 7, 6.55, 1.2],
+          [5, 2, 7.75, 0.24], [5, 4, 7.95, 0.45],
+          [4, 2, 8.35, 0.34], [4, 4, 8.65, 0.34],
+          [3, 2, 8.95, 0.34], [3, 4, 9.25, 0.34],
+
+          // Compás 4 (Bends y releases de tono completo en 3ª cuerda traste 4 -> 6 -> 4)
+          [3, 4, 9.6, 0.32], [3, 6, 9.92, 0.3], [3, 4, 10.22, 0.25],
+          [3, 2, 10.45, 0.38],
+          [4, 4, 10.8, 0.28], [4, 2, 11.05, 0.28], [4, 4, 11.3, 0.28],
+          [3, 2, 11.55, 0.28],
+          [3, 4, 11.8, 0.3], [3, 6, 12.1, 0.28], [3, 4, 12.38, 0.24],
+          [3, 2, 12.6, 0.28],
+          [4, 4, 12.85, 0.28], [4, 2, 13.1, 0.28],
+          [3, 2, 13.35, 0.28], [3, 4, 13.6, 0.28],
+          [3, 4, 13.85, 0.28], [3, 6, 14.13, 0.26], [3, 4, 14.39, 0.22],
+          [3, 2, 14.6, 0.35],
+
+          // Compás 5
+          [4, 4, 14.95, 0.48], [4, 4, 15.4, 0.48],
+          [3, 2, 15.85, 0.28],
+          [3, 4, 16.1, 0.25], [3, 6, 16.35, 0.24], [3, 4, 16.59, 0.18],
+          [3, 4, 16.75, 0.24], [3, 2, 16.95, 0.24], [3, 4, 17.15, 0.65],
+          [2, 12, 18.0, 0.38],
+          [1, 12, 18.35, 0.35], [1, 14, 18.7, 0.38],
+          [2, 12, 18.35, 0.7],
+
+          // Compás 6 (Double-stops deslizados)
+          [1, 12, 19.05, 0.28], [2, 12, 19.05, 0.28],
+          [1, 9, 19.3, 0.28], [2, 9, 19.3, 0.28],
+          [1, 9, 19.55, 0.28], [2, 9, 19.55, 0.28],
+          [1, 7, 19.8, 0.28], [2, 7, 19.8, 0.28],
+          [1, 7, 20.05, 0.24], [2, 7, 20.05, 0.24],
+          [1, 12, 20.25, 0.28], [2, 12, 20.25, 0.28],
+          [1, 12, 20.5, 0.28], [2, 12, 20.5, 0.28],
+          [1, 9, 20.75, 0.28], [2, 9, 20.75, 0.28],
+          [1, 9, 21.0, 0.28], [2, 9, 21.0, 0.28],
+          [1, 7, 21.25, 0.28], [2, 7, 21.25, 0.28],
+          [1, 7, 21.5, 0.38], [2, 7, 21.5, 0.38],
+          [4, 0, 21.85, 0.28],
+          [3, 11, 22.1, 0.28], [3, 13, 22.38, 0.26], [3, 11, 22.64, 0.22],
+          [3, 9, 22.85, 0.35],
+
+          // Compás 7
+          [3, 11, 23.2, 1.1],
+          [2, 12, 24.25, 0.35], [2, 14, 24.6, 0.35],
+          [5, 9, 24.9, 0.18], [5, 11, 25.05, 0.28],
+          [4, 9, 25.3, 0.28],
+          [3, 11, 25.55, 0.18], [3, 13, 25.7, 0.28],
+          [2, 14, 25.95, 0.25], [2, 12, 26.17, 0.25],
+          [1, 12, 26.39, 0.25], [2, 14, 26.61, 0.28],
+
+          // Compás 8
+          [2, 12, 26.9, 0.18], [2, 14, 27.05, 0.25], [2, 12, 27.27, 0.25],
+          [3, 13, 27.49, 0.28],
+          [2, 12, 27.74, 0.18], [2, 14, 27.89, 0.25], [2, 12, 28.11, 0.25],
+          [3, 13, 28.33, 0.28],
+          [2, 12, 28.58, 0.25], [2, 12, 28.8, 0.25], [2, 12, 29.02, 0.25], [2, 12, 29.24, 0.25],
+          [3, 13, 29.46, 0.28],
+          [2, 12, 29.71, 0.25], [2, 14, 29.93, 0.25],
+          [1, 12, 30.15, 0.25],
+          [1, 14, 30.37, 0.32], [1, 16, 30.69, 0.35],
+          [1, 14, 31.02, 0.25], [1, 12, 31.24, 0.28],
+
+          // Compás 9 y 10
+          [1, 14, 31.55, 1.65],
+          [1, 16, 33.4, 0.42], [1, 17, 33.82, 0.45],
+          [1, 14, 34.25, 0.42], [1, 16, 34.67, 0.45],
+          [1, 12, 35.15, 0.38],
+          [2, 14, 35.5, 2.6]
+        ];
+
+        // Acompañamiento de bajo eléctrico real (MIDI: E2=40, B1=35, C#2=37, A1=33)
+        const bassProgression = [
+          [40, 1.75, 3.8],
+          [35, 5.6, 3.9],
+          [37, 9.6, 5.2],
+          [33, 14.95, 4.0],
+          [40, 19.05, 4.1],
+          [35, 23.2, 3.6],
+          [37, 26.9, 4.6],
+          [33, 31.55, 3.9],
+          [40, 35.5, 2.6]
+        ];
+
+        const loopBeats = 38.2;
+        for (let pass = 0; pass < 2; pass++) {
+          const offsetBeats = pass * loopBeats;
+          tabEvents.forEach(([str, fret, startB, durB]) => {
+            const startTime = now + (offsetBeats + startB) * beat;
+            const duration = durB * beat;
+            if ((offsetBeats + startB) * beat <= 61) {
+              const node = realGuitarInstrument.play(fretToMidi(str, fret), startTime, {
+                duration: duration + 0.08,
+                gain: 1.5
+              });
+              if (node) activeSoloNodes.push(node);
+            }
+          });
+          if (realBassInstrument) {
+            bassProgression.forEach(([midiNote, startB, durB]) => {
+              const startTime = now + (offsetBeats + startB) * beat;
+              if ((offsetBeats + startB) * beat <= 61) {
+                const bNode = realBassInstrument.play(midiNote, startTime, {
+                  duration: durB * beat,
+                  gain: 0.8
+                });
+                if (bNode) activeSoloNodes.push(bNode);
+              }
+            });
+          }
+        }
+
+        soloStopTimeout = setTimeout(() => {
+          isSoloPlaying = false;
+        }, 62000);
+      } catch (e) {
+        console.warn("Audio no disponible:", e);
+      }
+    }
+
+    function triggerAlarmModal(title, desc) {
+      document.getElementById("alarm-banner-title").textContent = title;
+      document.getElementById("alarm-banner-desc").textContent = desc;
+      document.getElementById("alarm-banner").classList.remove("hidden");
+
+      playBeepPattern();
+      if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+      }
+      // Si no tiene canción MP3 personalizada y eligió infinito, repetir la guitarra cada 61s
+      if (!customAudioUrl && Number(appState.alarmRepeatCount ?? 3) === 0) {
+        alarmInterval = setInterval(playBeepPattern, 61000);
+      }
+    }
+
+    function testAlarmSound() {
+      if (isSoloPlaying) {
+        stopGuitarSolo();
+        showToast("Alarma detenida.");
+      } else {
+        playBeepPattern();
+        const reps = Number(appState.alarmRepeatCount ?? 3);
+        const repMsg = reps === 0 ? "repetición infinita" : `${reps} repetición(es)`;
+        showToast(`Reproduciendo alarma (${repMsg}). Toca de nuevo para detener.`);
+      }
+    }
+    window.testAlarmSound = testAlarmSound;
+
+    function parseDateLocal(dateStr) {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      return new Date(y, m - 1, d, 12, 0, 0);
+    }
+
+    function formatDateStr(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const d = String(dateObj.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function addDays(dateStr, days) {
+      const dt = parseDateLocal(dateStr);
+      dt.setDate(dt.getDate() + days);
+      return formatDateStr(dt);
+    }
+
+    function formatDisplayDate(dateStr) {
+      const dt = parseDateLocal(dateStr);
+      return dt.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "short", year: "numeric" });
+    }
+
+    function formatShortDate(dateStr) {
+      const dt = parseDateLocal(dateStr);
+      return dt.toLocaleDateString("es-MX", { day: "2-digit", month: "short" });
+    }
+
+    function buildScheduleMap() {
+      const activeSyllabus = getActiveSyllabus();
+      const postponedSet = new Set(appState.postponedDates);
+      const dateToSyllabus = {};
+      const syllabusToDate = {};
+      const allTimelineDates = [];
+
+      let currentDate = PLAN_START_DATE;
+      let syllabusIdx = 0;
+
+      while (syllabusIdx < activeSyllabus.length) {
+        allTimelineDates.push(currentDate);
+        if (postponedSet.has(currentDate)) {
+          dateToSyllabus[currentDate] = { isPostponed: true, topic: null };
+        } else {
+          const item = activeSyllabus[syllabusIdx];
+          dateToSyllabus[currentDate] = { isPostponed: false, topic: item };
+          syllabusToDate[item.dayNum] = currentDate;
+          syllabusIdx++;
+        }
+        currentDate = addDays(currentDate, 1);
+      }
+
+      const lastDate = allTimelineDates[allTimelineDates.length - 1] || PLAN_START_DATE;
+      return { dateToSyllabus, syllabusToDate, allTimelineDates, lastDate };
+    }
+
+    function dismissAlarm() {
+      document.getElementById("alarm-banner").classList.add("hidden");
+      stopGuitarSolo();
+      if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+      }
+    }
+
+    function toggleScheduleAlarms() {
+      appState.alarmsEnabled = !appState.alarmsEnabled;
+      if (appState.alarmsEnabled) {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission();
+        }
+        showToast("Alarmas activadas para tus bloques de 06:30 a 17:30");
+      } else {
+        showToast("Alarmas desactivadas");
+      }
+      saveState();
+      updateAlarmButtonUI();
+    }
+
+    function updateAlarmButtonUI() {
+      const dot = document.getElementById("alarm-dot");
+      const text = document.getElementById("alarm-btn-text");
+      if (!dot || !text) return;
+      if (appState.alarmsEnabled) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+        text.textContent = "Alarmas: ON";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-slate-500";
+        text.textContent = "Alarmas: OFF";
+      }
+    }
+
+    let timerInterval = null;
+    let timerState = { blockId: null, blockTitle: "", remainingSec: 0, running: false };
+
+    function startBlockTimer(blockId, title, minutes) {
+      if (timerInterval) clearInterval(timerInterval);
+      timerState = { blockId, blockTitle: title, remainingSec: minutes * 60, running: true };
+      document.getElementById("active-timer-card").classList.remove("hidden");
+      document.getElementById("timer-block-name").textContent = title;
+      document.getElementById("timer-pause-btn").textContent = "Pausar";
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        if (!timerState.running) return;
+        timerState.remainingSec--;
+        updateTimerDisplay();
+        if (timerState.remainingSec <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          timerState.running = false;
+          triggerAlarmModal("¡Bloque terminado!", `Has completado el tiempo de: ${timerState.blockTitle}`);
+        }
+      }, 1000);
+      showToast(`Temporizador iniciado: ${title}`);
+    }
+
+    function updateTimerDisplay() {
+      const h = Math.floor(timerState.remainingSec / 3600);
+      const m = Math.floor((timerState.remainingSec % 3600) / 60);
+      const s = timerState.remainingSec % 60;
+      document.getElementById("timer-display").textContent =
+        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    function togglePauseTimer() {
+      timerState.running = !timerState.running;
+      document.getElementById("timer-pause-btn").textContent = timerState.running ? "Pausar" : "Reanudar";
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      timerState.running = false;
+      document.getElementById("active-timer-card").classList.add("hidden");
+    }
+
+    function toggleBlockCompletion(dateStr, blockId) {
+      if (!appState.completedBlocks[dateStr]) appState.completedBlocks[dateStr] = [];
+      const list = appState.completedBlocks[dateStr];
+      const idx = list.indexOf(blockId);
+      if (idx >= 0) list.splice(idx, 1);
+      else list.push(blockId);
+      saveState();
+      renderAll();
+    }
+
+    function toggleCarriedTask(dateStr, taskIdx) {
+      const tasks = appState.carriedOverTasks[dateStr];
+      if (!tasks || !tasks[taskIdx]) return;
+      tasks[taskIdx].done = !tasks[taskIdx].done;
+      saveState();
+      renderAll();
+    }
+
+    function openPostponeModal() {
+      document.getElementById("postpone-modal-date").textContent = formatDisplayDate(appState.selectedDate);
+      const isAlreadyPostponed = appState.postponedDates.includes(appState.selectedDate);
+      document.getElementById("undo-postpone-box").classList.toggle("hidden", !isAlreadyPostponed);
+      document.getElementById("postpone-modal").classList.remove("hidden");
+    }
+
+    function closePostponeModal() {
+      document.getElementById("postpone-modal").classList.add("hidden");
+    }
+
+    function confirmPostponeFullDay() {
+      const dateStr = appState.selectedDate;
+      if (!appState.postponedDates.includes(dateStr)) {
+        appState.postponedDates.push(dateStr);
+        appState.postponedDates.sort();
+      }
+      saveState();
+      closePostponeModal();
+      appState.selectedDate = addDays(dateStr, 1);
+      renderAll();
+      showToast("Calendario recorrido +1 día sin perder ningún tema.");
+    }
+
+    function confirmCarryOverTasks() {
+      const dateStr = appState.selectedDate;
+      const nextDate = addDays(dateStr, 1);
+      const doneList = appState.completedBlocks[dateStr] || [];
+      const dayBlocks = getBlocksForDate(dateStr);
+      const pendingCore = dayBlocks.filter(b => b.isCore && !doneList.includes(b.id));
+
+      if (pendingCore.length === 0) {
+        closePostponeModal();
+        showToast("No tienes bloques pendientes por arrastrar hoy.");
+        return;
+      }
+
+      if (!appState.carriedOverTasks[nextDate]) appState.carriedOverTasks[nextDate] = [];
+      pendingCore.forEach(b => {
+        appState.carriedOverTasks[nextDate].push({
+          title: `${b.title} (del ${formatShortDate(dateStr)})`,
+          fromDate: dateStr,
+          done: false
+        });
+      });
+
+      saveState();
+      closePostponeModal();
+      appState.selectedDate = nextDate;
+      renderAll();
+      showToast(`${pendingCore.length} bloque(s) enviados como pendientes a mañana.`);
+    }
+
+    function undoPostponeDay() {
+      appState.postponedDates = appState.postponedDates.filter(d => d !== appState.selectedDate);
+      saveState();
+      closePostponeModal();
+      renderAll();
+      showToast("Pausa eliminada. Calendario ajustado.");
+    }
+
+    function openAddBlockModal() {
+      document.getElementById("block-editor-title").textContent = "Agregar Bloque / Tarea";
+      document.getElementById("block-editor-subtitle").textContent = `Para ${formatDisplayDate(appState.selectedDate)}`;
+      document.getElementById("edit-block-id").value = "";
+      document.getElementById("edit-block-scope").value = "new";
+      document.getElementById("edit-block-name").value = "";
+      document.getElementById("edit-block-start").value = "17:30";
+      document.getElementById("edit-block-end").value = "18:30";
+      document.getElementById("edit-block-color").value = "cyan";
+      document.getElementById("edit-scope-selector-box").classList.remove("hidden");
+      document.getElementById("block-editor-modal").classList.remove("hidden");
+    }
+
+    function openEditBlockModal(blockId) {
+      const dayBlocks = getBlocksForDate(appState.selectedDate);
+      const blk = dayBlocks.find(b => b.id === blockId);
+      if (!blk) return;
+
+      const isBase = getBaseBlocks().some(b => b.id === blockId);
+      document.getElementById("block-editor-title").textContent = "Editar Bloque";
+      document.getElementById("block-editor-subtitle").textContent = isBase ? "Editando bloque del horario base diario" : "Editando tarea del día";
+      document.getElementById("edit-block-id").value = blk.id;
+      document.getElementById("edit-block-scope").value = isBase ? "base" : "single";
+      document.getElementById("edit-block-name").value = blk.title;
+      document.getElementById("edit-block-start").value = blk.start;
+      document.getElementById("edit-block-end").value = blk.end;
+      document.getElementById("edit-block-color").value = blk.color || "cyan";
+      document.getElementById("edit-scope-selector-box").classList.add("hidden");
+      document.getElementById("block-editor-modal").classList.remove("hidden");
+    }
+
+    function closeBlockEditorModal() {
+      document.getElementById("block-editor-modal").classList.add("hidden");
+    }
+
+    function saveBlockFromModal(e) {
+      e.preventDefault();
+      const id = document.getElementById("edit-block-id").value;
+      const scope = document.getElementById("edit-block-scope").value;
+      const title = document.getElementById("edit-block-name").value.trim();
+      const start = document.getElementById("edit-block-start").value;
+      const end = document.getElementById("edit-block-end").value;
+      const color = document.getElementById("edit-block-color").value;
+      const applyTo = document.getElementById("edit-block-apply-to").value;
+      const { durationMin, hours } = calcDurationFromTimes(start, end);
+
+      if (!id) {
+        const newBlock = {
+          id: "blk_" + Date.now(),
+          start,
+          end,
+          durationMin,
+          hours,
+          title,
+          category: color === "indigo" ? "book" : color === "amber" ? "ankis" : color === "rose" ? "videos" : color === "cyan" ? "enarm" : "custom",
+          isCore: color !== "slate",
+          color
+        };
+
+        if (applyTo === "all") {
+          const updatedBase = [...getBaseBlocks(), newBlock].sort((a, b) => a.start.localeCompare(b.start));
+          appState.customBaseBlocks = updatedBase;
+        } else {
+          const d = appState.selectedDate;
+          if (!appState.customDayBlocks[d]) appState.customDayBlocks[d] = [];
+          appState.customDayBlocks[d].push(newBlock);
+        }
+        showToast("Bloque agregado correctamente.");
+      } else if (scope === "base") {
+        appState.customBaseBlocks = getBaseBlocks().map(b =>
+          b.id === id ? { ...b, title, start, end, durationMin, hours, color } : b
+        ).sort((a, b) => a.start.localeCompare(b.start));
+        showToast("Horario base actualizado.");
+      } else {
+        const d = appState.selectedDate;
+        if (appState.customDayBlocks[d]) {
+          appState.customDayBlocks[d] = appState.customDayBlocks[d].map(b =>
+            b.id === id ? { ...b, title, start, end, durationMin, hours, color } : b
+          );
+        }
+        showToast("Tarea actualizada.");
+      }
+
+      saveState();
+      closeBlockEditorModal();
+      renderAll();
+    }
+
+    function deleteCustomBlock(blockId) {
+      const d = appState.selectedDate;
+      if (appState.customDayBlocks[d] && appState.customDayBlocks[d].some(b => b.id === blockId)) {
+        appState.customDayBlocks[d] = appState.customDayBlocks[d].filter(b => b.id !== blockId);
+      } else {
+        appState.customBaseBlocks = getBaseBlocks().filter(b => b.id !== blockId);
+      }
+      saveState();
+      renderAll();
+      showToast("Bloque eliminado.");
+    }
+
+    function openTopicEditorModal(dayNum) {
+      const item = getActiveSyllabus().find(s => s.dayNum === dayNum);
+      if (!item) return;
+      document.getElementById("edit-topic-daynum").value = dayNum;
+      document.getElementById("topic-editor-subtitle").textContent = `Editando Día ${dayNum} del temario`;
+      document.getElementById("edit-topic-title").value = item.title;
+      document.getElementById("edit-topic-pages").value = item.pages;
+      document.getElementById("edit-topic-topics").value = item.topics;
+      document.getElementById("edit-topic-focus").value = item.focus;
+      document.getElementById("topic-editor-modal").classList.remove("hidden");
+    }
+
+    function closeTopicEditorModal() {
+      document.getElementById("topic-editor-modal").classList.add("hidden");
+    }
+
+    function saveTopicFromModal(e) {
+      e.preventDefault();
+      const dayNum = Number(document.getElementById("edit-topic-daynum").value);
+      appState.editedSyllabus[dayNum] = {
+        title: document.getElementById("edit-topic-title").value.trim(),
+        pages: document.getElementById("edit-topic-pages").value.trim(),
+        topics: document.getElementById("edit-topic-topics").value.trim(),
+        focus: document.getElementById("edit-topic-focus").value.trim()
+      };
+      saveState();
+      closeTopicEditorModal();
+      renderAll();
+      showToast(`Tema del Día ${dayNum} actualizado.`);
+    }
+
+    function openSettingsModal() {
+      document.getElementById("settings-modal").classList.remove("hidden");
+    }
+
+    function closeSettingsModal() {
+      document.getElementById("settings-modal").classList.add("hidden");
+    }
+
+    async function checkAppUpdate() {
+      try {
+        showToast("Verificando actualización sin borrar tus datos...");
+        if ("serviceWorker" in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const reg of regs) {
+            await reg.update();
+          }
+        }
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 600);
+      } catch (e) {
+        window.location.reload();
+      }
+    }
+
+    function resetCustomEditsOnly() {
+      appState.customBaseBlocks = null;
+      appState.customDayBlocks = {};
+      appState.editedSyllabus = {};
+      saveState();
+      closeSettingsModal();
+      renderAll();
+      showToast("Horarios y temas restaurados por defecto.");
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `respaldo-agenda-enarm-${appState.selectedDate}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Respaldo .json descargado.");
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          appState = { ...appState, ...imported };
+          saveState();
+          closeSettingsModal();
+          renderAll();
+          showToast("¡Progreso restaurado exitosamente!");
+        } catch (err) {
+          showToast("Error: archivo de respaldo inválido.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadPWAManifest() {
+      const manifestObj = {
+        name: "Agenda Médica ENARM & Proyectos",
+        short_name: "Agenda ENARM",
+        description: "Planificador diario 06:30 a 17:30, seguimiento de 30 días ENARM y bloques de proyectos.",
+        start_url: "./index.html",
+        scope: "./",
+        display: "standalone",
+        orientation: "portrait",
+        background_color: "#0b1120",
+        theme_color: "#0f172a",
+        icons: [
+          {
+            src: "https://placehold.co/192x192/0284c7/ffffff.png?text=ENARM",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable"
+          },
+          {
+            src: "https://placehold.co/512x512/0284c7/ffffff.png?text=ENARM",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable"
+          }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifestObj, null, 2)], { type: "application/manifest+json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "manifest.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("manifest.json descargado.");
+    }
+
+    function downloadPWAServiceWorker() {
+      const swCode = `const CACHE_NAME = 'agenda-enarm-v1.1';
+const ASSETS = ['./', './index.html', './manifest.json'];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
+});`;
+      const blob = new Blob([swCode], { type: "application/javascript" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sw.js";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("sw.js descargado.");
+    }
+
+    function exportICS() {
+      const { dateToSyllabus, allTimelineDates } = buildScheduleMap();
+      let ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Agenda ENARM & Proyectos//ES",
+        "CALSCALE:GREGORIAN"
+      ];
+
+      allTimelineDates.forEach(dateStr => {
+        const info = dateToSyllabus[dateStr];
+        if (!info || info.isPostponed) return;
+        const cleanDate = dateStr.replace(/-/g, "");
+        const dayBlocks = getBlocksForDate(dateStr);
+
+        dayBlocks.forEach(blk => {
+          const sTime = blk.start.replace(":", "") + "00";
+          const eTime = blk.end.replace(":", "") + "00";
+          let summary = blk.title;
+          let desc = "Bloque programado desde Agenda ENARM & Proyectos";
+
+          if (blk.category === "enarm" && info.topic) {
+            summary = `ENARM Día ${info.topic.dayNum}: ${info.topic.title} (Págs. ${info.topic.pages})`;
+            desc = `Temas: ${info.topic.topics} | Enfoque: ${info.topic.focus}`;
+          }
+
+          ics.push("BEGIN:VEVENT");
+          ics.push(`UID:${cleanDate}-${blk.id}@agendaenarm`);
+          ics.push(`DTSTART;TZID=America/Mexico_City:${cleanDate}T${sTime}`);
+          ics.push(`DTEND;TZID=America/Mexico_City:${cleanDate}T${eTime}`);
+          ics.push(`SUMMARY:${summary}`);
+          ics.push(`DESCRIPTION:${desc.replace(/\n/g, " ")}`);
+          ics.push("END:VEVENT");
+        });
+      });
+
+      ics.push("END:VCALENDAR");
+      const blob = new Blob([ics.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "agenda-enarm-reprogramada.ics";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Archivo .ics actualizado descargado.");
+    }
+
+    function switchTab(tabName) {
+      ["today", "grid", "syllabus"].forEach(t => {
+        document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tabName);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tabName) {
+          btn.className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition bg-cyan-500/15 text-cyan-300 border border-cyan-500/30";
+        } else {
+          btn.className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-400 hover:text-slate-200";
+        }
+      });
+    }
+
+    function changeSelectedDate(delta) {
+      appState.selectedDate = addDays(appState.selectedDate, delta);
+      saveState();
+      renderAll();
+    }
+
+    function selectSpecificDate(dateStr) {
+      appState.selectedDate = dateStr;
+      saveState();
+      switchTab("today");
+      renderAll();
+    }
+
+    function goToPlanStartOrToday() {
+      const todayStr = formatDateStr(new Date());
+      appState.selectedDate = todayStr < PLAN_START_DATE ? PLAN_START_DATE : todayStr;
+      saveState();
+      renderAll();
+    }
+
+    function getColorClasses(color) {
+      const map = {
+        cyan: { border: "border-cyan-500/40", bg: "bg-cyan-500/10", badge: "bg-cyan-500/20 text-cyan-300", check: "bg-cyan-500 border-cyan-400" },
+        indigo: { border: "border-indigo-500/40", bg: "bg-indigo-500/10", badge: "bg-indigo-500/20 text-indigo-300", check: "bg-indigo-500 border-indigo-400" },
+        amber: { border: "border-amber-500/40", bg: "bg-amber-500/10", badge: "bg-amber-500/20 text-amber-300", check: "bg-amber-500 border-amber-400" },
+        rose: { border: "border-rose-500/40", bg: "bg-rose-500/10", badge: "bg-rose-500/20 text-rose-300", check: "bg-rose-500 border-rose-400" },
+        slate: { border: "border-slate-800", bg: "bg-slate-900", badge: "bg-slate-800 text-slate-400", check: "bg-emerald-500 border-emerald-400" }
+      };
+      return map[color] || map.slate;
+    }
+
+    function renderStats() {
+      const { lastDate } = buildScheduleMap();
+      let enarmDaysDone = 0;
+      let hoursEnarm = 0;
+      let hoursBook = 0;
+      let hoursAnkis = 0;
+      let hoursVideos = 0;
+
+      Object.entries(appState.completedBlocks).forEach(([dateStr, ids]) => {
+        const dayBlocks = getBlocksForDate(dateStr);
+        ids.forEach(id => {
+          const blk = dayBlocks.find(b => b.id === id);
+          if (!blk) return;
+          if (blk.category === "enarm") {
+            enarmDaysDone++;
+            hoursEnarm += blk.hours;
+          } else if (blk.category === "book") {
+            hoursBook += blk.hours;
+          } else if (blk.category === "ankis") {
+            hoursAnkis += blk.hours;
+          } else if (blk.category === "videos") {
+            hoursVideos += blk.hours;
+          }
+        });
+      });
+
+      document.getElementById("stat-enarm-days").textContent = `${enarmDaysDone}/30`;
+      document.getElementById("stat-hours-enarm").textContent = `${Math.round(hoursEnarm * 10) / 10}h`;
+      document.getElementById("stat-hours-book").textContent = `${Math.round(hoursBook * 10) / 10}h`;
+      document.getElementById("stat-hours-ankis").textContent = `${Math.round(hoursAnkis * 10) / 10}h`;
+      document.getElementById("stat-hours-videos").textContent = `${Math.round(hoursVideos * 10) / 10}h`;
+      document.getElementById("stat-end-date").textContent = formatShortDate(lastDate);
+      document.getElementById("stat-postponed-count").textContent = `${appState.postponedDates.length} día(s) recorridos`;
+    }
+
+    function renderTodayView() {
+      const dateStr = appState.selectedDate;
+      const { dateToSyllabus } = buildScheduleMap();
+      const dayInfo = dateToSyllabus[dateStr];
+      const dayBlocks = getBlocksForDate(dateStr);
+      const doneList = appState.completedBlocks[dateStr] || [];
+      const coreBlocks = dayBlocks.filter(b => b.isCore);
+      const coreDoneCount = coreBlocks.filter(b => doneList.includes(b.id)).length;
+
+      document.getElementById("selected-date-label").textContent = formatDisplayDate(dateStr);
+      const badge = document.getElementById("selected-day-badge");
+      const statusText = document.getElementById("selected-date-status");
+      const topicCard = document.getElementById("enarm-topic-card");
+
+      if (dayInfo && dayInfo.isPostponed) {
+        badge.className = "px-2 py-0.5 text-[11px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40";
+        badge.textContent = "Día Pospuesto (+1d)";
+        statusText.textContent = "Este día se marcó como pausa y el calendario se recorrió al día siguiente.";
+        topicCard.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Jornada en Pausa</span>
+              <h3 class="text-base font-bold text-white mt-0.5">El temario ENARM de esta fecha se recorrió al siguiente día</h3>
+              <p class="text-xs text-slate-400 mt-1">Si deseas reactivar este día, abre "Posponer día" y selecciona deshacer pausa.</p>
+            </div>
+            <button onclick="openPostponeModal()" class="px-3.5 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-xs font-bold text-amber-300 shrink-0">
+              Administrar pausa
+            </button>
+          </div>
+        `;
+      } else if (dayInfo && dayInfo.topic) {
+        const t = dayInfo.topic;
+        badge.className = "px-2 py-0.5 text-[11px] font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30";
+        badge.textContent = `Día ${t.dayNum} / 30`;
+        statusText.textContent = `${coreDoneCount} de ${coreBlocks.length} bloques productivos completados hoy`;
+        topicCard.innerHTML = `
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-300 text-xs font-bold">ENARM · Día ${t.dayNum}</span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-mono">Págs. ${t.pages}</span>
+              </div>
+              <h3 class="text-lg font-extrabold text-white mt-2">${t.title}</h3>
+            </div>
+            <button onclick="openTopicEditorModal(${t.dayNum})"
+              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 transition">
+              Editar tema
+            </button>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed"><strong class="text-slate-200">Temas:</strong> ${t.topics}</p>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs text-cyan-200/90">
+            <strong>Enfoque:</strong> ${t.focus}
+          </div>
+        `;
+      } else {
+        badge.className = "px-2 py-0.5 text-[11px] font-bold rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+        badge.textContent = "Fuera de rango 30d";
+        statusText.textContent = `${coreDoneCount} de ${coreBlocks.length} bloques completados`;
+        topicCard.innerHTML = `
+          <h3 class="text-sm font-bold text-slate-200">Fecha fuera del bloque inicial de 30 días</h3>
+          <p class="text-xs text-slate-400">Puedes seguir usando tus bloques diarios o agregar tareas personalizadas para esta fecha.</p>
+        `;
+      }
+
+      // Renderizar tareas arrastradas
+      const carriedList = appState.carriedOverTasks[dateStr] || [];
+      const carriedSection = document.getElementById("carried-over-section");
+      const carriedContainer = document.getElementById("carried-over-list");
+      if (carriedList.length > 0) {
+        carriedSection.classList.remove("hidden");
+        carriedContainer.innerHTML = carriedList.map((task, idx) => `
+          <div onclick="toggleCarriedTask('${dateStr}', ${idx})"
+            class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/90 border border-amber-500/30 cursor-pointer hover:bg-slate-800 transition">
+            <div class="w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${task.done ? "bg-amber-500 border-amber-400 text-slate-950" : "border-amber-500/60"}">
+              ${task.done ? "✓" : ""}
+            </div>
+            <span class="text-xs sm:text-sm font-medium ${task.done ? "line-through text-slate-500" : "text-amber-100"}">${task.title}</span>
+          </div>
+        `).join("");
+      } else {
+        carriedSection.classList.add("hidden");
+      }
+
+      // Renderizar bloques horarios
+      const container = document.getElementById("blocks-container");
+      container.innerHTML = dayBlocks.map(blk => {
+        const isDone = doneList.includes(blk.id);
+        const colors = getColorClasses(blk.color);
+        const dynamicTitle = (blk.category === "enarm" && dayInfo && dayInfo.topic)
+          ? `${blk.title} — ${dayInfo.topic.title}`
+          : blk.title;
+
+        return `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl border transition ${isDone ? "bg-slate-900/50 border-slate-800/80 opacity-75" : `${colors.bg} ${colors.border}`}">
+            <div class="flex items-start sm:items-center gap-3.5 cursor-pointer flex-1" onclick="toggleBlockCompletion('${dateStr}', '${blk.id}')">
+              <button type="button" aria-label="Marcar bloque"
+                class="mt-0.5 sm:mt-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition ${isDone ? `${colors.check} text-slate-950 font-extrabold` : "border-slate-600 bg-slate-950/60 hover:border-cyan-400"}">
+                ${isDone ? "✓" : ""}
+              </button>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-mono font-bold text-slate-300">${blk.start} – ${blk.end}</span>
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${colors.badge}">${blk.hours}h</span>
+                </div>
+                <p class="text-sm font-bold mt-0.5 ${isDone ? "line-through text-slate-500" : "text-white"}">${dynamicTitle}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-1.5 pl-9 sm:pl-0">
+              <button onclick="startBlockTimer('${blk.id}', '${dynamicTitle.replace(/'/g, "")}', ${blk.durationMin})"
+                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-cyan-300 transition">
+                Iniciar reloj
+              </button>
+              <button onclick="openEditBlockModal('${blk.id}')" title="Editar hora o nombre"
+                class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition">
+                ✎
+              </button>
+              <button onclick="deleteCustomBlock('${blk.id}')" title="Eliminar bloque"
+                class="p-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 text-slate-400 hover:text-rose-300 transition">
+                🗑
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderGridView() {
+      const { dateToSyllabus, allTimelineDates } = buildScheduleMap();
+      const globalGrid = document.getElementById("global-squares-grid");
+
+      globalGrid.innerHTML = allTimelineDates.map(dateStr => {
+        const info = dateToSyllabus[dateStr];
+        const dayBlocks = getBlocksForDate(dateStr);
+        const coreBlocks = dayBlocks.filter(b => b.isCore);
+        const doneList = appState.completedBlocks[dateStr] || [];
+        const coreDone = coreBlocks.filter(b => doneList.includes(b.id)).length;
+
+        let cardClass = "bg-slate-800/80 border-slate-700 text-slate-300";
+        let label = info && info.topic ? `D${info.topic.dayNum}` : "Pausa";
+
+        if (info && info.isPostponed) {
+          cardClass = "bg-sky-500/20 border-sky-400/50 text-sky-200";
+          label = "+1d";
+        } else if (coreBlocks.length > 0 && coreDone === coreBlocks.length) {
+          cardClass = "bg-emerald-500/25 border-emerald-400 text-emerald-200";
+        } else if (coreDone > 0) {
+          cardClass = "bg-amber-500/25 border-amber-400 text-amber-200";
+        }
+
+        return `
+          <button onclick="selectSpecificDate('${dateStr}')"
+            class="p-2 rounded-xl border text-center transition hover:scale-105 ${cardClass}">
+            <span class="block text-xs font-extrabold">${label}</span>
+            <span class="block text-[10px] opacity-80 mt-0.5">${formatShortDate(dateStr)}</span>
+            <span class="block text-[10px] font-mono mt-1">${info && info.isPostponed ? "Pausa" : `${coreDone}/${coreBlocks.length}`}</span>
+          </button>
+        `;
+      }).join("");
+
+      const matrixContainer = document.getElementById("habit-matrix-container");
+      const baseCore = getBaseBlocks().filter(b => b.isCore);
+
+      matrixContainer.innerHTML = baseCore.map(blk => {
+        const squares = allTimelineDates.map(dateStr => {
+          const info = dateToSyllabus[dateStr];
+          const isPostponed = info && info.isPostponed;
+          const isDone = (appState.completedBlocks[dateStr] || []).includes(blk.id);
+          let bg = "bg-slate-800 border-slate-700";
+          if (isPostponed) bg = "bg-sky-500/30 border-sky-400/60";
+          else if (isDone) bg = "bg-emerald-500 border-emerald-400";
+
+          return `<button onclick="toggleBlockCompletion('${dateStr}', '${blk.id}')" title="${formatShortDate(dateStr)} - ${blk.title}"
+            class="w-6 h-6 rounded-md border shrink-0 transition hover:scale-110 ${bg}"></button>`;
+        }).join("");
+
+        return `
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white">${blk.title} <span class="text-slate-500 font-mono">(${blk.start})</span></span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">${squares}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderSyllabus() {
+      const { syllabusToDate } = buildScheduleMap();
+      const query = (document.getElementById("syllabus-search")?.value || "").toLowerCase();
+      const list = document.getElementById("syllabus-list");
+
+      const filtered = getActiveSyllabus().filter(item =>
+        item.title.toLowerCase().includes(query) || item.topics.toLowerCase().includes(query)
+      );
+
+      list.innerHTML = filtered.map(item => {
+        const assignedDate = syllabusToDate[item.dayNum];
+        const isDone = assignedDate && (appState.completedBlocks[assignedDate] || []).includes("enarm");
+
+        return `
+          <div class="bg-slate-900 border ${isDone ? "border-emerald-500/40" : "border-slate-800"} rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-lg text-xs font-bold ${isDone ? "bg-emerald-500/20 text-emerald-300" : "bg-cyan-500/20 text-cyan-300"}">
+                  Día ${item.dayNum}
+                </span>
+                <span class="text-xs font-mono text-amber-300">${assignedDate ? formatDisplayDate(assignedDate) : ""}</span>
+                <span class="text-xs text-slate-500">· Págs. ${item.pages}</span>
+              </div>
+              <h3 class="text-sm sm:text-base font-bold text-white">${item.title}</h3>
+              <p class="text-xs text-slate-400">${item.topics}</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="openTopicEditorModal(${item.dayNum})"
+                class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300">
+                Editar
+              </button>
+              <button onclick="selectSpecificDate('${assignedDate}')"
+                class="px-3.5 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-xs font-bold text-cyan-300">
+                Ir al día
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.remove("hidden");
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => toast.classList.add("hidden"), 3200);
+    }
+
+    function startLiveClock() {
+      setInterval(() => {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mm = String(now.getMinutes()).padStart(2, "0");
+        const ss = String(now.getSeconds()).padStart(2, "0");
+        const currentHHMM = `${hh}:${mm}`;
+
+        const clockEl = document.getElementById("live-clock");
+        if (clockEl) clockEl.textContent = `${hh}:${mm}:${ss}`;
+
+        const todayStr = formatDateStr(now);
+        const todayBlocks = getBlocksForDate(todayStr);
+        const nextBlk = todayBlocks.find(b => b.start > currentHHMM);
+        const hintEl = document.getElementById("next-block-hint");
+        if (hintEl) {
+          hintEl.textContent = nextBlk ? `Siguiente: ${nextBlk.start} ${nextBlk.title}` : "Jornada finalizada";
+        }
+
+        if (appState.alarmsEnabled && appState.lastTriggeredMinute !== `${todayStr}_${currentHHMM}`) {
+          const matchingBlock = todayBlocks.find(b => b.start === currentHHMM);
+          if (matchingBlock) {
+            appState.lastTriggeredMinute = `${todayStr}_${currentHHMM}`;
+            saveState();
+            triggerAlarmModal(`¡${matchingBlock.start} — ${matchingBlock.title}!`, `Inicia tu bloque programado de ${matchingBlock.hours} hora(s).`);
+          }
+        }
+      }, 1000);
+    }
+
+    function renderAll() {
+      renderStats();
+      renderTodayView();
+      renderGridView();
+      renderSyllabus();
+      updateAlarmButtonUI();
+      const repeatSel = document.getElementById("alarm-repeat-select");
+      if (repeatSel) repeatSel.value = String(appState.alarmRepeatCount ?? 3);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      restoreSavedAudioFromDB();
+      renderAll();
+      startLiveClock();
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
+    });
+  </script>
+</body>
+</html>
