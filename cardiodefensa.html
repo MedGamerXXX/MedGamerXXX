@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardioDefensa: Navesita + Tarjetas Anki HAS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #070b14;
+      color: #f8fafc;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+    }
+    .font-arcade { font-family: 'Chakra Petch', sans-serif; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+    .arcade-panel {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 13, 24, 0.98) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .btn-arcade {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.55);
+    }
+    .btn-arcade:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pop-in { animation: popIn 0.22s ease-out forwards; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 320px;
+      border-radius: 0.75rem;
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- Barra Superior HUD -->
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-cyan-500/20 px-4 py-3">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="game.showMenu()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center text-slate-950 font-arcade font-bold text-xl shadow-lg shadow-cyan-500/25">
+          ⚡
+        </div>
+        <div>
+          <h1 class="font-arcade text-lg sm:text-xl font-bold tracking-wider uppercase text-white leading-none">
+            CARDIO<span class="text-cyan-400">DEFENSA</span>
+          </h1>
+          <span id="hud-subtitle" class="font-mono-code text-[11px] text-emerald-400">Cardiología 1: HAS + Angina + SCASEST + IAMCEST</span>
+        </div>
+      </div>
+
+      <!-- Indicadores -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-2 font-mono-code text-xs">
+          <span class="text-amber-400">★ XP:</span>
+          <span id="hud-xp" class="font-bold text-white">0</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-2 font-mono-code text-xs">
+          <span class="text-cyan-400">Dominados:</span>
+          <span id="hud-mastered" class="font-bold text-emerald-400">0/0</span>
+        </div>
+        <button onclick="game.openAnkiModal()" class="btn-arcade px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 font-arcade font-bold text-xs flex items-center gap-1.5">
+          <span>Exportar Anki</span>
+          <span id="hud-mistakes" class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-mono-code text-[11px]">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Escenario Principal -->
+  <main id="game-root" class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 flex flex-col justify-center">
+    <!-- Renderizado dinámico -->
+  </main>
+
+  <!-- Modal Exportar Anki -->
+  <div id="anki-modal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="arcade-panel rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-arcade text-lg font-bold text-amber-400 uppercase">Exportar Mazos a Anki (Pregunta ; Respuesta)</h3>
+        <button onclick="game.closeAnkiModal()" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-sm">✕</button>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="game.setAnkiExport('mistakes')" class="px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/50 text-rose-300 text-xs font-bold">Solo Fallos</button>
+        <button onclick="game.setAnkiExport('all')" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 text-xs font-bold">Todo Cardiología 1</button>
+        <button onclick="game.copyAnkiText()" class="ml-auto px-4 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold">Copiar Texto</button>
+      </div>
+      <textarea id="anki-textarea" readonly rows="9" class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono-code text-xs text-slate-200 focus:outline-none"></textarea>
+      <p id="anki-status" class="text-xs text-emerald-400 hidden font-bold">¡Copiado al portapapeles! Importa en Anki separando por punto y coma (;).</p>
+    </div>
+  </div>
+
+  <!-- Pie -->
+  <footer class="border-t border-slate-900 py-3 px-4 text-center text-[11px] font-mono-code text-slate-500">
+    CardioDefensa • Cardiología 1 (HAS • Angina • SCASEST • IAMCEST) • GPC México / PRONAM / HEARTS
+  </footer>
+
+  <script>
+    /* ========================================================================
+       MOTOR DE SONIDO ARCADE SINTETIZADO (WEB AUDIO API)
+       ======================================================================== */
+    const sfx = {
+      ctx: null,
+      playTone(freq, type, duration, vol = 0.08) {
+        try {
+          if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      },
+      click() { this.playTone(540, 'triangle', 0.08, 0.06); },
+      laser() { this.playTone(880, 'sawtooth', 0.12, 0.07); },
+      hit()   { this.playTone(620, 'sine', 0.14, 0.09); setTimeout(() => this.playTone(930, 'sine', 0.18, 0.09), 70); },
+      boom()  { this.playTone(150, 'sawtooth', 0.28, 0.11); }
+    };
+
+    /* ========================================================================
+       BASE COMPLETA CARDIOLOGÍA 1: HAS + ANGINA + SCASEST + IAMCEST
+       ======================================================================== */
+    const HAS_PAIRS = [
+      // ==================== TEMA 1: HIPERTENSIÓN ARTERIAL SISTÉMICA ====================
+      // NIVEL 1: MEDICIÓN Y DIAGNÓSTICO
+      { id: 'm1', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Reposo previo y abstinencia para medir PA', right: 'Reposo 5 min; evitar café, tabaco y ejercicio 30 min antes' },
+      { id: 'm2', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Postura correcta al tomar la PA', right: 'Espalda y pies apoyados sin cruzar piernas, vejiga vacía, brazo a nivel corazón' },
+      { id: 'm3', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Diagnóstico HAS en población general', right: 'PAS ≥140 mmHg y/o PAD ≥90 mmHg (corroborar con MDPA o MAPA)' },
+      { id: 'm4', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Diagnóstico HAS en alto riesgo (DM2, ERC, dislipidemia)', right: 'PAS ≥130 mmHg y/o PAD ≥80 mmHg' },
+      { id: 'm5', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Tomas en consultorio y 1.ª visita', right: '3 tomas (1–2 min), promediar últimas 2; extra si difieren >10 mmHg; medir ambos brazos' },
+      { id: 'm6', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Hipotensión ortostática (definición)', right: 'Caída PAS ≥20 o PAD ≥10 mmHg a los 1–3 min de ponerse de pie' },
+      { id: 'm7', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Protocolo MDPA (domiciliario)', right: '2 tomas mañana y 2 noche (intervalo 1–2 min) por ≥3 de 7 días + bitácora' },
+      { id: 'm8', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Protocolo MAPA (24 h, estándar de oro)', right: 'Intervalos 15–30 min día / 30–60 min noche; ≥70% registros válidos' },
+      { id: 'm9', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Confirmación en consultorio vs. diagnóstico en 1 visita', right: '2–3 visitas (1–4 sem); 1 visita si PA ≥180/110 + daño cardiovascular' },
+      { id: 'm10', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'Criterios de rigidez arterial', right: 'Presión de pulso >60 mmHg y velocidad onda pulso carotídeo-femoral >10 m/s' },
+      { id: 'm11', topic: '1. HAS', cat: 'HAS 1: Medición y Diagnóstico', left: 'PA casual 135–149 / 85–109 (corte ≤149, ej. 135/85)', right: 'Tratamiento no farmacológico y revalorar en 6 meses' },
+
+      // NIVEL 2: RIESGO CV (HEARTS Y SCORE2)
+      { id: 'r1', topic: '1. HAS', cat: 'HAS 2: Riesgo CV (HEARTS/SCORE)', left: 'Calculadora HEARTS en las Américas', right: 'Estima riesgo a 10 años de IAM, EVC o muerte CV (desde >18 años)' },
+      { id: 'r2', topic: '1. HAS', cat: 'HAS 2: Riesgo CV (HEARTS/SCORE)', left: 'Riesgo Alto (criterios clínicos)', right: '>2 factores de riesgo (obesidad, DM2, tabaco, dislipidemia), DOB o cálculo >10%' },
+      { id: 'r3', topic: '1. HAS', cat: 'HAS 2: Riesgo CV (HEARTS/SCORE)', left: 'Riesgo Muy Alto (criterios clínicos)', right: 'Enfermedad cardiovascular establecida, ERC o enfermedad cerebrovascular' },
+      { id: 'r4', topic: '1. HAS', cat: 'HAS 2: Riesgo CV (HEARTS/SCORE)', left: '5 categorías de escala HEARTS', right: 'Bajo <5%, Moderado 5–10%, Alto 10–20%, Muy alto 20–30%, Crítico >30%' },
+      { id: 'r5', topic: '1. HAS', cat: 'HAS 2: Riesgo CV (HEARTS/SCORE)', left: 'Variantes de edad de escala SCORE2', right: 'SCORE2 (40–69 años), SCORE2-OP (≥70 años), SCORE2-Diabetes (≥70 años + DM)' },
+      { id: 'r6', topic: '1. HAS', cat: 'HAS 2: Riesgo CV (HEARTS/SCORE)', left: '3 categorías de escala SCORE', right: 'Bajo <5%, Limítrofe 5–10%, Aumentado >10%' },
+
+      // NIVEL 3: CAUSAS SECUNDARIAS POR EDAD
+      { id: 's1', topic: '1. HAS', cat: 'HAS 3: Causas Secundarias', left: 'HAS secundaria en <18 años (<11 años: 70–85%)', right: 'Enfermedad renal y coartación de la aorta' },
+      { id: 's2', topic: '1. HAS', cat: 'HAS 3: Causas Secundarias', left: 'HAS secundaria de 19 a 39 años', right: 'Disfunción tiroidea y estenosis arteria renal por displasia fibromuscular' },
+      { id: 's3', topic: '1. HAS', cat: 'HAS 3: Causas Secundarias', left: 'HAS secundaria de 40 a 64 años', right: 'Hiperaldosteronismo, AOS, Cushing, disfunción tiroidea y feocromocitoma' },
+      { id: 's4', topic: '1. HAS', cat: 'HAS 3: Causas Secundarias', left: 'HAS secundaria en ≥65 años', right: 'Estenosis arteria renal por aterosclerosis, enfermedad renal e hipotiroidismo' },
+
+      // NIVEL 4: MEDIDAS NO FARMACOLÓGICAS
+      { id: 'n1', topic: '1. HAS', cat: 'HAS 4: Medidas No Farmacológicas', left: 'Pérdida de peso (IMC 18.5–24.9 o bajar ≥5 kg)', right: 'Reduce 5–20 mmHg (la medida más efectiva)' },
+      { id: 'n2', topic: '1. HAS', cat: 'HAS 4: Medidas No Farmacológicas', left: 'Dieta tipo DASH (frutas, verduras, lácteos descremados)', right: 'Reduce 8–14 mmHg' },
+      { id: 'n3', topic: '1. HAS', cat: 'HAS 4: Medidas No Farmacológicas', left: 'Dejar de fumar (evitar tabaquismo)', right: 'Reduce 5–10 mmHg y disminuye riesgo CV' },
+      { id: 'n4', topic: '1. HAS', cat: 'HAS 4: Medidas No Farmacológicas', left: 'Ejercicio aeróbico (30–45 min, 5–7 d/sem o ≥150 min mod)', right: 'Reduce 4–9 mmHg (caminar 8,000–12,000 pasos/día)' },
+      { id: 'n5', topic: '1. HAS', cat: 'HAS 4: Medidas No Farmacológicas', left: 'Reducir sal (<5 g sal/día ≈ 2 g sodio)', right: 'Reduce 2–8 mmHg (meta 2–5 g/día ≈ 1 cucharadita)' },
+      { id: 'n6', topic: '1. HAS', cat: 'HAS 4: Medidas No Farmacológicas', left: 'Moderar alcohol (<10 g/día o ≤30 mL etanol/día)', right: 'Reduce 2–4 mmHg' },
+      { id: 'n7', topic: '1. HAS', cat: 'HAS 4: Medidas No Farmacológicas', left: 'Potasio, agua, bebidas azucaradas y resistencia', right: 'Potasio 3.5 g/d, agua 1.5–2 L/d, cero azúcar, resistencia 2–3 d/sem (30 min)' },
+
+      // NIVEL 5: ABORDAJE Y ESCALADA FARMACOLÓGICA
+      { id: 't1', topic: '1. HAS', cat: 'HAS 5: Escalada Terapéutica', left: 'Criterio de inicio de fármacos en HAS', right: '≥140/90 mmHg general; ≥130/80 mmHg en alto riesgo CV' },
+      { id: 't2', topic: '1. HAS', cat: 'HAS 5: Escalada Terapéutica', left: 'Indicaciones de monoterapia inicial', right: 'Fragilidad (Rockwood 5–6), ≥85 años o hipotensión ortostática' },
+      { id: 't3', topic: '1. HAS', cat: 'HAS 5: Escalada Terapéutica', left: 'Inicio estándar sin fragilidad ni ≥85 años', right: 'Terapia dual a dosis media (IECA o ARA II + CaA o tiazida) en 1 comprimido' },
+      { id: 't4', topic: '1. HAS', cat: 'HAS 5: Escalada Terapéutica', left: 'Escalada mensual si no alcanza meta (<130/80 mmHg)', right: 'Mes 1: Dual dosis máx → Mes 2: Triple (IECA/ARA II + CaA + diurético) → Mes 3: 2.º nivel' },
+      { id: 't5', topic: '1. HAS', cat: 'HAS 5: Escalada Terapéutica', left: '¿Cuándo agregar betabloqueador o AAS en cualquier momento?', right: 'BB: cardiopatía isquémica, IC o FA; AAS + estatina: enfermedad CV aterosclerosa' },
+      { id: 't6', topic: '1. HAS', cat: 'HAS 5: Escalada Terapéutica', left: 'Frecuencia de seguimiento y vacunas PRONAM', right: 'Cada 1 mes si descontrol/inicio; cada 3 meses en meta; vacunas Influenza, COVID y Neumococo' },
+
+      // NIVEL 6: GRUPOS ESPECIALES
+      { id: 'g1', topic: '1. HAS', cat: 'HAS 6: Grupos Especiales', left: 'Adulto joven (18–40 años) con HAS', right: 'Buscar causas secundarias; meta <130/80 mmHg' },
+      { id: 'g2', topic: '1. HAS', cat: 'HAS 6: Grupos Especiales', left: 'Adulto mayor frágil (Rockwood 5–6) o ≥85 años', right: 'Iniciar si ≥140/90 con CaA DHP, IECA o ARA II; 2.ª línea diurético dosis baja; evitar BB y alfa-1' },
+      { id: 'g3', topic: '1. HAS', cat: 'HAS 6: Grupos Especiales', left: 'Meta de PA en adulto mayor vs. demencia severa', right: 'General: PAS 130–139 (PAD ≥80); Demencia severa/fragilidad: hasta 140/80 mmHg' },
+      { id: 'g4', topic: '1. HAS', cat: 'HAS 6: Grupos Especiales', left: 'Obesidad, DM2 o Síndrome Metabólico', right: 'IECA/ARA II + CaA (evitar tiazidas); bajar 5–10% peso, HbA1c <7%, c-LDL <70, PA <130/80' },
+      { id: 'g5', topic: '1. HAS', cat: 'HAS 6: Grupos Especiales', left: 'Cardiopatía isquémica crónica', right: 'IECA/ARA II + Betabloqueador (o CaA no DHP en 2.ª línea); meta c-LDL <55 mg/dL' },
+      { id: 'g6', topic: '1. HAS', cat: 'HAS 6: Grupos Especiales', left: 'Insuficiencia cardíaca crónica vs. Fibrilación auricular', right: 'IC: IECA, ARNI o CaA (meta <130/80); FA: IECA/ARA II + BB o CaA no DHP + anticoagulación' },
+      { id: 'g7', topic: '1. HAS', cat: 'HAS 6: Grupos Especiales', left: 'Antecedente de EVC vs. Enfermedad Renal Crónica', right: 'Ambos: IECA/ARA II + CaA (2.ª diurético); EVC c-LDL <55; ERC PA <130/80' },
+
+      // NIVEL 7: HAS RESISTENTE, FÁRMACOS Y CRISIS
+      { id: 'c1', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'HAS resistente: definición y fármaco añadido', right: 'Sin meta con ≥3 fármacos (incluyendo diurético) a dosis máx o ≥4 fármacos; añadir espironolactona' },
+      { id: 'c2', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Crisis hipertensiva: Urgencia (76%) vs. Emergencia (24%)', right: 'PA ≥180/110–120 mmHg; Urgencia SIN daño órgano blanco; Emergencia CON daño agudo' },
+      { id: 'c3', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Manejo de Urgencia Hipertensiva (PRONAM)', right: 'Ambulatorio, vía oral (NO sublingual ni nifedipino); Amlodipino 5–10 mg; bajar en 24–48 h' },
+      { id: 'c4', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Meta general de Emergencia Hipertensiva (PRONAM)', right: 'Referencia 2.º/3.º nivel; bajar PA 20–25% en 1–2 h IV; VO a las 6–12 h; normalizar en 48–72 h' },
+      { id: 'c5', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Tiazidas (clortalidona, HCTZ, indapamida): EA clave', right: 'Evitar en gota, hiponatremia, hipokalemia e hipercalcemia (↑gota ↓Na ↓K ↑Ca)' },
+      { id: 'c6', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Diuréticos de asa vs. Espironolactona: precauciones', right: 'Asa (furosemida): ↓volumen ↓Na ↓K; Espironolactona: evitar en hiperkalemia y TFG muy baja' },
+      { id: 'c7', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Betabloqueadores cardioselectivos vs. no selectivos', right: 'Selectivos (metoprolol): evitar BAV 2°/3°; No selectivos (propranolol, labetalol): evitar en asma' },
+      { id: 'c8', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'IECA vs. ARA-II: contraindicaciones y regla clave', right: 'Embarazo, estenosis bilateral renal, ↑K; IECA da tos/angioedema; NO combinar IECA + ARA-II' },
+      { id: 'c9', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Amlodipino, Prazosina, Clonidina e Hidralazina: EA', right: 'Amlodipino: edema; Prazosina: ortostatismo; Clonidina: sedación; Hidralazina: taquicardia' },
+      { id: 'c10', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Disección aórtica aguda: meta, tiempo y fármaco', right: 'PAS <120 + FC <60 lpm en 20 min (120/60/20); Esmolol o labetalol + nitroprusiato' },
+      { id: 'c11', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Edema agudo de pulmón cardiogénico hipertensivo', right: 'PAS <140 mmHg inmediato con Furosemida + nitroprusiato o nitroglicerina' },
+      { id: 'c12', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Encefalopatía hipertensiva e HTA maligna', right: 'Bajar PAM 20–25% (inmediato en encefalopatía / varias horas en maligna) con Labetalol' },
+      { id: 'c13', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'EVC isquémico: candidato vs. NO candidato a trombólisis', right: 'Candidato: <185/110 inmediato (labetalol); NO candidato: solo si >220/120, bajar PAM 15% en 24 h' },
+      { id: 'c14', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'EVC hemorrágico vs. Evento coronario agudo (IAM)', right: 'EVC hemorrágico: PAS <180 (labetalol); IAM: PAS <140 inmediato (nitroglicerina, labetalol o esmolol)' },
+      { id: 'c15', topic: '1. HAS', cat: 'HAS 7: Resistente y Crisis', left: 'Hipertensión perioperatoria: tratamiento y diferir cirugía', right: 'Tratar si >160/90 por 15 min con Esmolol; diferir cirugía electiva si PAS >180 o PAD >110' },
+
+      // ==================== TEMA 2: ANGINA DE PECHO ====================
+      { id: 'ang1', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'Etiología más común y mecanismo de la angina de pecho', right: 'Aterosclerosis; desequilibrio aporte-demanda de O₂ (↑carga trabajo cardíaca sin ↑flujo coronario)' },
+      { id: 'ang2', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'Elección antiisquémica: ↑demanda O₂ vs. vasoespasmo', right: '↑Demanda: Betabloqueadores y CaA no DHP; Vasoespasmo: Nitratos y CaA dihidropiridínicos' },
+      { id: 'ang3', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'Duración clásica de la angina estable y cambio de patrón', right: '15 seg a 15 min (sin necrosis); en reposo o nocturna indica angina inestable o Prinzmetal' },
+      { id: 'ang4', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'Equivalentes anginosos y hallazgos en exploración aguda', right: 'Disnea, dolor epigástrico/mandibular/interescapular; S3/S4 y soplo regurgitación mitral (CD)' },
+      { id: 'ang5', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'ECG en reposo vs. durante episodio de angina y estándar de oro', right: 'Reposo normal posible; anormal ≥50% en crisis (Onda T picuda = isquemia subendocárdica); Angiografía = oro' },
+      { id: 'ang6', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'Clasificación CCS Clase I y Clase II (Angina)', right: 'I: solo ejercicio intenso; II: limitación ligera (>2 cuadras plano, >1 piso, frío, tras comer)' },
+      { id: 'ang7', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'Clasificación CCS Clase III y Clase IV (Angina)', right: 'III: limitación marcada (1–2 cuadras plano, >1 piso); IV: incapacidad cualquier actividad / en reposo' },
+      { id: 'ang8', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'Antianginosos de 1.ª línea, 2.ª línea y alivio agudo', right: '1.ª: Betabloqueadores; 2.ª: CaA o nitratos acción prolongada; Agudo: Nitroglicerina sublingual' },
+      { id: 'ang9', topic: '2. Angina', cat: 'Angina: Clínica, CCS y Tratamiento', left: 'Prevención secundaria en EAC (todos vs. comorbilidades)', right: 'Todos: AAS + estatina alta intensidad; DM/DISVI/ERC: IECA o ARA II; IC: añadir i-SGLT2' },
+
+      // ==================== TEMA 3: SCASEST ====================
+      { id: 'sca1', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Diferencia entre Angina Inestable e IAMSEST', right: 'Ambos sin elevación ST; Angina Inestable SIN necrosis (troponina/CK-MB normal); IAMSEST CON necrosis' },
+      { id: 'sca2', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'SCASEST primario vs. secundario y prevención primaria GPC', right: 'Primario: rotura placa + trombo; Secundario: anemia/hipoxemia/fiebre/tirotoxicosis; Riesgo CV c/3 años' },
+      { id: 'sca3', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Causas no ateroscleróticas y tóxico a interrogar en <40 años', right: 'Vasoespasmo (Prinzmetal, triptanos, quimio) o disección espontánea (vasculitis); interrogar cocaína/metanfetaminas' },
+      { id: 'sca4', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Grupos con presentación atípica en SCASEST', right: 'Jóvenes (25–40 años), ancianos (>75 años), mujeres, DM, ERC y demencia' },
+      { id: 'sca5', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Braunwald Gravedad: Clase I, II y III (Angina inestable)', right: 'I: reciente/acelerada (<2 meses, sin reposo); II: reposo subaguda (mes previo, NO últimas 48 h); III: reposo aguda (<48 h)' },
+      { id: 'sca6', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Braunwald Circunstancias Clínicas (A, B, C) e Intensidad (1–3)', right: 'A: secundaria; B: primaria; C: post-IAM (<2 sem); 1: mínimo, 2: oral estándar, 3: dosis máx + nitroglicerina IV' },
+      { id: 'sca7', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Los 7 criterios de la escala TIMI en SCASEST', right: '>65 años, ≥3 FR, EAC conocida, ≥2 anginas/24 h, AAS últimos 7 d, ST ≥0.5 mV, ↑troponina/CK-MB' },
+      { id: 'sca8', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Interpretación y mortalidad a 1 año de escala TIMI', right: '0–2: Bajo (3.9%); 3–4: Intermedio (6.5%); 5–7: Alto (21%)' },
+      { id: 'sca9', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Las 8 variables de la escala GRACE', right: 'Edad, FC, PAS, Killip, desviación ST, paro cardíaco al ingreso, creatinina y biomarcadores' },
+      { id: 'sca10', topic: '3. SCASEST', cat: 'SCASEST 1: Diagnóstico y Escalas', left: 'Puntos de corte GRACE (mortalidad hospitalaria vs. 6 meses)', right: 'Hosp: ≤108 (<1%), 109–140 (1–3%), >140 (>3%); 6 meses: ≤88 (<3%), 89–118 (3–8%), >118 (>8%)' },
+
+      { id: 'sca11', topic: '3. SCASEST', cat: 'SCASEST 2: Manejo y Tiempos', left: 'Tiempos de ECG y biomarcadores al ingreso en SCASEST', right: 'ECG en ≤10 min (repetir 3–6 h si normal); Biomarcadores <60 min (repetir 6–12 h, luego c/6–8 h hasta pico)' },
+      { id: 'sca12', topic: '3. SCASEST', cat: 'SCASEST 2: Manejo y Tiempos', left: 'Troponina vs. CK-MB en SCASEST', right: 'Troponina: mejor pronóstico a 30 días (falsos + en ERC); CK-MB: mejor para detectar reinfarto' },
+      { id: 'sca13', topic: '3. SCASEST', cat: 'SCASEST 2: Manejo y Tiempos', left: 'Tratamiento inicial en SCASEST y fármaco contraindicado', right: 'Reposo, monitor ECG, O₂, opioides (morfina/buprenorfina), antianginosos, AAS + clopidogrel + atorvastatina; NO AINE' },
+      { id: 'sca14', topic: '3. SCASEST', cat: 'SCASEST 2: Manejo y Tiempos', left: 'Anticoagulación en SCASEST: conservador vs. invasivo / ICP', right: 'Conservador: HNF, HBPM o fondaparinux; Invasivo: HNF o HBPM; ICP: bivalirudina (no al inicio)' },
+      { id: 'sca15', topic: '3. SCASEST', cat: 'SCASEST 2: Manejo y Tiempos', left: 'Revascularización SCASEST: ICP vs. Cirugía (SYNTAX y DM)', right: 'ICP: 1–2 vasos, SYNTAX bajo (<13) o sin DM; Cirugía: multivaso SYNTAX alto (≥13) y/o DM' },
+      { id: 'sca16', topic: '3. SCASEST', cat: 'SCASEST 2: Manejo y Tiempos', left: 'Suspensión previa a CABG en SCASEST', right: 'Suspender clopidogrel 5 días antes o antagonista GP IIb/IIIa 4 horas antes' },
+      { id: 'sca17', topic: '3. SCASEST', cat: 'SCASEST 2: Manejo y Tiempos', left: 'Tiempos de angiografía en SCASEST según riesgo', right: 'Muy alto (IH/CC/refractario): ≤2 h; Alto (IAMSEST/GRACE ≥140/TIMI 5–7): ≤24 h; Intermedio (GRACE 109–139): ≤72 h' },
+
+      // ==================== TEMA 4: IAMCEST ====================
+      { id: 'iam1', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Epidemiología IAM en México (RENASCA-IMSS) y factores de riesgo', right: '1.ª muerte hombres y 2.ª mujeres (12.6%); mortalidad RENASCA 14.9%; FR: HAS 60%, tabaco 46%, DM 45%' },
+      { id: 'iam2', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Tipos de Infarto Universal: Tipo 1, Tipo 2 y Tipo 3', right: '1: aterotrombosis aguda; 2: desequilibrio aporte/demanda sin trombo; 3: muerte cardíaca isquémica antes de cTn' },
+      { id: 'iam3', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Tipos de Infarto Universal: 4a, 4b, 4c y 5 (umbrales cTn)', right: '4a (ICP): cTn >5x LSR; 4b: trombosis stent; 4c: reestenosis; 5 (CABG): cTn >10x LSR (cambio >20% si basal alto)' },
+      { id: 'iam4', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Horario pico, desencadenantes y límite de irradiación IAMCEST', right: '6:00 a. m. a 12:00 p. m.; desencadenante en 50%; dolor >20 min que nunca irradia por debajo del ombligo' },
+      { id: 'iam5', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Clasificación Killip-Kimball y mortalidad hospitalaria (MH)', right: 'I: sin IC (6%); II: S3 y estertores basales (17%); III: edema agudo pulmonar (38%); IV: choque cardiogénico (81%)' },
+      { id: 'iam5b', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Cambios ECG por capa: Isquemia, Lesión y Necrosis', right: 'Isquemia (repolarización): T picuda simétrica (subendocárdica) / T negativa simétrica (subepicárdica); Lesión (corriente): ST ↓ (subendocárdica) / ST ↑ (subepicárdica); Necrosis (pérdida miocardio): Onda Q patológica (transmural)' },
+      { id: 'iam6', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Criterios elevación ST en V2–V3 (punto J, ≥2 derivaciones)', right: 'Hombres <40 años: ≥2.5 mm (0.25 mV); Hombres ≥40 años: ≥2.0 mm; Mujeres: ≥1.5 mm; Resto derivaciones: ≥1 mm' },
+      { id: 'iam6b', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Criterios ECG de IAMSEST y Onda Q patológica (necrosis)', right: 'IAMSEST: depresión ST ≥0.5 mm y/o inversión onda T ≥1 mm en ≥2 derivaciones contiguas; Onda Q: duración ≥0.04 s (1 cuadrito) y profundidad ≥2 mm o ≥25% de R' },
+      { id: 'iam7', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Derivaciones especiales e imagen en espejo (Posterior y VD)', right: 'Posterior: V7–V9 (≥0.05 mV) con imagen en espejo ST ↓ en V1–V3; VD: V3R–V4R (≥0.05 mV)' },
+      { id: 'iam8', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Localización ECG y arteria culpable (Anteroseptal, Lateral alto y bajo)', right: 'Anteroseptal (V1–V4 ± V5–V6, DI, aVL): DA; Lateral alto (DI, aVL): Circunfleja; Lateral bajo (V5–V6): Circunfleja' },
+      { id: 'iam9', topic: '4. IAMCEST', cat: 'IAMCEST 1: Definiciones y ECG', left: 'Localización ECG y clínica asociada (Inferior, VD y Posterior)', right: 'Inferior (DII, DIII, aVF): CD 85% (irriga nodos SA y AV → bradicardia/BAV) o Cx 8%; VD (V3R–V4R): CD (hipotensión, yugulares ↑, pulmones limpios, EVITAR NITRATOS); Posterior (V7–V9): CD o Cx' },
+
+      { id: 'iam10', topic: '4. IAMCEST', cat: 'IAMCEST 2: Biomarcadores y Forrester', left: 'Cinética de Mioglobina, Troponina I/T y CK-MB', right: 'Mioglobina: ↑1–2 h, norm 24 h; Troponina: ↑3–6 h, pico 24–48 h, norm 7–10 d; CK-MB: ↑4–6 h, pico 24 h, norm 48–72 h' },
+      { id: 'iam11', topic: '4. IAMCEST', cat: 'IAMCEST 2: Biomarcadores y Forrester', left: 'Escala de Zwolle y control ecocardiográfico post-IAMCEST', right: 'Zwolle: riesgo hospitalización por IC; repetir ecocardiograma a los 3 meses si hubo alteración de FEVI' },
+      { id: 'iam12', topic: '4. IAMCEST', cat: 'IAMCEST 2: Biomarcadores y Forrester', left: 'Forrester I y II (IC ≥2.2; corte PCP 18 mmHg)', right: 'I (PCP ≤18): normal → Betabloqueadores; II (PCP >18): congestión pulmonar → Diuréticos' },
+      { id: 'iam13', topic: '4. IAMCEST', cat: 'IAMCEST 2: Biomarcadores y Forrester', left: 'Forrester III y IV (IC <2.2; corte PCP 18 mmHg)', right: 'III (PCP ≤18, ej. IAM VD): hipoperfusión sin congestión → Líquidos; IV (PCP >18): choque → Aminas + diuréticos' },
+
+      { id: 'iam14', topic: '4. IAMCEST', cat: 'IAMCEST 3: Reperfusión y Tiempos', left: 'Ventana de reperfusión y tiempos límite de ICP primaria', right: 'Síntomas ≤12 h; Máx traslado a ICP ≤120 min; Puerta-balón en centro con ICP ≤60 min (trasladado ≤90 min)' },
+      { id: 'iam15', topic: '4. IAMCEST', cat: 'IAMCEST 3: Reperfusión y Tiempos', left: 'Tiempo puerta-aguja, ventana de oro y evaluación de fibrinólisis', right: 'Puerta-aguja ≤10 min; máxima eficacia en primeras 2 h; evaluar éxito a los 60–90 min (éxito = resolución ST ≥50%)' },
+      { id: 'iam16', topic: '4. IAMCEST', cat: 'IAMCEST 3: Reperfusión y Tiempos', left: 'Conducta tras fibrinólisis: exitosa vs. fallida (<50% ST)', right: 'Exitosa: angiografía/ICP en 2–24 horas; Fallida o inestabilidad: ICP de rescate inmediata' },
+      { id: 'iam17', topic: '4. IAMCEST', cat: 'IAMCEST 3: Reperfusión y Tiempos', left: 'Dosis de Tenecteplasa (bolo IV único) por peso y edad', right: '<60 kg: 30 mg; 60–69: 35 mg; 70–79: 40 mg; 80–89: 45 mg; ≥90 kg: 50 mg (>75 años: reducir dosis 50%)' },
+      { id: 'iam18', topic: '4. IAMCEST', cat: 'IAMCEST 3: Reperfusión y Tiempos', left: 'Contraindicaciones ABSOLUTAS de fibrinólisis (clave)', right: 'Hemorragia activa, HIC previa cualquier tiempo, EVC isquémico <6 meses, trauma craneal/HTD <1 mes, síndrome aórtico, punción no compresible <24 h' },
+      { id: 'iam19', topic: '4. IAMCEST', cat: 'IAMCEST 3: Reperfusión y Tiempos', left: 'Contraindicaciones RELATIVAS de fibrinólisis (clave)', right: 'AIT <6 meses, anticoagulante oral, embarazo/1.ª sem posparto, HTA refractaria >180/110, úlcera péptica activa, plaquetas <100 mil' },
+
+      { id: 'iam20', topic: '4. IAMCEST', cat: 'IAMCEST 4: Fármacos y Complicaciones', left: 'Dosis de carga y mantenimiento DAPT + O₂ en IAMCEST', right: 'AAS 300 mg carga (75–100 mg/d) + Clopidogrel 600 mg carga (75 mg/d por 12 meses; 6 m si alto riesgo sangrado); O₂ solo si SatO₂ <90%' },
+      { id: 'iam21', topic: '4. IAMCEST', cat: 'IAMCEST 4: Fármacos y Complicaciones', left: 'Anticoagulación en fibrinólisis (Enoxaparina, HNF, Fondaparinux)', right: 'Enoxaparina 1 mg/kg SC c/12 h (preferida); HNF bolo 60 U/kg (máx 4,000) + 12 U/kg/h; Fondaparinux 2.5 mg/d con estreptoquinasa' },
+      { id: 'iam22', topic: '4. IAMCEST', cat: 'IAMCEST 4: Fármacos y Complicaciones', left: 'Reglas de Nitroglicerina, BB, Estatina, IECA y ARM en IAMCEST', right: 'NTG contraindicada si PAS <90 o IAM VD; Atorvastatina 80 mg (LDL <55); IECA en primeras 24 h; ARM si FEVI ≤40% + IC/DM' },
+      { id: 'iam23', topic: '4. IAMCEST', cat: 'IAMCEST 4: Fármacos y Complicaciones', left: 'Arritmias en IAMCEST: FA/TV vs. Bradicardia/BAV alto grado', right: 'FA con isquemia o TV: cardioversión o amiodarona IV; Bradicardia/BAV sintomático: atropina IV → marcapaso temporal' },
+      { id: 'iam24', topic: '4. IAMCEST', cat: 'IAMCEST 4: Fármacos y Complicaciones', left: 'Complicaciones mecánicas IAMCEST: tiempo, tipos y manejo', right: '48 h a 14 días (más en IAM anterior); Rotura pared libre (<1%), IM aguda (0.1–0.9%), CIV (0.2%); Eco + Cirugía urgente' },
+      { id: 'iam25', topic: '4. IAMCEST', cat: 'IAMCEST 4: Fármacos y Complicaciones', left: 'Prevención secundaria y Rehabilitación Cardíaca post-IAMCEST', right: 'PA <130/80, LDL <55, HbA1c <7%, stent fármaco-activo DAPT ≥1 año (desnudo ≥1 mes); Rehab Fase 1 hosp, 2A/2B ambulatoria (Borg), 3 mantenimiento' }
+    ];
+
+    /* ========================================================================
+       MOTOR PRINCIPAL DEL JUEGO (TARJETAS ANKI + NAVESITA CÓMODA)
+       ======================================================================== */
+    const game = {
+      xp: 0,
+      mastered: [],
+      mistakes: [],
+      currentGame: null,
+      selectedTopic: 'ALL',
+      animFrame: null,
+
+      // Estado Anki
+      ankiFlashCat: 'ALL',
+      ankiQueue: [],
+      ankiIdx: 0,
+      ankiFlipped: false,
+
+      // Estado Navesita
+      shooterActive: false,
+      shooterCat: 'ALL',
+      shooterSpeedMode: 'normal',
+      waveScore: 0,
+      waveLives: 5,
+      waveStreak: 0,
+      waveQueue: [],
+      waveIndex: 0,
+      enemy: null,
+      turrets: [],
+      projectiles: [],
+      particles: [],
+      stars: [],
+
+      init() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('cardiodefensa_cardio1_v1') || '{}');
+          if (saved.xp) this.xp = saved.xp;
+          if (Array.isArray(saved.mastered)) this.mastered = saved.mastered;
+          if (Array.isArray(saved.mistakes)) this.mistakes = saved.mistakes;
+        } catch (e) {}
+        this.updateHUD();
+        this.showMenu();
+      },
+
+      saveProgress() {
+        try {
+          localStorage.setItem('cardiodefensa_cardio1_v1', JSON.stringify({
+            xp: this.xp,
+            mastered: this.mastered,
+            mistakes: this.mistakes
+          }));
+        } catch (e) {}
+        this.updateHUD();
+      },
+
+      updateHUD() {
+        const xpEl = document.getElementById('hud-xp');
+        const mEl = document.getElementById('hud-mastered');
+        const fEl = document.getElementById('hud-mistakes');
+        if (xpEl) xpEl.textContent = this.xp;
+        if (mEl) mEl.textContent = `${this.mastered.length}/${HAS_PAIRS.length}`;
+        if (fEl) fEl.textContent = this.mistakes.length;
+      },
+
+      recordMistake(pair) {
+        if (!pair) return;
+        if (!this.mistakes.some(m => m.id === pair.id)) {
+          this.mistakes.push(pair);
+          this.saveProgress();
+        }
+      },
+
+      markMastered(pair) {
+        if (!pair) return;
+        if (!this.mastered.includes(pair.id)) {
+          this.mastered.push(pair.id);
+          this.saveProgress();
+        }
+      },
+
+      stopAllLoops() {
+        this.shooterActive = false;
+        if (this.animFrame) {
+          cancelAnimationFrame(this.animFrame);
+          this.animFrame = null;
+        }
+      },
+
+      shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      },
+
+      /* ======================================================================
+         MENÚ PRINCIPAL POR TEMAS Y NIVELES SECUENCIALES (CARDIOLOGÍA 1)
+         ====================================================================== */
+      selectTopic(topic) {
+        sfx.click();
+        this.selectedTopic = topic;
+        this.showMenu();
+      },
+
+      showMenu() {
+        this.stopAllLoops();
+        this.currentGame = 'menu';
+        const topics = ['ALL', ...new Set(HAS_PAIRS.map(p => p.topic))];
+        const filteredPairs = this.selectedTopic === 'ALL'
+          ? HAS_PAIRS
+          : HAS_PAIRS.filter(p => p.topic === this.selectedTopic);
+        const categories = [...new Set(filteredPairs.map(p => p.cat))];
+        const pct = Math.round((this.mastered.length / HAS_PAIRS.length) * 100);
+
+        document.getElementById('game-root').innerHTML = `
+          <div class="space-y-5 pop-in">
+            <!-- Banner Principal -->
+            <div class="arcade-panel rounded-2xl p-5 sm:p-7 relative overflow-hidden">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                <div class="space-y-2 max-w-2xl">
+                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 font-mono-code text-xs font-bold">
+                    🫀 BLOQUE COMPLETO: CARDIOLOGÍA 1 (${HAS_PAIRS.length} TARJETAS)
+                  </div>
+                  <h2 class="font-arcade text-2xl sm:text-3xl font-bold text-white uppercase tracking-wide">
+                    Domina <span class="text-cyan-400">Cardiología 1</span> en <span class="text-emerald-400">5 Modos</span>
+                  </h2>
+                  <p class="text-slate-300 text-xs sm:text-sm">
+                    Elige cualquier nivel y entrénalo con <strong>🃏 Anki</strong>, <strong>⚡ Pares</strong>, <strong>🧠 Memorama</strong>, <strong>🚀 Nave</strong> o <strong>👾 Jefe Final</strong>.
+                  </p>
+                </div>
+
+                <!-- Progreso Total -->
+                <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 min-w-[210px] text-center space-y-2">
+                  <div class="font-mono-code text-xs text-slate-400">DOMINIO CARDIOLOGÍA 1</div>
+                  <div class="font-arcade text-3xl font-bold text-emerald-400">${pct}%</div>
+                  <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                    <div class="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 transition-all duration-500" style="width:${pct}%"></div>
+                  </div>
+                  <div class="text-[11px] font-mono-code text-slate-400">${this.mastered.length} de ${HAS_PAIRS.length} conceptos</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pestañas por Tema de Cardiología 1 -->
+            <div class="flex flex-wrap items-center gap-2">
+              ${topics.map(tp => {
+                const count = tp === 'ALL' ? HAS_PAIRS.length : HAS_PAIRS.filter(p => p.topic === tp).length;
+                const active = this.selectedTopic === tp;
+                return `
+                  <button onclick="game.selectTopic('${tp}')"
+                    class="btn-arcade px-3.5 py-2 rounded-xl font-arcade font-bold text-xs uppercase border ${active ? 'bg-cyan-400 text-slate-950 border-cyan-300' : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-cyan-500/50'}">
+                    ${tp === 'ALL' ? 'Todos los temas' : tp} (${count})
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Mapa de Niveles -->
+            <div class="arcade-panel rounded-2xl p-5 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="font-arcade text-lg font-bold text-cyan-300 uppercase">
+                  Niveles de ${this.selectedTopic === 'ALL' ? 'Cardiología 1' : this.selectedTopic}
+                </h3>
+                ${this.mistakes.length > 0 ? `
+                  <button onclick="game.startAnkiFlashByCat('MISTAKES')" class="btn-arcade px-4 py-2 rounded-xl bg-amber-400 text-slate-950 font-arcade font-bold text-xs uppercase animate-pulse">
+                    🃏 Repasar Mis ${this.mistakes.length} Fallos en Anki
+                  </button>
+                ` : ''}
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                ${categories.map((cat, idx) => {
+                  const catItems = HAS_PAIRS.filter(p => p.cat === cat);
+                  const catDone = catItems.filter(p => this.mastered.includes(p.id)).length;
+                  const isComplete = catDone === catItems.length;
+                  return `
+                    <div class="p-3.5 rounded-xl bg-slate-950/90 border-2 ${isComplete ? 'border-emerald-500/60' : 'border-slate-800'} flex flex-col justify-between gap-3">
+                      <div class="space-y-1">
+                        <div class="flex items-center justify-between font-mono-code text-[11px]">
+                          <span class="text-cyan-400 font-bold">NIVEL ${idx + 1}</span>
+                          <span class="${isComplete ? 'text-emerald-400 font-bold' : 'text-slate-400'}">${catDone}/${catItems.length} ${isComplete ? '⭐' : ''}</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-white">${cat}</h4>
+                        <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                          <div class="h-full ${isComplete ? 'bg-emerald-400' : 'bg-cyan-400'}" style="width:${Math.round((catDone / catItems.length) * 100)}%"></div>
+                        </div>
+                      </div>
+                      <div class="grid grid-cols-3 gap-1.5 pt-1">
+                        <button onclick="game.startAnkiFlashByCat('${cat}')" class="btn-arcade py-1.5 px-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-arcade font-bold text-[10px] uppercase">
+                          🃏 Anki
+                        </button>
+                        <button onclick="game.startMatchByCat('${cat}')" class="btn-arcade py-1.5 px-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-arcade font-bold text-[10px] uppercase">
+                          ⚡ Pares
+                        </button>
+                        <button onclick="game.startMemoryByCat('${cat}')" class="btn-arcade py-1.5 px-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 font-arcade font-bold text-[10px] uppercase">
+                          🧠 Memo
+                        </button>
+                      </div>
+                      <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="game.startShooterByCat('${cat}')" class="btn-arcade py-1.5 px-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-arcade font-bold text-[10px] uppercase">
+                          🚀 Nave
+                        </button>
+                        <button onclick="game.startBossByCat('${cat}')" class="btn-arcade py-1.5 px-2 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-arcade font-bold text-[10px] uppercase">
+                          👾 Jefe
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+
+                <!-- Nivel Global Cardiología 1 -->
+                <div class="p-3.5 rounded-xl bg-gradient-to-br from-rose-950/40 to-slate-950 border-2 border-rose-500/40 flex flex-col justify-between gap-3">
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between font-mono-code text-[11px]">
+                      <span class="text-rose-400 font-bold">DESAFÍO FINAL</span>
+                      <span class="text-amber-300 font-bold">${HAS_PAIRS.length} ITEMS</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-white">Cardiología 1 Completo</h4>
+                    <p class="text-[11px] text-slate-400">Mezcla HAS, Angina, SCASEST e IAMCEST en los 5 modos.</p>
+                  </div>
+                  <div class="grid grid-cols-3 gap-1.5 pt-1">
+                    <button onclick="game.startAnkiFlashByCat('ALL')" class="btn-arcade py-1.5 px-1.5 rounded-lg bg-amber-500 text-slate-950 font-arcade font-bold text-[10px] uppercase">
+                      🃏 Anki
+                    </button>
+                    <button onclick="game.startMatchByCat('ALL')" class="btn-arcade py-1.5 px-1.5 rounded-lg bg-cyan-400 text-slate-950 font-arcade font-bold text-[10px] uppercase">
+                      ⚡ Pares
+                    </button>
+                    <button onclick="game.startMemoryByCat('ALL')" class="btn-arcade py-1.5 px-1.5 rounded-lg bg-purple-400 text-slate-950 font-arcade font-bold text-[10px] uppercase">
+                      🧠 Memo
+                    </button>
+                  </div>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="game.startShooterByCat('ALL')" class="btn-arcade py-1.5 px-2 rounded-lg bg-emerald-400 text-slate-950 font-arcade font-bold text-[10px] uppercase">
+                      🚀 Nave
+                    </button>
+                    <button onclick="game.startBossByCat('ALL')" class="btn-arcade py-1.5 px-2 rounded-lg bg-rose-500 text-white font-arcade font-bold text-[10px] uppercase">
+                      👾 Jefe Final
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      /* ======================================================================
+         MODO 2: CONECTA-PARES (TABLERO 5x5 ESTILO MATCH)
+         ====================================================================== */
+      startMatchByCat(cat) {
+        sfx.click();
+        this.stopAllLoops();
+        this.currentGame = 'match';
+        this.matchCat = cat;
+        const pool = cat === 'ALL' ? [...HAS_PAIRS] : HAS_PAIRS.filter(p => p.cat === cat);
+        this.matchPool = this.shuffle(pool);
+        this.matchScore = 0;
+        this.matchCombo = 0;
+        this.loadMatchRound();
+      },
+
+      loadMatchRound() {
+        if (this.matchPool.length === 0) {
+          this.endMinigame('⚡🏆', '¡Conecta-Pares Completado!', `Puntaje total: ${this.matchScore} PTS`, this.matchCat, 'match');
+          return;
+        }
+        const batch = this.matchPool.splice(0, 5);
+        this.matchLeft = this.shuffle(batch.map(p => ({ id: p.id, text: p.left, pair: p, matched: false })));
+        this.matchRight = this.shuffle(batch.map(p => ({ id: p.id, text: p.right, pair: p, matched: false })));
+        this.selLeft = null;
+        this.selRight = null;
+        this.matchErrorId = null;
+        this.renderMatchUI();
+      },
+
+      selectMatchSide(side, id) {
+        if (side === 'L') {
+          const item = this.matchLeft.find(x => x.id === id);
+          if (!item || item.matched) return;
+          sfx.click();
+          this.selLeft = this.selLeft === id ? null : id;
+        } else {
+          const item = this.matchRight.find(x => x.id === id);
+          if (!item || item.matched) return;
+          sfx.click();
+          this.selRight = this.selRight === id ? null : id;
+        }
+
+        if (this.selLeft && this.selRight) {
+          if (this.selLeft === this.selRight) {
+            sfx.hit();
+            const lItem = this.matchLeft.find(x => x.id === this.selLeft);
+            const rItem = this.matchRight.find(x => x.id === this.selRight);
+            lItem.matched = true;
+            rItem.matched = true;
+            this.matchCombo++;
+            this.matchScore += 50 + this.matchCombo * 15;
+            this.xp += 25;
+            this.markMastered(lItem.pair);
+            this.selLeft = null;
+            this.selRight = null;
+            this.renderMatchUI();
+            if (this.matchLeft.every(x => x.matched)) {
+              setTimeout(() => this.loadMatchRound(), 450);
+            }
+          } else {
+            sfx.boom();
+            const lItem = this.matchLeft.find(x => x.id === this.selLeft);
+            if (lItem) this.recordMistake(lItem.pair);
+            this.matchCombo = 0;
+            const badL = this.selLeft;
+            const badR = this.selRight;
+            this.matchErrorPair = { badL, badR };
+            this.selLeft = null;
+            this.selRight = null;
+            this.renderMatchUI();
+            setTimeout(() => {
+              this.matchErrorPair = null;
+              if (this.currentGame === 'match') this.renderMatchUI();
+            }, 450);
+          }
+        } else {
+          this.renderMatchUI();
+        }
+      },
+
+      renderMatchUI() {
+        document.getElementById('game-root').innerHTML = `
+          <div class="space-y-4 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2 font-mono-code text-xs">
+              <button onclick="game.showMenu()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">← Mapa de Niveles</button>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300 font-bold">COMBO x${this.matchCombo}</span>
+                <span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">${this.matchScore} PTS</span>
+              </div>
+            </div>
+
+            <div class="arcade-panel rounded-2xl p-4 sm:p-6 space-y-3">
+              <div class="text-center">
+                <h3 class="font-arcade text-lg font-bold text-cyan-300 uppercase">⚡ Conecta cada concepto con su respuesta exacta</h3>
+                <p class="text-xs text-slate-400">Quedan ${this.matchPool.length + this.matchLeft.filter(x => !x.matched).length} pares en esta ronda</p>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                <div class="space-y-2">
+                  ${this.matchLeft.map(item => {
+                    const isSel = this.selLeft === item.id;
+                    const isErr = this.matchErrorPair && this.matchErrorPair.badL === item.id;
+                    const cls = item.matched
+                      ? 'opacity-25 bg-emerald-950/30 border-emerald-500/40 text-emerald-300 cursor-default'
+                      : isErr
+                        ? 'bg-rose-500/30 border-rose-500 text-white'
+                        : isSel
+                          ? 'bg-cyan-500/25 border-cyan-400 text-white scale-[1.01]'
+                          : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-100';
+                    return `
+                      <button onclick="game.selectMatchSide('L', '${item.id}')" ${item.matched ? 'disabled' : ''}
+                        class="btn-arcade w-full text-left p-3 rounded-xl border-2 text-xs sm:text-sm font-semibold transition-all ${cls}">
+                        ${item.matched ? '✅ ' : '🔹 '}${item.text}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <div class="space-y-2">
+                  ${this.matchRight.map(item => {
+                    const isSel = this.selRight === item.id;
+                    const isErr = this.matchErrorPair && this.matchErrorPair.badR === item.id;
+                    const cls = item.matched
+                      ? 'opacity-25 bg-emerald-950/30 border-emerald-500/40 text-emerald-300 cursor-default'
+                      : isErr
+                        ? 'bg-rose-500/30 border-rose-500 text-white'
+                        : isSel
+                          ? 'bg-amber-500/25 border-amber-400 text-white scale-[1.01]'
+                          : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-200';
+                    return `
+                      <button onclick="game.selectMatchSide('R', '${item.id}')" ${item.matched ? 'disabled' : ''}
+                        class="btn-arcade w-full text-left p-3 rounded-xl border-2 text-xs sm:text-sm transition-all ${cls}">
+                        ${item.matched ? '✅ ' : '🔸 '}${item.text}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      /* ======================================================================
+         MODO 3: MEMORAMA CLÍNICO (CARTAS VOLTEABLES)
+         ====================================================================== */
+      startMemoryByCat(cat) {
+        sfx.click();
+        this.stopAllLoops();
+        this.currentGame = 'memory';
+        this.memCat = cat;
+        const pool = cat === 'ALL' ? [...HAS_PAIRS] : HAS_PAIRS.filter(p => p.cat === cat);
+        const chosen = this.shuffle(pool).slice(0, 6);
+        const cards = [];
+        chosen.forEach(p => {
+          cards.push({ uid: `${p.id}_L`, pairId: p.id, side: 'PREGUNTA', text: p.left, pair: p, flipped: false, matched: false });
+          cards.push({ uid: `${p.id}_R`, pairId: p.id, side: 'RESPUESTA', text: p.right, pair: p, flipped: false, matched: false });
+        });
+        this.memCards = this.shuffle(cards);
+        this.memFlipped = [];
+        this.memMoves = 0;
+        this.memLock = false;
+        this.renderMemoryUI();
+      },
+
+      flipMemoryCard(idx) {
+        if (this.memLock) return;
+        const c = this.memCards[idx];
+        if (!c || c.flipped || c.matched) return;
+        sfx.click();
+        c.flipped = true;
+        this.memFlipped.push(idx);
+        this.renderMemoryUI();
+
+        if (this.memFlipped.length === 2) {
+          this.memMoves++;
+          this.memLock = true;
+          const [i1, i2] = this.memFlipped;
+          const c1 = this.memCards[i1];
+          const c2 = this.memCards[i2];
+
+          if (c1.pairId === c2.pairId) {
+            sfx.hit();
+            c1.matched = true;
+            c2.matched = true;
+            this.xp += 30;
+            this.markMastered(c1.pair);
+            this.memFlipped = [];
+            this.memLock = false;
+            this.renderMemoryUI();
+            if (this.memCards.every(x => x.matched)) {
+              setTimeout(() => {
+                this.endMinigame('🧠🏆', '¡Memorama Clínico Resuelto!', `Completado en ${this.memMoves} intentos.`, this.memCat, 'memory');
+              }, 500);
+            }
+          } else {
+            sfx.boom();
+            this.recordMistake(c1.pair);
+            setTimeout(() => {
+              c1.flipped = false;
+              c2.flipped = false;
+              this.memFlipped = [];
+              this.memLock = false;
+              if (this.currentGame === 'memory') this.renderMemoryUI();
+            }, 1100);
+          }
+        }
+      },
+
+      renderMemoryUI() {
+        document.getElementById('game-root').innerHTML = `
+          <div class="space-y-4 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2 font-mono-code text-xs">
+              <button onclick="game.showMenu()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">← Mapa de Niveles</button>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 font-bold">INTENTOS: ${this.memMoves}</span>
+                <span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">PARES: ${this.memCards.filter(x => x.matched).length / 2}/6</span>
+              </div>
+            </div>
+
+            <div class="arcade-panel rounded-2xl p-4 sm:p-5 space-y-3">
+              <div class="text-center">
+                <h3 class="font-arcade text-lg font-bold text-purple-300 uppercase">🧠 Memorama Clínico: Encuentra las 6 Parejas</h3>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 pt-1">
+                ${this.memCards.map((c, idx) => {
+                  if (c.matched) {
+                    return `
+                      <div class="p-3 rounded-xl bg-emerald-950/50 border-2 border-emerald-500/60 min-h-[115px] flex flex-col justify-center text-center">
+                        <span class="font-mono-code text-[10px] text-emerald-400 font-bold mb-1">✅ EMPAREJADA</span>
+                        <p class="text-[11px] sm:text-xs text-emerald-200 font-medium leading-snug">${c.text}</p>
+                      </div>
+                    `;
+                  }
+                  if (c.flipped) {
+                    return `
+                      <div class="p-3 rounded-xl bg-slate-900 border-2 ${c.side === 'PREGUNTA' ? 'border-cyan-400' : 'border-amber-400'} min-h-[115px] flex flex-col justify-center text-center pop-in">
+                        <span class="font-mono-code text-[10px] ${c.side === 'PREGUNTA' ? 'text-cyan-400' : 'text-amber-400'} font-bold mb-1">${c.side}</span>
+                        <p class="text-[11px] sm:text-xs text-white font-semibold leading-snug">${c.text}</p>
+                      </div>
+                    `;
+                  }
+                  return `
+                    <button onclick="game.flipMemoryCard(${idx})"
+                      class="btn-arcade p-3 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 hover:border-purple-400 border-2 border-slate-700 min-h-[115px] flex flex-col items-center justify-center gap-1">
+                      <span class="text-2xl">🫀</span>
+                      <span class="font-arcade text-xs font-bold text-purple-300">CARTA #${idx + 1}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      /* ======================================================================
+         MODO 4: JEFE FINAL POR TURNOS (TORMENTA CARDIOVASCULAR)
+         ====================================================================== */
+      startBossByCat(cat) {
+        sfx.click();
+        this.stopAllLoops();
+        this.currentGame = 'boss';
+        this.bossCat = cat;
+        const pool = cat === 'ALL' ? [...HAS_PAIRS] : HAS_PAIRS.filter(p => p.cat === cat);
+        this.bossQueue = this.shuffle(pool);
+        this.bossIdx = 0;
+        this.bossMaxHp = Math.min(1200, this.bossQueue.length * 100);
+        this.bossHp = this.bossMaxHp;
+        this.playerHp = 100;
+        this.bossLog = '¡El Jefe Cardiovascular ha aparecido! Responde para lanzar ataques críticos.';
+        this.bossName = cat === 'ALL' ? 'OCLUSIÓN DE TRONCO CORONARIO' : `JEFE: ${cat.toUpperCase()}`;
+        this.nextBossTurn();
+      },
+
+      nextBossTurn() {
+        if (this.playerHp <= 0) {
+          this.endMinigame('💀💔', '¡Derrotado por el Jefe!', 'Repasa tus fallos en Anki y vuelve a desafiarlo.', this.bossCat, 'boss');
+          return;
+        }
+        if (this.bossHp <= 0) {
+          this.xp += 150;
+          this.saveProgress();
+          this.endMinigame('👾🏆', '¡JEFE DERROTADO! (+150 XP)', `Sobreviviste con ${this.playerHp} HP restantes.`, this.bossCat, 'boss');
+          return;
+        }
+        if (this.bossIdx >= this.bossQueue.length) {
+          this.bossQueue = this.shuffle(this.bossQueue);
+          this.bossIdx = 0;
+        }
+        const pair = this.bossQueue[this.bossIdx++];
+        const sameCat = HAS_PAIRS.filter(p => p.id !== pair.id && p.cat === pair.cat);
+        const distPool = sameCat.length >= 3 ? sameCat : HAS_PAIRS.filter(p => p.id !== pair.id);
+        const distractors = this.shuffle(distPool).slice(0, 3);
+        this.bossCurrent = pair;
+        this.bossOptions = this.shuffle([
+          { text: pair.right, correct: true },
+          ...distractors.map(d => ({ text: d.right, correct: false }))
+        ]);
+        this.renderBossUI();
+      },
+
+      attackBoss(optIdx) {
+        const opt = this.bossOptions[optIdx];
+        if (!opt) return;
+        if (opt.correct) {
+          sfx.hit();
+          const dmg = 100;
+          this.bossHp = Math.max(0, this.bossHp - dmg);
+          this.xp += 35;
+          this.markMastered(this.bossCurrent);
+          this.bossLog = `⚔️ ¡ATAQUE CRÍTICO! Infligiste -${dmg} HP al Jefe.`;
+        } else {
+          sfx.boom();
+          this.playerHp = Math.max(0, this.playerHp - 25);
+          this.recordMistake(this.bossCurrent);
+          this.bossLog = `💥 Fallaste (-25 HP). Respuesta correcta: "${this.bossCurrent.right}"`;
+        }
+        this.nextBossTurn();
+      },
+
+      renderBossUI() {
+        const bossPct = Math.round((this.bossHp / this.bossMaxHp) * 100);
+        document.getElementById('game-root').innerHTML = `
+          <div class="space-y-4 pop-in max-w-3xl mx-auto">
+            <div class="flex items-center justify-between font-mono-code text-xs">
+              <button onclick="game.showMenu()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">← Huir al Mapa</button>
+              <span class="px-3 py-1 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold">BATALLA DE JEFE</span>
+            </div>
+
+            <div class="arcade-panel rounded-2xl p-5 sm:p-6 space-y-5 border-2 border-rose-500/50">
+              <!-- Barras de Vida -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-3 rounded-xl bg-slate-950 border border-rose-500/40 space-y-1.5">
+                  <div class="flex justify-between font-arcade text-xs font-bold text-rose-400">
+                    <span>👾 ${this.bossName}</span>
+                    <span>${this.bossHp}/${this.bossMaxHp} HP</span>
+                  </div>
+                  <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-rose-600 to-amber-500 transition-all duration-300" style="width:${bossPct}%"></div>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-950 border border-emerald-500/40 space-y-1.5">
+                  <div class="flex justify-between font-arcade text-xs font-bold text-emerald-400">
+                    <span>🛡️ TU ESCUDO CARDÍACO</span>
+                    <span>${this.playerHp}/100 HP</span>
+                  </div>
+                  <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-300" style="width:${this.playerHp}%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Log de Combate -->
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center font-mono-code text-xs text-amber-300">
+                ${this.bossLog}
+              </div>
+
+              <!-- Pregunta del Jefe -->
+              <div class="p-4 rounded-xl bg-rose-950/30 border border-rose-500/30 text-center space-y-1">
+                <span class="font-mono-code text-[11px] text-rose-300 uppercase">${this.bossCurrent.cat}</span>
+                <h3 class="font-arcade text-lg sm:text-xl font-bold text-white">${this.bossCurrent.left}</h3>
+              </div>
+
+              <!-- Opciones de Ataque -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                ${this.bossOptions.map((opt, idx) => `
+                  <button onclick="game.attackBoss(${idx})"
+                    class="btn-arcade text-left p-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border-2 border-slate-700 hover:border-rose-400 text-xs sm:text-sm text-slate-100 font-medium flex items-start gap-2.5">
+                    <span class="font-arcade font-bold text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0">⚔️ ${idx + 1}</span>
+                    <span>${opt.text}</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      endMinigame(icon, title, subtitle, cat, mode) {
+        const retryFn = mode === 'match'
+          ? `game.startMatchByCat('${cat}')`
+          : mode === 'memory'
+            ? `game.startMemoryByCat('${cat}')`
+            : `game.startBossByCat('${cat}')`;
+        document.getElementById('game-root').innerHTML = `
+          <div class="arcade-panel rounded-2xl p-6 sm:p-8 max-w-xl mx-auto text-center space-y-5 pop-in">
+            <div class="text-4xl">${icon}</div>
+            <h3 class="font-arcade text-2xl font-bold text-emerald-400 uppercase">${title}</h3>
+            <p class="text-sm text-slate-300">${subtitle}</p>
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+              <button onclick="${retryFn}" class="btn-arcade px-6 py-3 rounded-xl bg-cyan-400 text-slate-950 font-arcade font-bold text-sm uppercase">
+                Jugar de Nuevo →
+              </button>
+              <button onclick="game.startAnkiFlashByCat('${cat}')" class="btn-arcade px-5 py-3 rounded-xl bg-amber-400 text-slate-950 font-arcade font-bold text-sm uppercase">
+                🃏 Repasar en Anki
+              </button>
+              <button onclick="game.showMenu()" class="px-5 py-3 rounded-xl bg-slate-800 text-white font-bold text-sm border border-slate-700">
+                Mapa de Niveles
+              </button>
+            </div>
+          </div>
+        `;
+      },
+
+      /* ======================================================================
+         MODO ESTUDIO ANKI INTERACTIVO (FLASHCARDS CON REPETICIÓN ESPACIADA)
+         ====================================================================== */
+      startAnkiFlashByCat(cat) {
+        sfx.click();
+        this.stopAllLoops();
+        this.currentGame = 'anki_flash';
+        this.ankiFlashCat = cat;
+        if (cat === 'MISTAKES') {
+          this.ankiQueue = this.mistakes.length > 0 ? [...this.mistakes] : [...HAS_PAIRS];
+        } else if (cat === 'ALL') {
+          this.ankiQueue = [...HAS_PAIRS];
+        } else {
+          this.ankiQueue = HAS_PAIRS.filter(p => p.cat === cat);
+        }
+        this.ankiIdx = 0;
+        this.ankiFlipped = false;
+        this.renderAnkiFlashUI();
+      },
+
+      renderAnkiFlashUI() {
+        if (this.ankiIdx >= this.ankiQueue.length) {
+          this.ankiIdx = 0;
+        }
+        const card = this.ankiQueue[this.ankiIdx];
+        const isMastered = this.mastered.includes(card.id);
+
+        document.getElementById('game-root').innerHTML = `
+          <div class="space-y-4 pop-in max-w-2xl mx-auto">
+            <div class="flex flex-wrap items-center justify-between gap-2 font-mono-code text-xs">
+              <button onclick="game.showMenu()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">← Mapa de Niveles</button>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 font-bold">${this.ankiFlashCat === 'ALL' ? 'TODO HAS' : this.ankiFlashCat === 'MISTAKES' ? 'MIS FALLOS' : this.ankiFlashCat}</span>
+                <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-bold">${this.ankiIdx + 1} / ${this.ankiQueue.length}</span>
+              </div>
+            </div>
+
+            <!-- Tarjeta Anki Volteable -->
+            <div onclick="game.flipAnkiCard()" class="arcade-panel rounded-2xl p-6 sm:p-10 min-h-[260px] flex flex-col justify-between cursor-pointer border-2 ${this.ankiFlipped ? 'border-emerald-400/70' : 'border-cyan-400/60'} transition-all">
+              <div class="flex items-center justify-between font-mono-code text-xs">
+                <span class="text-cyan-400 font-bold uppercase">${card.cat}</span>
+                <span class="${isMastered ? 'text-emerald-400' : 'text-slate-500'} font-bold">${isMastered ? '⭐ APRENDIDA' : 'Toca para voltear'}</span>
+              </div>
+
+              <div class="my-6 text-center space-y-4">
+                <h3 class="font-arcade text-xl sm:text-2xl font-bold text-white leading-snug">
+                  ${card.left}
+                </h3>
+
+                ${this.ankiFlipped ? `
+                  <div class="pt-4 border-t border-slate-700/80 pop-in">
+                    <p class="text-base sm:text-lg font-bold text-emerald-300 leading-relaxed">
+                      ${card.right}
+                    </p>
+                  </div>
+                ` : `
+                  <p class="text-xs text-slate-400 pt-2">Intenta recordarlo mentalmente y toca la tarjeta para ver la respuesta</p>
+                `}
+              </div>
+
+              <div class="text-center font-mono-code text-[11px] text-slate-500">
+                ${this.ankiFlipped ? 'Califica qué tan bien la recordaste abajo 👇' : 'Espacio o Clic para mostrar respuesta'}
+              </div>
+            </div>
+
+            <!-- Botones estilo Anki (Otra vez / Bien) -->
+            ${this.ankiFlipped ? `
+              <div class="grid grid-cols-2 gap-3 pop-in">
+                <button onclick="game.rateAnkiCard(false)" class="btn-arcade py-3.5 px-4 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border-2 border-rose-500 text-rose-300 font-arcade font-bold text-sm uppercase">
+                  🔁 Otra vez (Se me olvida)
+                </button>
+                <button onclick="game.rateAnkiCard(true)" class="btn-arcade py-3.5 px-4 rounded-xl bg-emerald-500 text-slate-950 font-arcade font-bold text-sm uppercase">
+                  ✅ ¡Me la sé! (+20 XP)
+                </button>
+              </div>
+            ` : `
+              <button onclick="game.flipAnkiCard()" class="btn-arcade w-full py-3.5 rounded-xl bg-cyan-400 text-slate-950 font-arcade font-bold text-sm uppercase">
+                Mostrar Respuesta
+              </button>
+            `}
+
+            ${this.ankiFlashCat !== 'MISTAKES' ? `
+              <div class="pt-2 text-center">
+                <button onclick="game.startShooterByCat('${this.ankiFlashCat}')" class="text-xs font-mono-code text-emerald-400 hover:underline">
+                  🚀 Ya las repasé → Probar este nivel en la Navesita
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      },
+
+      flipAnkiCard() {
+        sfx.click();
+        this.ankiFlipped = !this.ankiFlipped;
+        this.renderAnkiFlashUI();
+      },
+
+      rateAnkiCard(knewIt) {
+        const card = this.ankiQueue[this.ankiIdx];
+        if (knewIt) {
+          sfx.hit();
+          this.xp += 20;
+          this.markMastered(card);
+          this.mistakes = this.mistakes.filter(m => m.id !== card.id);
+          this.saveProgress();
+          this.ankiIdx++;
+        } else {
+          sfx.boom();
+          this.recordMistake(card);
+          this.ankiQueue.splice(this.ankiIdx, 1);
+          const insertPos = Math.min(this.ankiQueue.length, this.ankiIdx + 2);
+          this.ankiQueue.splice(insertPos, 0, card);
+        }
+
+        if (this.ankiIdx >= this.ankiQueue.length) {
+          document.getElementById('game-root').innerHTML = `
+            <div class="arcade-panel rounded-2xl p-6 sm:p-8 max-w-xl mx-auto text-center space-y-5 pop-in">
+              <div class="text-4xl">🃏⭐</div>
+              <h3 class="font-arcade text-2xl font-bold text-emerald-400 uppercase">¡Ronda Anki Completada!</h3>
+              <p class="text-sm text-slate-300">Ahora pon a prueba estas tarjetas disparando con la navesita a velocidad cómoda.</p>
+              <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="game.startShooterByCat('${this.ankiFlashCat === 'MISTAKES' ? 'ALL' : this.ankiFlashCat}')" class="btn-arcade px-6 py-3 rounded-xl bg-emerald-400 text-slate-950 font-arcade font-bold text-sm uppercase">
+                  🚀 Jugar Navesita Ahora →
+                </button>
+                <button onclick="game.showMenu()" class="px-5 py-3 rounded-xl bg-slate-800 text-white font-bold text-sm border border-slate-700">
+                  Volver al Mapa
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          this.ankiFlipped = false;
+          this.renderAnkiFlashUI();
+        }
+      },
+
+      /* ======================================================================
+         MINIJUEGO: NAVESITA DE DEFENSA A VELOCIDAD CÓMODA
+         ====================================================================== */
+      startShooterByCat(cat) {
+        sfx.click();
+        this.stopAllLoops();
+        this.currentGame = 'shooter';
+        this.shooterCat = cat || 'ALL';
+        this.waveScore = 0;
+        this.waveLives = 5;
+        this.waveStreak = 0;
+        this.shooterSpeedMode = 'normal';
+
+        let basePool = this.shooterCat === 'ALL'
+          ? [...HAS_PAIRS]
+          : HAS_PAIRS.filter(p => p.cat === this.shooterCat);
+        this.waveQueue = this.shooterCat === 'ALL' ? this.shuffle(basePool) : [...basePool];
+        this.waveIndex = 0;
+        this.projectiles = [];
+        this.particles = [];
+        this.stars = Array.from({ length: 45 }, () => ({
+          x: Math.random() * 800,
+          y: Math.random() * 320,
+          r: Math.random() * 1.8 + 0.5,
+          s: Math.random() * 0.25 + 0.08
+        }));
+
+        this.renderShooterLayout();
+        this.canvas = document.getElementById('shooter-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.resizeCanvas();
+        window.addEventListener('resize', () => this.resizeCanvas());
+
+        this.shooterActive = true;
+        this.spawnEnemy();
+        this.shooterLoop();
+      },
+
+      toggleShooterSpeed() {
+        this.shooterSpeedMode = this.shooterSpeedMode === 'normal' ? 'slow' : 'normal';
+        const btn = document.getElementById('sh-speed-btn');
+        if (btn) {
+          btn.textContent = this.shooterSpeedMode === 'slow' ? '🐢 LENTO' : '🚀 CÓMODO';
+        }
+        if (this.enemy) {
+          this.enemy.vy = this.shooterSpeedMode === 'slow' ? 0.09 : 0.15;
+        }
+      },
+
+      resizeCanvas() {
+        if (!this.canvas) return;
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        this.canvas.width = rect.width || 640;
+        this.canvas.height = 320;
+        if (this.enemy) {
+          this.enemy.x = this.canvas.width / 2;
+        }
+        if (this.turrets && this.turrets.length === 4) {
+          this.turrets.forEach((t, idx) => {
+            t.x = (this.canvas.width / 4) * idx + (this.canvas.width / 8);
+          });
+        }
+      },
+
+      renderShooterLayout() {
+        document.getElementById('game-root').innerHTML = `
+          <div class="space-y-3 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2 font-mono-code text-xs">
+              <div class="flex items-center gap-2">
+                <button onclick="game.showMenu()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">← Mapa</button>
+                <button onclick="game.startAnkiFlashByCat('${this.shooterCat}')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold">🃏 Ver en Anki</button>
+              </div>
+              <div class="flex items-center gap-2 sm:gap-3">
+                <button id="sh-speed-btn" onclick="game.toggleShooterSpeed()" class="px-2.5 py-1 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold">🚀 CÓMODO</button>
+                <span id="sh-lives" class="px-2.5 py-1 rounded bg-rose-500/20 text-rose-400 font-bold">❤️❤️❤️❤️❤️</span>
+                <span id="sh-progress" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-bold">1/${this.waveQueue.length}</span>
+                <span id="sh-score" class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">PTS: 0</span>
+              </div>
+            </div>
+
+            <div id="sh-hint-banner" class="hidden p-3 rounded-xl bg-rose-950/70 border border-rose-500/60 text-xs text-rose-200"></div>
+
+            <div class="arcade-panel rounded-2xl p-3 sm:p-4 space-y-3">
+              <div class="relative w-full border-2 border-slate-800 rounded-xl overflow-hidden">
+                <canvas id="shooter-canvas"></canvas>
+              </div>
+
+              <div id="turret-controls" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+            </div>
+          </div>
+        `;
+      },
+
+      spawnEnemy() {
+        if (this.waveLives <= 0) {
+          this.endShooterGame(false);
+          return;
+        }
+        if (this.waveIndex >= this.waveQueue.length) {
+          this.shooterActive = false;
+          this.endShooterGame(true);
+          return;
+        }
+
+        const prog = document.getElementById('sh-progress');
+        if (prog) prog.textContent = `${this.waveIndex + 1}/${this.waveQueue.length}`;
+
+        const targetPair = this.waveQueue[this.waveIndex++];
+        const sameCat = HAS_PAIRS.filter(p => p.id !== targetPair.id && p.cat === targetPair.cat);
+        const distPool = sameCat.length >= 3 ? sameCat : HAS_PAIRS.filter(p => p.id !== targetPair.id);
+        const distractors = this.shuffle(distPool).slice(0, 3);
+        const options = this.shuffle([
+          { text: targetPair.right, correct: true },
+          ...distractors.map(d => ({ text: d.right, correct: false }))
+        ]);
+
+        const w = this.canvas ? this.canvas.width : 640;
+        const baseSpeed = this.shooterSpeedMode === 'slow' ? 0.09 : 0.15;
+
+        this.enemy = {
+          pair: targetPair,
+          x: w / 2,
+          y: 42,
+          vy: baseSpeed,
+          pulse: 0
+        };
+
+        this.turrets = options.map((opt, idx) => ({
+          idx,
+          text: opt.text,
+          correct: opt.correct,
+          x: (w / 4) * idx + (w / 8),
+          y: 262
+        }));
+
+        const controls = document.getElementById('turret-controls');
+        if (controls) {
+          controls.innerHTML = this.turrets.map((t, i) => `
+            <button onclick="game.fireTurret(${i})"
+              class="btn-arcade text-left p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 text-xs sm:text-sm text-slate-100 font-medium flex items-start gap-2.5">
+              <span class="font-arcade font-bold text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shrink-0">T${i + 1}</span>
+              <span>${t.text}</span>
+            </button>
+          `).join('');
+        }
+      },
+
+      fireTurret(turretIdx) {
+        if (!this.shooterActive || !this.enemy) return;
+        const turret = this.turrets[turretIdx];
+        if (!turret) return;
+
+        sfx.laser();
+        this.projectiles.push({
+          x: turret.x,
+          y: turret.y - 12,
+          tx: this.enemy.x,
+          ty: this.enemy.y,
+          progress: 0,
+          correct: turret.correct
+        });
+
+        if (turret.correct) {
+          sfx.hit();
+          const hint = document.getElementById('sh-hint-banner');
+          if (hint) hint.classList.add('hidden');
+          this.waveStreak++;
+          const pts = 100 + this.waveStreak * 20;
+          this.waveScore += pts;
+          this.xp += 30;
+          this.markMastered(this.enemy.pair);
+          this.createExplosion(this.enemy.x, this.enemy.y, '#00ff9d');
+          this.updateShooterHUD();
+          this.enemy = null;
+          setTimeout(() => { if (this.shooterActive) this.spawnEnemy(); }, 350);
+        } else {
+          sfx.boom();
+          this.waveStreak = 0;
+          this.waveLives--;
+          this.recordMistake(this.enemy.pair);
+          const hint = document.getElementById('sh-hint-banner');
+          if (hint) {
+            hint.innerHTML = `❌ <strong>Correcto para "${this.enemy.pair.left}":</strong> <span class="text-emerald-300 font-bold">${this.enemy.pair.right}</span>`;
+            hint.classList.remove('hidden');
+          }
+          this.createExplosion(turret.x, turret.y - 10, '#ff2a6d');
+          this.updateShooterHUD();
+          if (this.waveLives <= 0) {
+            this.shooterActive = false;
+            setTimeout(() => this.endShooterGame(false), 650);
+          }
+        }
+      },
+
+      createExplosion(x, y, color) {
+        for (let i = 0; i < 18; i++) {
+          const angle = (Math.PI * 2 * i) / 18;
+          const speed = Math.random() * 3 + 1.5;
+          this.particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            color
+          });
+        }
+      },
+
+      updateShooterHUD() {
+        const l = document.getElementById('sh-lives');
+        const p = document.getElementById('sh-score');
+        if (l) l.textContent = '❤️'.repeat(Math.max(0, this.waveLives)) + '🖤'.repeat(Math.max(0, 5 - this.waveLives));
+        if (p) p.textContent = `PTS: ${this.waveScore}`;
+      },
+
+      wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '';
+        const lines = [];
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+            lines.push(line.trim());
+            line = words[n] + ' ';
+          } else {
+            line = testLine;
+          }
+        }
+        lines.push(line.trim());
+        const startY = y - ((lines.length - 1) * lineHeight) / 2;
+        lines.forEach((l, i) => ctx.fillText(l, x, startY + i * lineHeight));
+      },
+
+      shooterLoop() {
+        if (!this.shooterActive || !this.ctx || !this.canvas) return;
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Estrellas de fondo
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.5)';
+        this.stars.forEach(s => {
+          s.y += s.s;
+          if (s.y > h) s.y = 0;
+          ctx.beginPath();
+          ctx.arc(s.x % w, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Línea de Escudo Coronario Inferior
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, h - 42);
+        ctx.lineTo(w, h - 42);
+        ctx.stroke();
+
+        // Dibujar las 4 torretas abajo
+        if (this.turrets) {
+          this.turrets.forEach((t, idx) => {
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(t.x - 24, h - 36, 48, 26, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 12px "Chakra Petch", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`T${idx + 1}`, t.x, h - 19);
+          });
+        }
+
+        // Nave Enemiga con el concepto a asociar
+        if (this.enemy) {
+          this.enemy.y += this.enemy.vy;
+          this.enemy.pulse += 0.08;
+
+          const boxW = Math.min(w - 30, 440);
+          const boxH = 58;
+          const bx = this.enemy.x - boxW / 2;
+          const by = this.enemy.y - boxH / 2;
+
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.roundRect(bx, by, boxW, boxH, 12);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#fda4af';
+          ctx.font = 'bold 10px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(this.enemy.pair.cat.toUpperCase(), this.enemy.x, by + 15);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 14px "Inter", sans-serif';
+          this.wrapCanvasText(ctx, this.enemy.pair.left, this.enemy.x, by + 37, boxW - 24, 16);
+
+          // Impacto contra el escudo
+          if (this.enemy.y + boxH / 2 >= h - 42) {
+            sfx.boom();
+            this.waveStreak = 0;
+            this.waveLives--;
+            this.recordMistake(this.enemy.pair);
+            const hint = document.getElementById('sh-hint-banner');
+            if (hint) {
+              hint.innerHTML = `⏰ <strong>Se escapó "${this.enemy.pair.left}" →</strong> <span class="text-emerald-300 font-bold">${this.enemy.pair.right}</span>`;
+              hint.classList.remove('hidden');
+            }
+            this.createExplosion(w / 2, h - 45, '#ff2a6d');
+            this.updateShooterHUD();
+            this.enemy = null;
+            if (this.waveLives <= 0) {
+              this.shooterActive = false;
+              setTimeout(() => this.endShooterGame(false), 650);
+            } else {
+              setTimeout(() => { if (this.shooterActive) this.spawnEnemy(); }, 550);
+            }
+          }
+        }
+
+        // Proyectiles láser
+        this.projectiles.forEach(p => {
+          p.progress += 0.18;
+          const cx = p.x + (p.tx - p.x) * p.progress;
+          const cy = p.y + (p.ty - p.y) * p.progress;
+          ctx.strokeStyle = p.correct ? '#34d399' : '#fb7185';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(cx, cy);
+          ctx.stroke();
+        });
+        this.projectiles = this.projectiles.filter(p => p.progress < 1);
+
+        // Partículas de explosión
+        this.particles.forEach(pt => {
+          pt.x += pt.vx;
+          pt.y += pt.vy;
+          pt.life -= 0.04;
+          ctx.globalAlpha = Math.max(0, pt.life);
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        });
+        this.particles = this.particles.filter(pt => pt.life > 0);
+
+        this.animFrame = requestAnimationFrame(() => this.shooterLoop());
+      },
+
+      endShooterGame(completed = false) {
+        this.stopAllLoops();
+        document.getElementById('game-root').innerHTML = `
+          <div class="arcade-panel rounded-2xl p-6 sm:p-8 max-w-xl mx-auto text-center space-y-5 pop-in">
+            <div class="text-4xl">${completed ? '🚀🏆' : '🛡️💥'}</div>
+            <h3 class="font-arcade text-2xl sm:text-3xl font-bold ${completed ? 'text-emerald-400' : 'text-rose-400'} uppercase">
+              ${completed ? '¡Nivel Completado!' : '¡Escudo Caído!'}
+            </h3>
+            <p class="text-sm text-slate-300">Puntaje final de defensa: <strong class="text-emerald-400 font-mono-code text-lg">${this.waveScore} PTS</strong></p>
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+              <button onclick="game.startShooterByCat('${this.shooterCat}')" class="btn-arcade px-6 py-3 rounded-xl bg-emerald-400 text-slate-950 font-arcade font-bold text-sm uppercase">
+                Repetir Nivel →
+              </button>
+              <button onclick="game.startAnkiFlashByCat('${this.shooterCat}')" class="btn-arcade px-5 py-3 rounded-xl bg-amber-400 text-slate-950 font-arcade font-bold text-sm uppercase">
+                🃏 Repasar en Anki
+              </button>
+              <button onclick="game.showMenu()" class="px-5 py-3 rounded-xl bg-slate-800 text-white font-bold text-sm border border-slate-700">
+                Mapa de Niveles
+              </button>
+            </div>
+          </div>
+        `;
+      },
+
+      /* ======================================================================
+         EXPORTADOR ANKI (PREGUNTA ; RESPUESTA)
+         ====================================================================== */
+      openAnkiModal() {
+        sfx.click();
+        document.getElementById('anki-modal').classList.remove('hidden');
+        this.setAnkiExport(this.mistakes.length > 0 ? 'mistakes' : 'all');
+      },
+
+      closeAnkiModal() {
+        document.getElementById('anki-modal').classList.add('hidden');
+        document.getElementById('anki-status').classList.add('hidden');
+      },
+
+      setAnkiExport(mode) {
+        const list = mode === 'mistakes' && this.mistakes.length > 0 ? this.mistakes : HAS_PAIRS;
+        const lines = list.map(item => `${item.left} ; ${item.right}`);
+        document.getElementById('anki-textarea').value = lines.join('\n');
+        document.getElementById('anki-status').classList.add('hidden');
+      },
+
+      copyAnkiText() {
+        const ta = document.getElementById('anki-textarea');
+        ta.select();
+        document.execCommand('copy');
+        sfx.hit();
+        document.getElementById('anki-status').classList.remove('hidden');
+      }
+    };
+
+    // Controles de teclado (1-4 para navesita, Espacio para tarjetas Anki)
+    window.addEventListener('keydown', (e) => {
+      if (game.currentGame === 'shooter' && ['1', '2', '3', '4'].includes(e.key)) {
+        game.fireTurret(parseInt(e.key, 10) - 1);
+      } else if (game.currentGame === 'anki_flash' && e.code === 'Space') {
+        e.preventDefault();
+        game.flipAnkiCard();
+      }
+    });
+
+    window.onload = () => game.init();
+  </script>
+</body>
+</html>
