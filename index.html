@@ -78,7 +78,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">Agenda ENARM & Proyectos</h1>
-            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">v1.1</span>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">v1.2</span>
           </div>
           <p id="header-subtitle" class="text-xs text-slate-400">Rutina 06:30 – 17:30 · 9h productivas</p>
         </div>
@@ -546,7 +546,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h3 class="text-base font-bold text-white">Ajustes, Editor y Actualizaciones</h3>
-            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300">v1.1</span>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300">v1.2</span>
           </div>
           <p class="text-xs text-slate-400 mt-0.5">Gestiona tu app instalada en el teléfono sin perder tus cuadritos</p>
         </div>
@@ -556,7 +556,7 @@
       <div class="space-y-3 text-xs">
         <!-- Sección Actualización de Código -->
         <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-          <p class="font-bold text-cyan-300">1. Buscar actualización de la App (v1.1)</p>
+          <p class="font-bold text-cyan-300">1. Buscar actualización de la App (v1.2)</p>
           <p class="text-slate-400 leading-relaxed">
             Limpia la caché del navegador/Service Worker y recarga la última versión disponible <strong>conservando intactos todos tus cuadritos marcados y ediciones</strong>.
           </p>
@@ -661,12 +661,12 @@
   <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-800 border border-slate-700 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl"></div>
 
   <script>
-    const APP_VERSION = "1.1";
+    const APP_VERSION = "1.2";
     const STORAGE_KEY = "agenda_enarm_proyectos_v1";
     const PLAN_START_DATE = "2026-11-25";
 
     const ENARM_SYLLABUS = [
-      { dayNum: 1, title: "Cardiología I", pages: "1–20", topics: "Hipertensión arterial sistémica; angina de pecho y cardiopatía isquémica estable; síndromes coronarios agudos sin elevación del ST; infarto agudo de miocardio con elevación del ST.", focus: "Prioriza diagnóstico, estratificación de riesgo, ECG, biomarcadores y tratamiento inicial." },
+      { dayNum: 1, title: "Cardiología I", pages: "1–20", gameUrl: "cardiodefensa.html", topics: "Hipertensión arterial sistémica; angina de pecho y cardiopatía isquémica estable; síndromes coronarios agudos sin elevación del ST; infarto agudo de miocardio con elevación del ST.", focus: "Prioriza diagnóstico, estratificación de riesgo, ECG, biomarcadores y tratamiento inicial." },
       { dayNum: 2, title: "Cardiología II", pages: "21–33", topics: "Arritmias supraventriculares; síndromes de preexcitación; arritmias ventriculares; valvulopatías.", focus: "Haz cuadros de taquicardias, bradicardias, soplos y criterios de intervención." },
       { dayNum: 3, title: "Cardiología III", pages: "34–48", topics: "Fiebre reumática; pericarditis; insuficiencia cardiaca crónica y aguda; cor pulmonale crónico; síndrome cardiorrenal; cardiomiopatías.", focus: "Compara IC aguda vs. crónica y repasa criterios diagnósticos." },
       { dayNum: 4, title: "Dermatología I", pages: "49–57", topics: "Acné; rosácea; urticaria; dermatitis atópica; dermatitis por contacto; dermatitis seborreica.", focus: "Aprende lesiones elementales, desencadenantes y tratamiento de primera línea." },
@@ -772,7 +772,7 @@
     }
 
     // =========================================================================
-    // 4. MOTOR DE GUITARRA ELÉCTRICA REAL (MUESTRAS GRABADAS + SOPORTE MP3)
+    // MOTOR DE GUITARRA ELÉCTRICA REAL (MUESTRAS GRABADAS + SOPORTE MP3)
     // =========================================================================
     let audioCtx = null;
     let alarmInterval = null;
@@ -937,10 +937,8 @@
     async function playBeepPattern() {
       try {
         stopGuitarSolo();
-
         const maxRepeats = Number(appState.alarmRepeatCount ?? 3);
 
-        // Si el usuario cargó una canción en Ajustes, reproducirla las veces configuradas
         if (customAudioUrl) {
           isSoloPlaying = true;
           let playCounter = 1;
@@ -971,27 +969,19 @@
         const now = audioCtx.currentTime + 0.05;
         const beat = 60 / 71;
 
-        // Tablatura exacta de los 10 compases (cuerda, traste, inicio_beat, duracion_beats, bend_traste_destino)
         const tabEvents = [
-          // Compás 1
           [4, 9, 0.0, 0.28], [4, 11, 0.25, 0.55], [3, 9, 0.75, 0.38], [3, 11, 1.1, 0.65],
-
-          // Compás 2
           [4, 11, 1.75, 1.3],
           [3, 9, 3.0, 0.38], [3, 11, 3.35, 0.5],
           [4, 9, 3.8, 0.24], [4, 11, 4.0, 0.38],
           [4, 9, 4.35, 0.4], [4, 11, 4.75, 0.4],
           [4, 7, 5.1, 0.5],
-
-          // Compás 3
           [4, 9, 5.6, 0.5],
           [5, 7, 6.05, 0.5],
           [5, 7, 6.55, 1.2],
           [5, 2, 7.75, 0.24], [5, 4, 7.95, 0.45],
           [4, 2, 8.35, 0.34], [4, 4, 8.65, 0.34],
           [3, 2, 8.95, 0.34], [3, 4, 9.25, 0.34],
-
-          // Compás 4 (Bends y releases de tono completo en 3ª cuerda traste 4 -> 6 -> 4)
           [3, 4, 9.6, 0.32], [3, 6, 9.92, 0.3], [3, 4, 10.22, 0.25],
           [3, 2, 10.45, 0.38],
           [4, 4, 10.8, 0.28], [4, 2, 11.05, 0.28], [4, 4, 11.3, 0.28],
@@ -1002,8 +992,6 @@
           [3, 2, 13.35, 0.28], [3, 4, 13.6, 0.28],
           [3, 4, 13.85, 0.28], [3, 6, 14.13, 0.26], [3, 4, 14.39, 0.22],
           [3, 2, 14.6, 0.35],
-
-          // Compás 5
           [4, 4, 14.95, 0.48], [4, 4, 15.4, 0.48],
           [3, 2, 15.85, 0.28],
           [3, 4, 16.1, 0.25], [3, 6, 16.35, 0.24], [3, 4, 16.59, 0.18],
@@ -1011,8 +999,6 @@
           [2, 12, 18.0, 0.38],
           [1, 12, 18.35, 0.35], [1, 14, 18.7, 0.38],
           [2, 12, 18.35, 0.7],
-
-          // Compás 6 (Double-stops deslizados)
           [1, 12, 19.05, 0.28], [2, 12, 19.05, 0.28],
           [1, 9, 19.3, 0.28], [2, 9, 19.3, 0.28],
           [1, 9, 19.55, 0.28], [2, 9, 19.55, 0.28],
@@ -1027,8 +1013,6 @@
           [4, 0, 21.85, 0.28],
           [3, 11, 22.1, 0.28], [3, 13, 22.38, 0.26], [3, 11, 22.64, 0.22],
           [3, 9, 22.85, 0.35],
-
-          // Compás 7
           [3, 11, 23.2, 1.1],
           [2, 12, 24.25, 0.35], [2, 14, 24.6, 0.35],
           [5, 9, 24.9, 0.18], [5, 11, 25.05, 0.28],
@@ -1036,8 +1020,6 @@
           [3, 11, 25.55, 0.18], [3, 13, 25.7, 0.28],
           [2, 14, 25.95, 0.25], [2, 12, 26.17, 0.25],
           [1, 12, 26.39, 0.25], [2, 14, 26.61, 0.28],
-
-          // Compás 8
           [2, 12, 26.9, 0.18], [2, 14, 27.05, 0.25], [2, 12, 27.27, 0.25],
           [3, 13, 27.49, 0.28],
           [2, 12, 27.74, 0.18], [2, 14, 27.89, 0.25], [2, 12, 28.11, 0.25],
@@ -1048,8 +1030,6 @@
           [1, 12, 30.15, 0.25],
           [1, 14, 30.37, 0.32], [1, 16, 30.69, 0.35],
           [1, 14, 31.02, 0.25], [1, 12, 31.24, 0.28],
-
-          // Compás 9 y 10
           [1, 14, 31.55, 1.65],
           [1, 16, 33.4, 0.42], [1, 17, 33.82, 0.45],
           [1, 14, 34.25, 0.42], [1, 16, 34.67, 0.45],
@@ -1057,7 +1037,6 @@
           [2, 14, 35.5, 2.6]
         ];
 
-        // Acompañamiento de bajo eléctrico real (MIDI: E2=40, B1=35, C#2=37, A1=33)
         const bassProgression = [
           [40, 1.75, 3.8],
           [35, 5.6, 3.9],
@@ -1107,6 +1086,12 @@
     }
 
     function triggerAlarmModal(title, desc) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        try {
+          new Notification(title, { body: desc });
+        } catch (_) {}
+      }
+
       document.getElementById("alarm-banner-title").textContent = title;
       document.getElementById("alarm-banner-desc").textContent = desc;
       document.getElementById("alarm-banner").classList.remove("hidden");
@@ -1116,7 +1101,6 @@
         clearInterval(alarmInterval);
         alarmInterval = null;
       }
-      // Si no tiene canción MP3 personalizada y eligió infinito, repetir la guitarra cada 61s
       if (!customAudioUrl && Number(appState.alarmRepeatCount ?? 3) === 0) {
         alarmInterval = setInterval(playBeepPattern, 61000);
       }
@@ -1591,7 +1575,7 @@
     }
 
     function downloadPWAServiceWorker() {
-      const swCode = `const CACHE_NAME = 'agenda-enarm-v1.1';
+      const swCode = `const CACHE_NAME = 'agenda-enarm-v1.2';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', event => {
@@ -1799,6 +1783,7 @@ self.addEventListener('fetch', event => {
           <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs text-cyan-200/90">
             <strong>Enfoque:</strong> ${t.focus}
           </div>
+          ${t.gameUrl ? `<a href="${t.gameUrl}" class="block w-full text-center py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow-lg">🎮 Abrir juego del módulo</a>` : ""}
         `;
       } else {
         badge.className = "px-2 py-0.5 text-[11px] font-bold rounded-full bg-slate-800 text-slate-400 border border-slate-700";
@@ -1960,6 +1945,7 @@ self.addEventListener('fetch', event => {
               <p class="text-xs text-slate-400">${item.topics}</p>
             </div>
             <div class="flex items-center gap-2 shrink-0">
+              ${item.gameUrl ? `<a href="${item.gameUrl}" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-bold text-emerald-300">🎮 Juego</a>` : ""}
               <button onclick="openTopicEditorModal(${item.dayNum})"
                 class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300">
                 Editar
