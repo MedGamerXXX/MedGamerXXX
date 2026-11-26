@@ -78,7 +78,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">Agenda ENARM & Proyectos</h1>
-            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">v1.2</span>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">v1.3</span>
           </div>
           <p id="header-subtitle" class="text-xs text-slate-400">Rutina 06:30 – 17:30 · 9h productivas</p>
         </div>
@@ -546,7 +546,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h3 class="text-base font-bold text-white">Ajustes, Editor y Actualizaciones</h3>
-            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300">v1.2</span>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-cyan-500/20 text-cyan-300">v1.3</span>
           </div>
           <p class="text-xs text-slate-400 mt-0.5">Gestiona tu app instalada en el teléfono sin perder tus cuadritos</p>
         </div>
@@ -556,7 +556,7 @@
       <div class="space-y-3 text-xs">
         <!-- Sección Actualización de Código -->
         <div class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-          <p class="font-bold text-cyan-300">1. Buscar actualización de la App (v1.2)</p>
+          <p class="font-bold text-cyan-300">1. Buscar actualización de la App (v1.3)</p>
           <p class="text-slate-400 leading-relaxed">
             Limpia la caché del navegador/Service Worker y recarga la última versión disponible <strong>conservando intactos todos tus cuadritos marcados y ediciones</strong>.
           </p>
@@ -661,13 +661,13 @@
   <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-800 border border-slate-700 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl"></div>
 
   <script>
-    const APP_VERSION = "1.2";
+    const APP_VERSION = "1.3";
     const STORAGE_KEY = "agenda_enarm_proyectos_v1";
     const PLAN_START_DATE = "2026-11-25";
 
     const ENARM_SYLLABUS = [
-      { dayNum: 1, title: "Cardiología I", pages: "1–20", gameUrl: "cardiodefensa.html", topics: "Hipertensión arterial sistémica; angina de pecho y cardiopatía isquémica estable; síndromes coronarios agudos sin elevación del ST; infarto agudo de miocardio con elevación del ST.", focus: "Prioriza diagnóstico, estratificación de riesgo, ECG, biomarcadores y tratamiento inicial." },
-      { dayNum: 2, title: "Cardiología II", pages: "21–33", topics: "Arritmias supraventriculares; síndromes de preexcitación; arritmias ventriculares; valvulopatías.", focus: "Haz cuadros de taquicardias, bradicardias, soplos y criterios de intervención." },
+      { dayNum: 1, title: "Cardiología I", pages: "1–20", gameUrl: "cardiodefensa.html?mision=C1", topics: "Hipertensión arterial sistémica; angina de pecho y cardiopatía isquémica estable; síndromes coronarios agudos sin elevación del ST; infarto agudo de miocardio con elevación del ST.", focus: "Prioriza diagnóstico, estratificación de riesgo, ECG, biomarcadores y tratamiento inicial." },
+      { dayNum: 2, title: "Cardiología II", pages: "21–33", gameUrl: "cardiodefensa.html?mision=C2", topics: "Arritmias supraventriculares; síndromes de preexcitación; arritmias ventriculares; valvulopatías.", focus: "Haz cuadros de taquicardias, bradicardias, soplos y criterios de intervención." },
       { dayNum: 3, title: "Cardiología III", pages: "34–48", topics: "Fiebre reumática; pericarditis; insuficiencia cardiaca crónica y aguda; cor pulmonale crónico; síndrome cardiorrenal; cardiomiopatías.", focus: "Compara IC aguda vs. crónica y repasa criterios diagnósticos." },
       { dayNum: 4, title: "Dermatología I", pages: "49–57", topics: "Acné; rosácea; urticaria; dermatitis atópica; dermatitis por contacto; dermatitis seborreica.", focus: "Aprende lesiones elementales, desencadenantes y tratamiento de primera línea." },
       { dayNum: 5, title: "Dermatología II", pages: "58–77", topics: "Psoriasis; farmacodermias; eritema multiforme; Stevens-Johnson y NET; pénfigo; infecciones bacterianas; hidradenitis; ectima gangrenoso; lepra; escabiosis; pediculosis; dermatofitosis; pitiriasis; cromomicosis; micetoma; cáncer cutáneo; Kaposi.", focus: "Día denso: divide en bloques y usa imágenes clínicas para diferenciar lesiones." },
@@ -1575,7 +1575,7 @@
     }
 
     function downloadPWAServiceWorker() {
-      const swCode = `const CACHE_NAME = 'agenda-enarm-v1.2';
+      const swCode = `const CACHE_NAME = 'agenda-enarm-v1.3';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', event => {
@@ -2017,6 +2017,6 @@ self.addEventListener('fetch', event => {
         navigator.serviceWorker.register("./sw.js").catch(() => {});
       }
     });
-  </script>
+  </script> 
 </body>
 </html>
