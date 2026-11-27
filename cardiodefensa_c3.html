@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardioDefensa • Cardiología 3 (147 Tarjetas)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #070b14;
+      color: #f8fafc;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(244, 63, 94, 0.09) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 40%);
+    }
+    .font-arcade { font-family: 'Chakra Petch', sans-serif; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+    .arcade-panel {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 13, 24, 0.98) 100%);
+      border: 1px solid rgba(244, 63, 94, 0.28);
+      box-shadow: 0 0 25px rgba(244, 63, 94, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .btn-arcade {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.55);
+    }
+    .btn-arcade:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pop-in { animation: popIn 0.22s ease-out forwards; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake { animation: shake 0.35s ease-in-out; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 360px;
+      border-radius: 0.75rem;
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-rose-500 selection:text-white">
+
+  <!-- Barra Superior HUD -->
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-rose-500/25 px-4 py-3">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="game.showMenu()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-slate-950 font-arcade font-bold text-xl shadow-lg shadow-rose-500/25">
+          ⚡
+        </div>
+        <div>
+          <h1 class="font-arcade text-lg sm:text-xl font-bold tracking-wider uppercase text-white leading-none">
+            CARDIO<span class="text-rose-400">DEFENSA</span>
+          </h1>
+          <span class="font-mono-code text-[11px] text-rose-300">Cardiología 3 • IC (74), Cor Pulmonale (18), SCR (16) y Cardiomiopatías (39)</span>
+        </div>
+      </div>
+
+      <!-- Indicadores -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="index.html" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-arcade font-bold text-xs">
+          ← Agenda
+        </a>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-2 font-mono-code text-xs">
+          <span class="text-amber-400">★ XP:</span>
+          <span id="hud-xp" class="font-bold text-white">0</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-2 font-mono-code text-xs">
+          <span class="text-rose-300">Dominados:</span>
+          <span id="hud-mastered" class="font-bold text-emerald-400">0/147</span>
+        </div>
+        <button onclick="game.openAnkiModal()" class="btn-arcade px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 font-arcade font-bold text-xs flex items-center gap-1.5">
+          <span>Exportar Anki</span>
+          <span id="hud-mistakes" class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-mono-code text-[11px]">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Escenario Principal -->
+  <main id="game-root" class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 flex flex-col justify-start">
+    <!-- Renderizado dinámico -->
+  </main>
+
+  <!-- Modal Exportar Anki -->
+  <div id="anki-modal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="arcade-panel rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-arcade text-lg font-bold text-amber-400 uppercase">Exportar Cardiología 3 a Anki (Pregunta ; Respuesta)</h3>
+        <button onclick="game.closeAnkiModal()" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-sm">✕</button>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="game.setAnkiExport('mistakes')" class="px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/50 text-rose-300 text-xs font-bold">Solo Fallos</button>
+        <button onclick="game.setAnkiExport('all')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-bold">Todo Cardiología 3 (147)</button>
+        <button onclick="game.copyAnkiText()" class="ml-auto px-4 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold">Copiar Texto</button>
+      </div>
+      <textarea id="anki-textarea" readonly rows="9" class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono-code text-xs text-slate-200 focus:outline-none"></textarea>
+      <p id="anki-status" class="text-xs text-emerald-400 hidden font-bold">¡Copiado al portapapeles! Importa en Anki separando por punto y coma (;).</p>
+    </div>
+  </div>
+
+  <!-- Pie -->
+  <footer class="border-t border-slate-900 py-3 px-4 text-center text-[11px] font-mono-code text-slate-500">
+    CardioDefensa • Módulo 3: Cardiología 3 (147 tarjetas: IC, Cor Pulmonale, SCR, Cardiomiopatías y Miocarditis)
+  </footer>
+
+  <script>
+    const sfx = {
+      ctx: null,
+      playTone(freq, type, duration, vol = 0.08) {
+        try {
+          if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      },
+      click() { this.playTone(540, 'triangle', 0.08, 0.06); },
+      laser() { this.playTone(880, 'sawtooth', 0.12, 0.07); },
+      hit()   { this.playTone(620, 'sine', 0.14, 0.09); setTimeout(() => this.playTone(930, 'sine', 0.18, 0.09), 70); },
+      boom()  { this.playTone(150, 'sawtooth', 0.28, 0.11); }
+    };
+
+    const cardiologiaDia3 = [
+      // =========================================================================
+      // TEMA 3: INSUFICIENCIA CARDIACA CRÓNICA Y AGUDA (74 PREGUNTAS)
+      // =========================================================================
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Bases, Epidemiología y Fisiopatología",
+        numero: 1,
+        pregunta: "¿Cómo se define la insuficiencia cardiaca (IC)?",
+        respuesta: "Síndrome clínico complejo producido por una alteración estructural o funcional cardiaca, que genera signos y síntomas por incapacidad para mantener un gasto adecuado y/o por aumento de las presiones de llenado."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Bases, Epidemiología y Fisiopatología",
+        numero: 2,
+        pregunta: "¿Cuáles son los dos mecanismos fisiopatológicos cardinales que explican toda la semiología de la insuficiencia cardiaca?",
+        respuesta: "• Congestión ('hacia atrás'): acumulación de líquido y aumento de presiones → disnea, ortopnea, DPN, crepitantes, yugulares ingurgitadas, edema, hepatomegalia, ascitis y congestión intestinal.\n• Hipoperfusión ('hacia adelante'): disminución del gasto cardiaco → hipotensión, oliguria, confusión, extremidades frías y alteración del estado mental."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Bases, Epidemiología y Fisiopatología",
+        numero: 3,
+        pregunta: "¿Cuál es la prevalencia estimada de la IC a nivel mundial, su incidencia anual en adultos y la prevalencia en pacientes con EPOC?",
+        respuesta: "• Prevalencia general: ~2 %.\n• Incidencia anual en adultos: 600,000 casos.\n• En pacientes con EPOC: se documenta hipertensión pulmonar/disfunción asociada en 30–70 % en fases avanzadas."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Etiología y Clasificación",
+        numero: 4,
+        pregunta: "¿Cuáles son las causas más frecuentes de insuficiencia cardiaca y sus porcentajes aproximados?",
+        respuesta: "• Enfermedad arterial coronaria (cardiopatía isquémica — causa principal): 56.5 %.\n• Enfermedad valvular: 22.4 %.\n• Miocardiopatías: 12 %.\n• Cardiopatías congénitas: 2.5 %.\n• Enfermedad pulmonar: 2.1 %.\n• Síndrome aórtico agudo: 1 %."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Etiología y Clasificación",
+        numero: 5,
+        pregunta: "¿Cómo se clasifica la insuficiencia cardiaca según el área afectada o problema principal?",
+        respuesta: "1. Disfunción del ventrículo izquierdo (la más común).\n2. Disfunción del ventrículo derecho.\n3. Valvulopatías cardiacas.\n4. Enfermedad pericárdica (taponamiento cardiaco, pericarditis constrictiva, enfermedad efusivo-constrictiva).\n5. Lesiones obstructivas (mixoma, estenosis de vena pulmonar).\n6. Insuficiencia cardiaca de alto gasto."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Etiología y Clasificación",
+        numero: 6,
+        pregunta: "¿Cómo se clasifica la insuficiencia cardiaca según la fracción de eyección del ventrículo izquierdo (FEVI)?",
+        respuesta: "• IC con fracción de eyección reducida (IC-FEr): FEVI ≤ 40 %.\n• IC con fracción de eyección ligeramente reducida (IC-FElr): FEVI 41–49 %.\n• IC con fracción de eyección preservada (IC-FEp): FEVI ≥ 50 % (nota: FEVI ≥ 50 % por sí sola NO diagnostica IC)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Etiología y Clasificación",
+        numero: 7,
+        pregunta: "¿Cuál es la clasificación funcional de la NYHA y sus METs de referencia aproximada?",
+        respuesta: "• Clase I: sin limitación con actividad habitual (> 7 METs).\n• Clase II: actividad habitual produce síntomas (> 5 METs).\n• Clase III: actividad menor de la habitual produce síntomas (> 2 METs).\n• Clase IV: síntomas en reposo (no tolera actividad).\n*(Los METs son referencia aproximada y no la definición formal)*."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Etiología y Clasificación",
+        numero: 8,
+        pregunta: "¿Cómo se clasifica al paciente según los 4 perfiles de Nohria-Stevenson, cuál es el más frecuente, cuál el más grave y cuál es su conducta conceptual?",
+        respuesta: "Evalúa congestión (Húmedo/Seco) e hipoperfusión (Caliente/Frío):\n• Perfil A (Caliente - Seco): perfusión conservada, sin congestión → manejo crónico.\n• Perfil B (Caliente - Húmedo — MÁS FRECUENTE): perfusión conservada, con congestión → diurético.\n• Perfil C (Frío - Húmedo — MÁS GRAVE): perfusión disminuida, con congestión → grave: descongestión + valorar soporte/inotrópico.\n• Perfil L (Frío - Seco): perfusión disminuida, sin congestión → valorar volumen/perfusión y causa."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Manifestaciones Clínicas y Criterios Diagnósticos",
+        numero: 9,
+        pregunta: "¿Cuáles son los síntomas típicos y los síntomas menos típicos de la insuficiencia cardiaca (incluyendo bendopnea)?",
+        respuesta: "• Síntomas típicos: disnea, ortopnea, disnea paroxística nocturna (DPN), fatiga/cansancio, intolerancia al ejercicio y edema periférico.\n• Síntomas menos típicos: tos nocturna, sibilancias, depresión, palpitaciones, mareo, síncope, anorexia, confusión y bendopnea (disnea al inclinarse hacia adelante)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Manifestaciones Clínicas y Criterios Diagnósticos",
+        numero: 10,
+        pregunta: "¿Cuáles son los signos más específicos y los signos menos específicos de la insuficiencia cardiaca?",
+        respuesta: "• Signos más específicos: presión venosa yugular elevada, tercer ruido cardiaco (S3), impulso apical desplazado lateralmente y reflujo hepatoyugular positivo.\n• Signos menos específicos: cambios de peso, taquicardia, pulso irregular, soplo cardiaco, taquipnea, estertores pulmonares, hepatomegalia, ascitis, edema periférico y respiración de Cheyne-Stokes."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Manifestaciones Clínicas y Criterios Diagnósticos",
+        numero: 11,
+        pregunta: "¿Cuáles son los Criterios Mayores y Menores de Framingham para el diagnóstico de insuficiencia cardiaca?",
+        respuesta: "Diagnóstico clásico: 2 criterios mayores, o 1 mayor + 2 menores.\n• Criterios Mayores: 1) Ortopnea o DPN, 2) Distensión venosa yugular, 3) Crepitantes pulmonares, 4) Cardiomegalia en radiografía de tórax, 5) Edema agudo de pulmón, 6) Galope por tercer ruido (S3 — hallazgo más sensible), 7) Pérdida > 4.5 kg en 5 días con diuréticos, 8) Reflujo hepatoyugular.\n• Criterios Menores: edema maleolar bilateral, tos nocturna, disnea de esfuerzo, hepatomegalia, derrame pleural y taquicardia ≥ 120 lpm."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Manifestaciones Clínicas y Criterios Diagnósticos",
+        numero: 12,
+        pregunta: "¿Cuáles son los estadios evolutivos de la IC según la clasificación ACC/AHA (A, B, C, D)?",
+        respuesta: "• Estadio A: en riesgo de IC sin cardiopatía estructural ni síntomas.\n• Estadio B (Pre-IC): cardiopatía estructural, remodelado o biomarcadores elevados sin síntomas previos ni actuales.\n• Estadio C: cardiopatía estructural con síntomas previos o actuales de IC.\n• Estadio D: IC avanzada con síntomas graves refractarios al tratamiento médico óptimo que requieren intervenciones especializadas."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 13,
+        pregunta: "¿Cuáles son los valores de corte para DESCARTAR IC aguda vs. IC crónica/no aguda con péptidos natriuréticos (BNP, NT-proBNP, MR-proANP)?",
+        respuesta: "• IC aguda (descartan si están por debajo — 100/300/120): BNP < 100 pg/mL, NT-proBNP < 300 pg/mL, MR-proANP < 120 pmol/L.\n• IC crónica / no aguda (descartan si están por debajo — 35/125): BNP < 35 pg/mL, NT-proBNP < 125 pg/mL.\n*(Valores elevados no establecen diagnóstico por sí solos; requieren clínica + ecocardiograma)*."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 14,
+        pregunta: "¿Cuál es la progresión radiológica típica de la congestión pulmonar en la radiografía de tórax?",
+        respuesta: "1. Redistribución vascular (cefalización, aumento de trama vascular).\n2. Edema intersticial (líneas B de Kerley).\n3. Edema alveolar (consolidaciones en alas de mariposa).\n*(También puede mostrar cardiomegalia y derrame pleural)*."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 15,
+        pregunta: "¿Para qué sirve la prueba de caminata de 6 minutos en la insuficiencia cardiaca?",
+        respuesta: "Evalúa la capacidad funcional real (no diagnostica IC por sí sola). Sirve para: cuantificar limitación funcional, valorar gravedad, evaluar respuesta al tratamiento, seguimiento y aportar información pronóstica."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 16,
+        pregunta: "¿Cuáles son los tres predictores ecocardiográficos de MAL PRONÓSTICO en la insuficiencia cardiaca (40 ↑ — 19 ↓ — 22 ↑)?",
+        respuesta: "• Diámetro telediastólico del ventrículo derecho (VD) > 40 mm (VD grande).\n• TAPSE < 19 mm (VD se mueve poco).\n• Vena cava inferior (VCI) > 22 mm (VCI grande)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 17,
+        pregunta: "¿Qué parámetros iniciales de laboratorio y gabinete se recomiendan en el abordaje de IC crónica?",
+        respuesta: "ECG de 12 derivaciones, ecocardiograma transtorácico, radiografía de tórax, BNP o NT-proBNP, biometría hemática, química sanguínea, electrolitos séricos, función renal, pruebas de función hepática, perfil tiroideo (TSH) y cinética de hierro (ferritina y saturación de transferrina)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 18,
+        pregunta: "¿Qué utilidad tiene la resonancia magnética cardiaca en el estudio de la insuficiencia cardiaca?",
+        respuesta: "Es el estándar de oro para medir volúmenes, masa y FEVI, y permite caracterizar el tejido miocárdico (detección de fibrosis/cicatriz mediante realce tardío con gadolinio, miocarditis, amiloidosis o sobrecarga de hierro)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 19,
+        pregunta: "¿Cuándo está indicada la angiografía coronaria invasiva o angiotomografía coronaria en pacientes con IC?",
+        respuesta: "En pacientes con angina refractaria al tratamiento médico, sobrevivientes de paro cardiaco o arritmias ventriculares sintomáticas, y en pacientes con probabilidad intermedia-alta de enfermedad arterial coronaria candidatos a revascularización."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 20,
+        pregunta: "¿Qué hallazgos electrocardiográficos son comunes en la insuficiencia cardiaca y cuál es su valor predictivo?",
+        respuesta: "Taquicardia sinusal, fibrilación auricular, ondas Q patológicas, hipertrofia ventricular izquierda, bloqueo de rama izquierda (BRIHH) o ensanchamiento del QRS. Un ECG completamente normal hace muy poco probable la IC sistólica (alto valor predictivo negativo)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 21,
+        pregunta: "¿Cómo se define la deficiencia de hierro en pacientes con insuficiencia cardiaca?",
+        respuesta: "Ferritina sérica < 100 ng/mL, o ferritina entre 100 y 299 ng/mL con saturación de transferrina (TSAT) < 20 %."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 22,
+        pregunta: "¿Qué papel cumple el ecocardiograma Doppler tisular en la evaluación de la disfunción diastólica?",
+        respuesta: "Evalúa las velocidades de relajación miocárdica (onda e' septal y lateral) y calcula la relación E/e', estimando de forma no invasiva las presiones de llenado del ventrículo izquierdo."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 23,
+        pregunta: "¿Qué alteraciones hidroelectrolíticas y metabólicas son frecuentes y de mal pronóstico en la IC?",
+        respuesta: "Hiponatremia dilucional (por activación neurohormonal y elevación de ADH, marcador de mal pronóstico), hipopotasemia o hiperpotasemia (asociada a diuréticos o bloqueo del SRAA) e hiperuricemia."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 24,
+        pregunta: "¿Cuándo se indica la prueba de esfuerzo cardiopulmonar (ergoespirometría) en la IC?",
+        respuesta: "En la evaluación de candidatos a trasplante cardiaco o asistencia ventricular mecánica (un consumo pico de oxígeno VO2 ≤ 12–14 mL/kg/min indica mal pronóstico) y para guiar la prescripción de rehabilitación cardiaca."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 25,
+        pregunta: "¿Qué factores no cardiacos pueden elevar los niveles de péptidos natriuréticos (falsos positivos)?",
+        respuesta: "Edad avanzada, enfermedad renal crónica, fibrilación auricular, tromboembolia pulmonar, hipertensión pulmonar, sepsis, EPOC grave y accidente cerebrovascular."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Estudios Complementarios y Biomarcadores",
+        numero: 26,
+        pregunta: "¿Qué condición clínica puede causar niveles falsamente bajos de péptidos natriuréticos?",
+        respuesta: "La obesidad (mayor aclaramiento mediado por receptores NPR-C en el tejido adiposo y menor estrés parietal ventricular)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Biomarcadores y Ecocardiografía Avanzada",
+        numero: 27,
+        pregunta: "¿Cuáles son los valores de referencia por edad de NT-proBNP y BNP (rangos intermedios vs. umbrales de alta especificidad)?",
+        respuesta: "• < 50 años: sensibilidad elevada pero especificidad limitada: NT-proBNP 125–450 pg/mL o BNP 35–100 pg/mL. Alta especificidad: NT-proBNP > 450 pg/mL o BNP > 100 pg/mL.\n• 50 a 75 años: intermedios: NT-proBNP 450–900 pg/mL o BNP 100–300 pg/mL. Alta especificidad: NT-proBNP > 900 pg/mL o BNP > 300 pg/mL.\n• > 75 años: intermedios: NT-proBNP 900–1800 pg/mL o BNP 100–300 pg/mL. Alta especificidad: NT-proBNP > 1800 pg/mL o BNP > 300 pg/mL."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Biomarcadores y Ecocardiografía Avanzada",
+        numero: 28,
+        pregunta: "¿Cuáles son los hallazgos ecocardiográficos de especificidad INTERMEDIA en la evaluación de insuficiencia cardiaca?",
+        respuesta: "• Índice de volumen de la aurícula izquierda > 34 mL/m².\n• Relación E/A < 0.8 con onda E > 50 cm/s.\n• Relación E/A entre 0.8 y 2.1 sin otros hallazgos."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Biomarcadores y Ecocardiografía Avanzada",
+        numero: 29,
+        pregunta: "¿Cuáles son los hallazgos ecocardiográficos de ALTA ESPECIFICIDAD en la evaluación de insuficiencia cardiaca?",
+        respuesta: "• FEVI < 30 %.\n• Diámetro telesistólico del ventrículo izquierdo > 5.8 cm en hombres o > 5.2 cm en mujeres.\n• Relación E/A > 2.1.\n• Vena cava inferior > 2.1 cm con colapso inspiratorio < 50 %."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Biomarcadores y Ecocardiografía Avanzada",
+        numero: 30,
+        pregunta: "¿Cómo se interpreta la probabilidad diagnóstica de IC según la integración de hallazgos clínicos, bioquímicos y ecocardiográficos?",
+        respuesta: "• Alta probabilidad diagnóstica: presencia de uno o más hallazgos altamente específicos (ortopnea, ingurgitación yugular, líneas B, NT-proBNP elevado o ecocardiografía con disfunción diastólica avanzada).\n• Requiere evaluación profunda y opinión del especialista: presencia únicamente de hallazgos de especificidad intermedia (cardiomegalia, estertores o elevación leve-moderada de péptidos natriuréticos).\n• Baja probabilidad diagnóstica: presencia únicamente de síntomas o signos de baja especificidad con ecocardiografía normal."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento de la IC-FEr",
+        numero: 31,
+        pregunta: "¿Cuáles son los cuatro grupos farmacológicos modificadores de la enfermedad en la IC-FEr (cuádruple terapia) y en qué plazo ideal deben iniciarse y titularse?",
+        respuesta: "Deben administrarse de forma simultánea, iniciarse lo antes posible y titularse a dosis objetivo en ≤ 4 semanas desde el diagnóstico:\n1. Inhibidor del SRAA: de preferencia ARNI (sacubitrilo-valsartán); si no está disponible, IECA (enalapril, ramipril) o ARA II (losartán, candesartán).\n2. Betabloqueador con beneficio demostrado: carvedilol, bisoprolol o metoprolol succinato.\n3. Antagonista del receptor de mineralocorticoides (ARM): espironolactona o eplerenona.\n4. Inhibidor de SGLT2 (iSGLT2): dapagliflozina o empagliflozina (indicados incluso en ausencia de diabetes mellitus)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento de la IC-FEr",
+        numero: 32,
+        pregunta: "¿Cuándo se indica vericiguat en la IC-FEr y cuál es su mecanismo de acción?",
+        respuesta: "• Mecanismo: estimulador de la guanilato ciclasa soluble.\n• Indicación: pacientes con síntomas persistentes a pesar del tratamiento cuádruple, especialmente en aquellos con hospitalizaciones recientes."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento de la IC-FEr",
+        numero: 33,
+        pregunta: "¿Cuál es la indicación exacta de ivabradina en pacientes con IC-FEr?",
+        respuesta: "Pacientes en ritmo sinusal con FEVI ≤ 35 % y frecuencia cardiaca > 70 lpm (o ≥ 70 lpm) a pesar de recibir un betabloqueador a dosis máxima tolerada."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento de la IC-FEr",
+        numero: 34,
+        pregunta: "¿Cuál es el papel terapéutico, impacto en la mortalidad y precauciones de la digoxina en la IC-FEr?",
+        respuesta: "• Indicación: pacientes que continúan sintomáticos a pesar del tratamiento óptimo, particularmente si presentan fibrilación auricular con respuesta ventricular rápida no controlada.\n• Impacto pronóstico: no reduce la mortalidad.\n• Precauciones: estrecho margen terapéutico y riesgo de toxicidad (náusea, vómito, anorexia, alteraciones visuales, arritmias, confusión), especialmente en ancianos o en presencia de disfunción renal."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento Complementario y Dispositivos en IC-FEr",
+        numero: 35,
+        pregunta: "¿Cuál es la indicación y el beneficio clínico del hierro intravenoso en la insuficiencia cardiaca?",
+        respuesta: "• Indicación: pacientes con deficiencia de hierro documentada.\n• Beneficio: mejora la capacidad funcional y disminuye las hospitalizaciones."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento Complementario y Dispositivos en IC-FEr",
+        numero: 36,
+        pregunta: "¿Cuál es el papel pronóstico, la indicación y las metas de dosificación y vigilancia de los diuréticos de asa en la IC?",
+        respuesta: "• Fármacos: furosemida, torasemida o bumetanida.\n• Impacto pronóstico: no modifican el pronóstico, pero son fundamentales para el control sintomático de la congestión.\n• Dosificación y vigilancia: usar la dosis mínima efectiva que logre euvolemia; ajustar según estado clínico, peso, presión venosa yugular y diuresis, vigilando estrechamente función renal y electrolitos (especialmente potasio y sodio)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento Complementario y Dispositivos en IC-FEr",
+        numero: 37,
+        pregunta: "¿Cuáles son los criterios de indicación y el beneficio clínico de la terapia de resincronización cardiaca (TRC) en la IC-FEr?",
+        respuesta: "• Criterios: FEVI ≤ 35 %, clase funcional II a IV de la NYHA, ritmo sinusal y QRS ≥ 130 ms, especialmente con morfología de bloqueo de rama izquierda (BRIHH) (mayor beneficio si QRS ≥ 150 ms).\n• Beneficio: reduce la mortalidad y mejora la capacidad funcional al corregir la disincronía ventricular."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento Complementario y Dispositivos en IC-FEr",
+        numero: 38,
+        pregunta: "¿Cuáles son las indicaciones del desfibrilador automático implantable (DAI) como prevención primaria y secundaria, y cuándo se usa un dispositivo combinado TRC-DAI?",
+        respuesta: "• Prevención primaria: FEVI ≤ 35 % y clase funcional II o III de la NYHA tras ≥ 3 meses de tratamiento médico óptimo y expectativa de vida > 1 año.\n• Prevención secundaria: antecedentes de taquicardias ventriculares sostenidas o fibrilación ventricular resucitada.\n• Dispositivo combinado (TRC-DAI): en quienes cumplen criterios para ambos dispositivos (a cargo de electrofisiología)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento de IC-FEp y Manejo Integral",
+        numero: 39,
+        pregunta: "¿Cuál es el enfoque terapéutico de la IC-FEp y qué fármacos son de primera elección?",
+        respuesta: "• Enfoque: manejo de comorbilidades y control sintomático (ningún fármaco ha demostrado reducir contundentemente la mortalidad).\n• Primera elección: iSGLT2 (como empagliflozina), que reducen hospitalizaciones por IC y mejoran la calidad de vida.\n• Control de PA: preferentemente con ARA II, IECA o ARM si hay congestión o hipertrofia ventricular izquierda; diuréticos individualizados para congestión."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento de IC-FEp y Manejo Integral",
+        numero: 40,
+        pregunta: "¿Qué cinco comorbilidades deben evaluarse y controlarse integralmente en todo paciente con IC crónica por su impacto pronóstico, y qué medidas generales completan el abordaje?",
+        respuesta: "• Cinco comorbilidades: hipertensión, diabetes mellitus, fibrilación auricular, enfermedad renal crónica y obesidad.\n• Medidas generales: educación del paciente, adherencia terapéutica, rehabilitación cardiaca con ejercicio físico adaptado y seguimiento estrecho."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Insuficiencia Cardiaca Aguda (ICA)",
+        numero: 41,
+        pregunta: "¿Cómo se define la insuficiencia cardiaca aguda (ICA) y cuáles son sus dos formas de presentación temporal?",
+        respuesta: "Síndrome clínico complejo en el que uno o ambos ventrículos pierden la capacidad de bombear sangre de manera eficiente. Puede presentarse por el deterioro súbito de una IC crónica previa o como primer evento (de novo)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Insuficiencia Cardiaca Aguda (ICA)",
+        numero: 42,
+        pregunta: "¿Cuál es la epidemiología estimada de la ICA (prevalencia, incidencia anual en adultos y datos de mortalidad en México)?",
+        respuesta: "• Prevalencia estimada: ~2 %.\n• Incidencia anual: 600,000 casos en adultos.\n• México: las enfermedades del corazón fueron responsables de hasta el 90 % de las defunciones en algunos estados durante 2022."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Insuficiencia Cardiaca Aguda (ICA)",
+        numero: 43,
+        pregunta: "¿Cuáles son los factores de riesgo y desencadenantes principales de la ICA?",
+        respuesta: "Síndrome coronario agudo (el principal en la mayoría de las regiones), hipertensión arterial no controlada, arritmias, baja adherencia al tratamiento, tabaquismo, infecciones, disfunción renal y embarazo."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Insuficiencia Cardiaca Aguda (ICA)",
+        numero: 44,
+        pregunta: "¿Cuáles son las causas más frecuentes y las etiologías adicionales de la ICA?",
+        respuesta: "• Causas más frecuentes: enfermedad arterial coronaria y valvulopatías.\n• Otras etiologías: miocardiopatías, cardiopatías congénitas, enfermedades pulmonares, síndromes pericárdicos, tumores intracardiacos y síndromes aórticos."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Insuficiencia Cardiaca Aguda (ICA)",
+        numero: 45,
+        pregunta: "¿Cuál es la fisiopatología y clasificación anatómica/hemodinámica de la ICA?",
+        respuesta: "Implica una alteración del llenado o del vaciamiento ventricular que produce congestión sistémica o pulmonar y perfusión tisular deficiente. Se clasifica según el ventrículo comprometido (izquierdo, derecho o ambos), enfermedad pericárdica, lesiones obstructivas intracardiacas e IC de alto gasto."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Insuficiencia Cardiaca Aguda (ICA)",
+        numero: 46,
+        pregunta: "¿Cuáles son los cuatro fenotipos clínicos principales de presentación de la ICA y cuál es el más frecuente?",
+        respuesta: "1. Descompensación aguda de la IC crónica (más frecuente: 50–70 % de las presentaciones).\n2. Edema pulmonar agudo.\n3. Insuficiencia ventricular derecha aislada.\n4. Choque cardiogénico."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Insuficiencia Cardiaca Aguda (ICA)",
+        numero: 47,
+        pregunta: "¿Qué síntomas atípicos y signos físicos destacan en el cuadro clínico de la ICA?",
+        respuesta: "• Síntomas atípicos: tos nocturna, sibilancias, mareo, síncope, anorexia, confusión y bendopnea.\n• Signos físicos: galope por tercer ruido (S3), yugulares ingurgitadas, reflujo hepatoyugular, estertores pulmonares, hepatomegalia, ascitis, taquicardia y disminución del gasto urinario."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Insuficiencia Cardiaca Aguda (ICA)",
+        numero: 48,
+        pregunta: "¿Qué umbrales séricos de péptidos natriuréticos se emplean en el diagnóstico de la ICA y cuál es su principal utilidad?",
+        respuesta: "BNP ≥ 100 pg/mL o NT-proBNP > 300 pg/mL. Poseen un alto valor predictivo negativo cuando están por debajo de dichos umbrales (descartando ICA), complementándose con radiografía de tórax y ecocardiograma transtorácico."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Diagnóstico y Estudios en ICA",
+        numero: 49,
+        pregunta: "¿Qué estudios de gabinete/imagen deben solicitarse en la ICA y cuál es su utilidad específica?",
+        respuesta: "• ECG: al ingreso; excluye SCA o arritmias como desencadenantes.\n• Radiografía de tórax: al ingreso; identifica congestión pulmonar o infecciones respiratorias (valor confirmatorio).\n• Ecografía pulmonar: al ingreso/hospitalización; detecta congestión pulmonar como complemento.\n• Ecocardiografía transtorácica: en todos los pacientes al ingreso y, si es necesario, antes del alta; valora función sistólica/diastólica, alteraciones estructurales/mecánicas y orienta el tratamiento (valor diagnóstico mayor)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Diagnóstico y Estudios en ICA",
+        numero: 50,
+        pregunta: "¿Qué péptidos natriuréticos se miden en la ICA, en qué momentos se solicitan y cuál es su valor diagnóstico?",
+        respuesta: "BNP, NT-proBNP o MR-proANP; se miden al ingreso y pueden repetirse antes del alta. Reflejan congestión hemodinámica y ofrecen un alto valor predictivo negativo (su negatividad descarta prácticamente el diagnóstico)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Diagnóstico y Estudios en ICA",
+        numero: 51,
+        pregunta: "¿Qué pruebas de laboratorio se solicitan para valorar daño miocárdico, función renal y electrolitos en la ICA?",
+        respuesta: "• Troponina sérica (al ingreso): detecta daño miocárdico y excluye SCA.\n• Creatinina sérica (ingreso, hospitalización y antes del alta): evalúa función renal para pronóstico y ajuste de diuréticos/nefrotóxicos.\n• Electrolitos séricos — sodio, potasio y cloro (ingreso, hospitalización y antes del alta): detectan alteraciones que explican síntomas o complicaciones."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Diagnóstico y Estudios en ICA",
+        numero: 52,
+        pregunta: "¿Qué estudios bioquímicos complementarios se solicitan en ICA según el contexto clínico (hierro, tiroides, TEP, infección, hipoperfusión e insuficiencia respiratoria)?",
+        respuesta: "• Estado de hierro (transferrina y ferritina, preferentemente antes del alta): detecta depleción de hierro.\n• TSH (al ingreso solo si hay sospecha clínica de hipo/hipertiroidismo).\n• Dímero D (si hay sospecha clínica de TEP).\n• Procalcitonina (no rutinaria; útil si se sospecha neumonía).\n• Lactato (ingreso/hospitalización): valora acidosis láctica ante sospecha de bajo gasto o hipoperfusión periférica.\n• Oximetría de pulso y gases arteriales (ingreso/hospitalización): en insuficiencia respiratoria para guiar soporte ventilatorio."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento de la ICA",
+        numero: 53,
+        pregunta: "¿Cuál es el manejo diurético escalonado en pacientes con ICA sin inestabilidad hemodinámica y qué combinaciones NO se recomiendan rutinariamente?",
+        respuesta: "• Primera línea: furosemida en bolo o infusión continua.\n• Respuesta insuficiente: añadir acetazolamida.\n• NO recomendados rutinariamente: combinación de espironolactona o hidroclorotiazida con diuréticos de asa.\n• Pacientes refractarios: ultrafiltración si está disponible."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Tratamiento de la ICA",
+        numero: 54,
+        pregunta: "¿Cuál es la postura sobre vasodilatadores, inotrópicos, ventilación mecánica no invasiva y opioides en la ICA?",
+        respuesta: "• Vasodilatadores: se desaconseja su uso rutinario (evaluar escenario específico).\n• Inotrópicos (dopamina, dobutamina, milrinona, levosimendán): empleo individualizado y no sistemático.\n• Ventilación mecánica no invasiva (VMNI): recomendada en edema agudo pulmonar para reducir necesidad de intubación.\n• Opioides (morfina): evitar su administración (se asocia a mayor mortalidad e ingreso a UCI)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Fenotipos Hemodinámicos de ICA",
+        numero: 55,
+        pregunta: "¿Cuáles son la fisiopatología, hemodinamia, perfil clínico y tratamiento de la DESCOMPENSACIÓN AGUDA DE LA IC CRÓNICA?",
+        respuesta: "• Mecanismo y aparición: disfunción del VI con retención renal de sodio y agua; aparición gradual (días).\n• Hemodinamia: presión telediastólica del VI y PCWP elevadas; gasto cardiaco bajo o normal; PAS normal o baja.\n• Perfil clínico: típicamente 'húmedo y caliente' (o 'seco y frío').\n• Tratamiento: diuréticos (furosemida); si hay hipoperfusión o hipotensión, inotrópicos (dobutamina) o vasopresores (norepinefrina)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Fenotipos Hemodinámicos de ICA",
+        numero: 56,
+        pregunta: "¿Cuáles son la fisiopatología, hemodinamia, perfil clínico y tratamiento del EDEMA PULMONAR AGUDO?",
+        respuesta: "• Mecanismo y aparición: incremento abrupto de presión en el VI con disfunción diastólica predominante (valvulopatías o aumento de poscarga) y redistribución rápida de líquidos al pulmón; aparición súbita.\n• Hemodinamia: presión telediastólica del VI y PCWP aumentadas; gasto cardiaco normal o elevado; PAS normal o alta.\n• Perfil clínico: más comúnmente 'húmedo y caliente'.\n• Tratamiento: diuréticos (furosemida) y vasodilatadores (nitroglicerina) para disminuir precarga (más VMNI)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Fenotipos Hemodinámicos de ICA",
+        numero: 57,
+        pregunta: "¿Cuáles son la fisiopatología, hemodinamia, perfil clínico y tratamiento de la INSUFICIENCIA VENTRICULAR DERECHA AISLADA?",
+        respuesta: "• Mecanismo y aparición: disfunción del VD e hipertensión pulmonar significativa, con presión venosa central aumentada y congestión sistémica; aparición rápida o progresiva.\n• Hemodinamia: presión telediastólica del VD aumentada; gasto cardiaco reducido; PAS baja.\n• Perfil clínico: 'seco y frío' o 'húmedo y frío'.\n• Tratamiento: diuréticos para congestión periférica, inotrópicos o vasopresores si hay hipoperfusión, y asistencia circulatoria mecánica temporal si hay compromiso grave."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Fenotipos Hemodinámicos de ICA",
+        numero: 58,
+        pregunta: "¿Cuáles son la fisiopatología, hemodinamia, perfil clínico y tratamiento del CHOQUE CARDIOGÉNICO?",
+        respuesta: "• Mecanismo y aparición: forma más grave, asociada a disfunción cardiaca grave (izquierda, derecha o biventricular) con hipoperfusión sistémica manifiesta; aparición gradual o repentina.\n• Hemodinamia: presión telediastólica del VI y PCWP elevadas; gasto cardiaco bajo; PAS reducida.\n• Perfil clínico: típicamente 'húmedos y fríos'.\n• Tratamiento: tratamiento intensivo con inotrópicos (dobutamina, levosimendán, milrinona) y vasopresores (primera línea: norepinefrina), requiriendo muchas veces asistencia circulatoria mecánica o terapia de sustitución renal."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 59,
+        pregunta: "¿Cuál es la dosis intravenosa de acetazolamida como uso complementario en la ICA con sobrecarga de volumen y respuesta diurética insuficiente?",
+        respuesta: "Acetazolamida 500 mg IV cada 24 horas (junto con optimización del diurético de asa y bloqueo secuencial de la nefrona)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 60,
+        pregunta: "¿Cuál es el mecanismo hemodinámico por el cual la ventilación mecánica no invasiva (VMNI) mejora el edema agudo pulmonar?",
+        respuesta: "Aumenta la presión intratorácica → ↓ retorno venoso → ↓ precarga → ↓ presión pulmonar → mejora oxigenación."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 61,
+        pregunta: "¿Cuál es el tiempo de lavado (washout) obligatorio al realizar el cambio de un IECA a un ARNI (sacubitrilo/valsartán)?",
+        respuesta: "36 horas entre la última dosis de IECA y el inicio de ARNI (sacubitrilo/valsartán)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 62,
+        pregunta: "¿Cuáles son las manifestaciones clínicas de toxicidad por digoxina que deben vigilarse estrechamente?",
+        respuesta: "Náusea y vómito, anorexia, alteraciones visuales, arritmias y confusión."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 63,
+        pregunta: "¿Qué grupo farmacológico de los 4 pilares de la IC-FEr está indicado incluso en ausencia de diabetes mellitus y también es primera elección en IC-FEp?",
+        respuesta: "Los inhibidores del cotransportador sodio-glucosa tipo 2 (iSGLT2): dapagliflozina y empagliflozina."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 64,
+        pregunta: "¿Qué fármaco se prefiere dentro del bloqueo del SRAA en IC-FEr cuando es factible y cuáles son las alternativas?",
+        respuesta: "Se prefiere un ARNI (sacubitrilo/valsartán); si no es posible, usar IECA (enalapril, ramipril) o ARA II (losartán, candesartán), vigilando función renal y potasio."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 65,
+        pregunta: "¿Qué efecto fisiológico ejercen los betabloqueadores en la IC-FEr y cómo deben iniciarse?",
+        respuesta: "Disminuyen frecuencia cardiaca, consumo de O2, activación simpática, remodelado, arritmias y mortalidad; deben iniciarse y titularse cuando el paciente esté clínicamente estable."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 66,
+        pregunta: "¿Qué efectos bloquean los antagonistas de mineralocorticoides (ARM) en la IC-FEr y qué parámetro bioquímico exige vigilancia estrecha?",
+        respuesta: "Bloquean efectos de aldosterona, retención de Na+, fibrosis, remodelado y mortalidad; exigen vigilar potasio (K+) y función renal."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 67,
+        pregunta: "¿Cómo se maneja la IC con fracción de eyección ligeramente reducida (FEVI 41–49 %)?",
+        respuesta: "Manejo individualizado según tolerancia clínica y características del paciente (considerando los pilares neurohormonales e iSGLT2)."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 68,
+        pregunta: "¿Cuáles son los 6 pasos del esquema general secuencial del manejo de la insuficiencia cardiaca?",
+        respuesta: "1) Evaluar congestión/perfusión → 2) Clasificar (FEVI + NYHA + Nohria) → 3) Confirmar con estudios (ECO, BNP, Rx, labs) → 4) Tratar aguda según congestión/perfusión → 5) Iniciar y titular tratamiento crónico (ABMS + otros) → 6) Seguimiento clínico y ajuste."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 69,
+        pregunta: "¿Qué diferencia hemodinámica clave distingue al edema pulmonar agudo de la descompensación aguda de la IC crónica respecto a la presión arterial sistólica y gasto cardiaco?",
+        respuesta: "En el edema pulmonar agudo el gasto cardiaco es normal o incluso elevado y la PAS es normal o alta (por aumento súbito de poscarga/disfunción diastólica), mientras que en la descompensación aguda de IC crónica el gasto es bajo o normal y la PAS es normal o baja."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 70,
+        pregunta: "¿Cuál es el vasopresor de primera línea en el choque cardiogénico?",
+        respuesta: "Norepinefrina."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 71,
+        pregunta: "¿Qué utilidad tiene la ecografía pulmonar en el diagnóstico rápido de congestión en ICA?",
+        respuesta: "Detecta líneas B pulmonares de forma rápida al ingreso o durante la hospitalización como complemento confirmatorio de congestión pulmonar."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 72,
+        pregunta: "¿Por qué se evita la morfina en la insuficiencia cardiaca aguda?",
+        respuesta: "Porque su uso se asocia a mayor mortalidad y mayor riesgo de ingreso a unidad de cuidados intensivos."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 73,
+        pregunta: "¿Qué regla mnemotécnica resume los puntos de corte de FEVI en la clasificación de insuficiencia cardiaca?",
+        respuesta: "40 corta la reducida (≤ 40 %); 50 inicia la preservada (≥ 50 %); el intervalo 41–49 % corresponde a ligeramente reducida."
+      },
+      {
+        tema: "Tema 3: Insuficiencia Cardiaca Crónica y Aguda",
+        subtema: "Integración de Infografías (Perlas y Datos Clave)",
+        numero: 74,
+        pregunta: "¿Cuáles son los 4 objetivos finales del manejo integral de la insuficiencia cardiaca?",
+        respuesta: "1) ↓ Síntomas, 2) ↓ Hospitalizaciones, 3) ↓ Mortalidad y 4) Mejorar la calidad de vida."
+      },
+
+      // =========================================================================
+      // TEMA 4: COR PULMONALE CRÓNICO (18 PREGUNTAS)
+      // =========================================================================
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Definición, Epidemiología y Prevención",
+        numero: 1,
+        pregunta: "¿Cómo se define el cor pulmonale (CP)?",
+        respuesta: "Entidad clínica caracterizada por la hipertrofia o dilatación del ventrículo derecho (VD) secundaria a hipertensión pulmonar (HP), resultado de enfermedades que afectan al parénquima pulmonar, la vasculatura pulmonar o el control ventilatorio."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Definición, Epidemiología y Prevención",
+        numero: 2,
+        pregunta: "¿Cuál es la principal causa de cor pulmonale y qué otras etiologías frecuentes se asocian?",
+        respuesta: "• Causa principal: enfermedad pulmonar obstructiva crónica (EPOC), particularmente en fases avanzadas, donde se documenta HP en el 30 al 70 % de los casos.\n• Otras etiologías frecuentes: enfermedades pulmonares intersticiales, síndrome de apnea obstructiva del sueño (SAOS, presente en 17–41 % de los pacientes con HP), síndrome de hipoventilación por obesidad e hipertensión arterial pulmonar (HAP)."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Definición, Epidemiología y Prevención",
+        numero: 3,
+        pregunta: "¿Qué porcentaje de hospitalizaciones por insuficiencia cardiaca corresponde a cor pulmonale y cuál es su mortalidad en EPOC?",
+        respuesta: "• Hospitalizaciones por IC: entre 10 y 30 % presentan CP como mecanismo subyacente.\n• Mortalidad: hasta 73 % a 4 años en pacientes con EPOC y disfunción ventricular derecha documentada."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Definición, Epidemiología y Prevención",
+        numero: 4,
+        pregunta: "¿Cuáles son las cuatro medidas clave para la prevención del cor pulmonale?",
+        respuesta: "• Identificación temprana y tratamiento adecuado de enfermedades pulmonares crónicas.\n• Control del tabaquismo.\n• Vacunación contra influenza y neumococo.\n• Manejo apropiado de los trastornos respiratorios del sueño."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Etiopatogenia y Fisiopatología",
+        numero: 5,
+        pregunta: "¿Cuáles son los dos mecanismos etiopatogénicos principales que originan el cor pulmonale?",
+        respuesta: "• Vía por hipoxemia alveolar (ej. EPOC, neumopatías intersticiales): vasoconstricción hipóxica crónica → remodelado vascular pulmonar y aumento sostenido de poscarga al VD; asociada a hipercapnia, hiperviscosidad e inactivación del óxido nítrico.\n• Vía por obstrucción vascular pulmonar (ej. HAP [grupo 1] o HPTEC [grupo 4]): proliferación endotelial descontrolada por desbalance vasodilatador/vasoconstrictor → inflamación, trombosis in situ, remodelado vascular, hipertrofia del VD y caída del gasto cardiaco."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Cuadro Clínico, ECG y Radiología",
+        numero: 6,
+        pregunta: "¿Cuáles son las manifestaciones clínicas del cor pulmonale según su etapa evolutiva (inicial vs. avanzada)?",
+        respuesta: "• Etapas iniciales: disnea de esfuerzo, astenia, tos seca, angina, síncope y náusea.\n• Fases avanzadas: disnea de reposo, hemoptisis, letargia y signos de congestión venosa sistémica (plétora yugular, reflujo hepatoyugular, edema periférico, hepatomegalia y derrame pleural)."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Cuadro Clínico, ECG y Radiología",
+        numero: 7,
+        pregunta: "¿Cuáles son los cuatro hallazgos electrocardiográficos y los tres hallazgos radiológicos característicos del cor pulmonale?",
+        respuesta: "• ECG: eje de onda P > 90°, patrón S1-S2-S3, hipertrofia ventricular derecha y bloqueo de rama derecha.\n• Radiografía de tórax: dilatación de la arteria pulmonar, aumento del índice cardiotorácico y disminución del espacio retroesternal."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Etiología Completa por Grupo Fisiopatológico",
+        numero: 8,
+        pregunta: "¿Cuáles son las 7 enfermedades pulmonares obstructivas que causan cor pulmonale crónico?",
+        respuesta: "Enfermedad pulmonar obstructiva crónica (EPOC), enfisema, asma, fibrosis quística, bronquiectasias, bronquitis obliterante y enfermedad intersticial difusa."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Etiología Completa por Grupo Fisiopatológico",
+        numero: 9,
+        pregunta: "¿Cuáles son las 9 enfermedades pulmonares restrictivas que causan cor pulmonale crónico?",
+        respuesta: "Fibrosis pulmonar idiopática, escoliosis y malformaciones de la caja torácica, tuberculosis pulmonar, sarcoidosis pulmonar, neumoconiosis, enfermedad pulmonar relacionada con drogas, alveolitis alérgica extrínseca, enfermedades del tejido conectivo y fibrosis pulmonar intersticial."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Etiología Completa por Grupo Fisiopatológico",
+        numero: 10,
+        pregunta: "¿Cuáles son las 4 causas de insuficiencia respiratoria de origen central asociadas a cor pulmonale crónico?",
+        respuesta: "Síndrome de apnea obstructiva del sueño (SAOS), síndrome de obesidad/hipoventilación, hipoventilación alveolar central y enfermedades neuromusculares."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Etiología Completa por Grupo Fisiopatológico",
+        numero: 11,
+        pregunta: "¿Cuáles son las 11 enfermedades por oclusión del lecho vascular pulmonar que causan cor pulmonale crónico?",
+        respuesta: "Tromboembolia pulmonar, embolia tumoral, parásitos, hipertensión arterial pulmonar idiopática, enfermedad veno-oclusiva pulmonar, hemangioma capilar pulmonar, drepanocitosis, embolia grasa, mediastinitis fibrosante, tumor mediastínico y angeítis pulmonar secundaria a enfermedad sistémica."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Tratamiento, Pronóstico y Seguimiento",
+        numero: 12,
+        pregunta: "¿Cuáles son los objetivos terapéuticos y las medidas generales en el tratamiento del cor pulmonale crónico (CP)?",
+        respuesta: "• Objetivos: optimizar la función del ventrículo derecho, mejorar la clase funcional y aumentar la supervivencia.\n• Medidas generales: actividad física dentro de los límites sintomáticos, rehabilitación pulmonar supervisada, vacunación contra neumococo e influenza, consejería reproductiva y apoyo psicológico."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Tratamiento, Pronóstico y Seguimiento",
+        numero: 13,
+        pregunta: "¿Cuáles son las indicaciones exactas y el beneficio de la oxigenoterapia prolongada y del CPAP en el CP?",
+        respuesta: "• Oxigenoterapia prolongada (> 15 h/día): indicada cuando PaO2 < 60 mmHg o saturación < 88 %, ya que mejora la hemodinámica y reduce la mortalidad en EPOC.\n• Sobreposición SAOS-EPOC: presión positiva continua (CPAP) más oxígeno."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Tratamiento, Pronóstico y Seguimiento",
+        numero: 14,
+        pregunta: "¿Cómo se clasifican los 5 grupos clínicos de hipertensión pulmonar (HP) según la ESC/ERS?",
+        respuesta: "• Grupo 1: hipertensión arterial pulmonar (HAP).\n• Grupo 2: por cardiopatía izquierda.\n• Grupo 3: por enfermedad pulmonar o hipoxemia.\n• Grupo 4: por enfermedad tromboembólica crónica (HPTEC).\n• Grupo 5: miscelánea."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Tratamiento, Pronóstico y Seguimiento",
+        numero: 15,
+        pregunta: "¿Cuáles son los 5 grupos farmacológicos específicos empleados en la HAP (Grupo 1) y en qué grupos están contraindicados?",
+        respuesta: "Indicados en Grupo 1 (HAP) y contraindicados en Grupos 2 y 3:\n1. Bloqueadores de canales de calcio (nifedipino, diltiazem): solo si hay respuesta positiva a prueba de vasorreactividad.\n2. Antagonistas del receptor de endotelina: bosentán, ambrisentán y macitentán.\n3. Inhibidores de fosfodiesterasa tipo 5 (iPDE-5): sildenafil, tadalafil y vardenafil.\n4. Estimulantes de la guanilato ciclasa soluble: riociguat.\n5. Análogos de prostaciclina o agonistas del receptor IP: epoprostenol, iloprost, treprostinil y selexipag."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Tratamiento, Pronóstico y Seguimiento",
+        numero: 16,
+        pregunta: "¿Cuál es el papel de los diuréticos, anticoagulantes, corrección de hierro y qué fármacos cardiovasculares NO se recomiendan en el CP por enfermedad respiratoria?",
+        respuesta: "• Diuréticos (furosemida, espironolactona): en presencia de congestión.\n• Anticoagulantes: indicados en HAP idiopática y HPTEC (Grupo 4).\n• Corrección de anemia y deficiencia de hierro: mejora la capacidad funcional.\n• NO recomendados en CP por enfermedad respiratoria: digoxina, IECA, ARA-II y betabloqueadores."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Tratamiento, Pronóstico y Seguimiento",
+        numero: 17,
+        pregunta: "¿Cuáles son las tasas de supervivencia, mortalidad cardiovascular y el predictor hemodinámico independiente de mortalidad en el CP?",
+        respuesta: "• Supervivencia: 62 % a 5 años y 26 % a 10 años (más ominoso en EPOC grave y SAOS).\n• Mortalidad cardiovascular asociada: hasta 67.8 % en pacientes con EPOC.\n• Predictor independiente de mortalidad: presión media de la arteria pulmonar (PAPm) > 45 mmHg."
+      },
+      {
+        tema: "Tema 4: Cor Pulmonale Crónico",
+        subtema: "Tratamiento, Pronóstico y Seguimiento",
+        numero: 18,
+        pregunta: "¿Cuál es el esquema de seguimiento periódico, los criterios de referencia a tercer nivel y la opción quirúrgica en casos avanzados?",
+        respuesta: "• Seguimiento periódico: semestral por neumología y cardiología, con ecocardiograma anual y estudios adicionales ante cambios clínicos.\n• Referencia a tercer nivel: clase funcional deteriorada, presión sistólica de arteria pulmonar (PSAP) ≥ 60 mmHg o arritmias graves.\n• Casos avanzados: considerar trasplante pulmonar tras estricta selección."
+      },
+
+      // =========================================================================
+      // TEMA 5: SÍNDROME CARDIORRENAL (16 PREGUNTAS)
+      // =========================================================================
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Definición, Clasificación y Epidemiología",
+        numero: 1,
+        pregunta: "¿Cómo se define el síndrome cardiorrenal (SCR) y cuáles son sus 5 tipos clínicos?",
+        respuesta: "Entidad fisiopatológica caracterizada por la disfunción aguda o crónica de un órgano (corazón o riñón) que induce la disfunción del otro:\n• SCR tipo 1 (cardiorrenal agudo): disfunción cardiaca aguda que causa lesión renal aguda.\n• SCR tipo 2 (cardiorrenal crónico): insuficiencia cardiaca crónica que causa enfermedad renal crónica.\n• SCR tipo 3 (renocardiaco agudo): lesión renal aguda que induce disfunción cardiaca aguda.\n• SCR tipo 4 (renocardiaco crónico): enfermedad renal crónica que lleva a disfunción cardiaca crónica.\n• SCR tipo 5 (secundario): enfermedad sistémica que afecta simultáneamente ambos órganos."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Definición, Clasificación y Epidemiología",
+        numero: 2,
+        pregunta: "¿Cuál es la prevalencia de disfunción renal en la insuficiencia cardiaca, su impacto en la mortalidad y sus principales factores de riesgo?",
+        respuesta: "• Prevalencia: hasta 49 % en pacientes con insuficiencia cardiaca.\n• Impacto en mortalidad: aumenta hasta el doble la mortalidad general; aumenta 7 % por cada incremento de 1 mg/dL de creatinina sérica y 23 % por cada descenso de 10 mL/min/1.73 m² en la TFG calculada.\n• Factores de riesgo: edad avanzada, diabetes mellitus, hipertensión arterial y enfermedad renal crónica previa."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Etiopatogenia y Fisiopatología",
+        numero: 3,
+        pregunta: "¿Cuáles son los mecanismos hemodinámicos, neurohormonales e inmunológicos que explican la etiopatogenia del SCR?",
+        respuesta: "• Hemodinámicos: hipoperfusión renal y congestión venosa sistémica; elevaciones en presión venosa central (PVC) y presión intraabdominal se correlacionan con deterioro renal.\n• Neurohormonales: activación del SRAA y sistema nervioso simpático (vasoconstricción, retención hidrosalina, apoptosis, remodelamiento); sobreexpresión de ADH pese a hiponatremia.\n• Inmunológicos/moleculares: citocinas inflamatorias (IL-1, IL-6, TNF-α) producen daño miocárdico directo; FGF-23 elevado en enfermedad renal se asocia a hipertrofia ventricular izquierda."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Cuadro Clínico",
+        numero: 4,
+        pregunta: "¿Qué rendimiento diagnóstico tienen los signos físicos en el SCR y cuál es el hallazgo más útil para establecer congestión?",
+        respuesta: "• Pulso venoso yugular > 8 cm: hallazgo físico más útil para establecer congestión.\n• Edema bilateral de piernas: alta sensibilidad (94 %) pero baja especificidad (solo 10 %).\n• Estertores, galope por tercer ruido (S3) y disnea: escaso valor diagnóstico individual."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Cuadro Clínico",
+        numero: 5,
+        pregunta: "¿Cómo varían las manifestaciones clínicas del SCR según su presentación aguda, crónica o etiología primaria (tipos 1–5)?",
+        respuesta: "• Formas agudas cardiacas (tipo 1): oliguria o anuria como signo temprano de lesión renal aguda.\n• Formas crónicas (tipo 2): síntomas de sobrecarga hídrica progresiva (disnea, ortopnea, oliguria, fatiga, edema periférico).\n• Lesión renal primaria (tipos 3 y 4): arritmias, edema pulmonar, pericarditis urémica e isquemia miocárdica por toxinas urémicas.\n• Enfermedad sistémica (tipo 5): varían según el cuadro primario (sepsis, lupus), coexistiendo congestión e hipoperfusión renal."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Abordaje Diagnóstico",
+        numero: 6,
+        pregunta: "¿Cómo se diagnostica la lesión renal aguda en el SCR (criterios KDIGO) y qué precaución debe tenerse al estimar la TFG en formas crónicas?",
+        respuesta: "• Criterios KDIGO: elevación de creatinina sérica ≥ 0.3 mg/dL en 48 horas o ≥ 50 % respecto al valor basal en 7 días.\n• Precaución en formas crónicas: evitar extrapolaciones de TFG basadas en valores estimados sin creatinina basal, ya que la sobrecarga hídrica puede diluirla y falsear la estimación."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Abordaje Diagnóstico",
+        numero: 7,
+        pregunta: "¿Cuál es la utilidad diagnóstica y pronóstica de la cistatina C, el NGAL y el sedimento urinario en el SCR?",
+        respuesta: "• Cistatina C: sin superioridad diagnóstica sobre creatinina, pero con mayor valor pronóstico.\n• NGAL (lipocalina asociada a gelatinasa de neutrófilos): biomarcador más estudiado, útil para predecir lesión renal (ej. cirugía cardiaca).\n• Sedimento urinario: herramienta sensible y económica para detectar necrosis tubular aguda."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Abordaje Diagnóstico",
+        numero: 8,
+        pregunta: "¿Cuál es el estándar de oro hemodinámico para evaluar la congestión en el SCR y cuáles son sus valores diagnósticos?",
+        respuesta: "• Estándar de oro: cateterismo cardiaco derecho (reservado a casos seleccionados como choque cardiogénico).\n• Valores diagnósticos: presión auricular derecha > 7 mmHg y presión de oclusión de la arteria pulmonar > 18 mmHg."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Abordaje Diagnóstico",
+        numero: 9,
+        pregunta: "¿Qué marcadores indirectos de imagen (ultrasonido pulmonar y ecocardiografía) se prefieren en la práctica clínica para evaluar congestión y volemia?",
+        respuesta: "• Ultrasonido pulmonar: sensibilidad 92.4 % y especificidad 94.1 % ante tres líneas B bilaterales.\n• Ecocardiograma transtorácico: diámetro de VCI < 12 mm sugiere hipovolemia; tiempo de desaceleración mitral < 130 ms; alteración del cociente sistólico/diastólico de la vena pulmonar."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Abordaje Diagnóstico",
+        numero: 10,
+        pregunta: "¿Cómo se interpretan los péptidos natriuréticos (NT-proBNP) y el CA-125 en el contexto de enfermedad renal y congestión venosa?",
+        respuesta: "• NT-proBNP: en pacientes con TFG disminuida, un valor < 225 pg/mL conserva su valor predictivo negativo para descartar IC.\n• CA-125: marcador emergente que parece superar a los péptidos natriuréticos en la evaluación de congestión venosa intrarrenal."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Abordaje Diagnóstico",
+        numero: 11,
+        pregunta: "¿Qué utilidad tienen la bioimpedancia (BIVA) y el índice VExUS en el SCR?",
+        respuesta: "Cuantifican el grado de congestión venosa sistémica mediante análisis ecográfico de la vena cava inferior y flujo venoso hepático, portal e intrarrenal, correlacionándose con la resolución de la lesión renal y el balance hídrico."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Abordaje Diagnóstico",
+        numero: 12,
+        pregunta: "¿Cuáles son los criterios hemodinámicos que definen al choque cardiogénico como causa frecuente de SCR tipo 1?",
+        respuesta: "Presión arterial sistólica < 90 mmHg o descenso > 30 mmHg en la presión arterial media, con datos clínicos de hipoperfusión e índice cardíaco < 1.8 L/min/m² (debiendo descartar IAM)."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Tratamiento Agudo y Crónico",
+        numero: 13,
+        pregunta: "¿Cuáles son los tres objetivos del tratamiento agudo del SCR, la piedra angular farmacológica y las metas cuantitativas de diuresis?",
+        respuesta: "• Objetivos: descongestión efectiva, preservación de la perfusión y mantenimiento de la terapia basal para IC o enfermedad renal.\n• Piedra angular: diuréticos de asa, preferentemente en infusión continua y a dosis altas.\n• Meta diaria de diuresis: > 3 L por día (evaluar respuesta temprana con sodio urinario o diuresis a las 6 horas)."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Tratamiento Agudo y Crónico",
+        numero: 14,
+        pregunta: "¿Qué estrategia escalonada se sigue ante una respuesta diurética insuficiente y cuándo se indica la ultrafiltración?",
+        respuesta: "• Respuesta insuficiente: agregar diuréticos secuenciales como tiazidas, antagonistas del receptor de mineralocorticoides (ARM) y acetazolamida.\n• Ultrafiltración: se reserva para casos refractarios debido a su mayor incidencia de eventos adversos."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Tratamiento Agudo y Crónico",
+        numero: 15,
+        pregunta: "¿Cómo deben interpretarse la hemoconcentración y el aumento leve de creatinina tras lograr la descongestión en el SCR?",
+        respuesta: "Ambos hallazgos se asocian con mejor pronóstico (reflejan descongestión intravascular efectiva) y NO deben llevar a reducir el tratamiento."
+      },
+      {
+        tema: "Tema 5: Síndrome Cardiorrenal",
+        subtema: "Tratamiento Agudo y Crónico",
+        numero: 16,
+        pregunta: "¿Cuál es el manejo farmacológico a largo plazo del SCR y qué conducta debe tomarse con los iSRAA y betabloqueadores ante aumentos moderados de creatinina?",
+        respuesta: "• Control estricto de presión arterial; NO suspender iSRAA ni betabloqueadores ante aumentos moderados de creatinina (reducen mortalidad incluso con disfunción renal).\n• Inicio precoz de sacubitrilo/valsartán e iSGLT2 mejora desenlaces renales y cardiovasculares.\n• Monitorización con ultrasonido pulmonar y biomarcadores mediante enfoque multidisciplinario."
+      },
+
+      // =========================================================================
+      // TEMA 6: CARDIOMIOPATÍAS Y MIOCARDITIS (39 PREGUNTAS)
+      // =========================================================================
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Concepto General y Evaluación Paraclínica",
+        numero: 1,
+        pregunta: "¿Cómo se define el término cardiomiopatía?",
+        respuesta: "Trastornos en los que el músculo cardiaco es anormal en su estructura y función en ausencia de arteriopatía coronaria, hipertensión, valvulopatía o cardiopatía congénita suficientes para causar la anormalidad miocárdica observada."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Concepto General y Evaluación Paraclínica",
+        numero: 2,
+        pregunta: "¿Qué estudios comprende la EVALUACIÓN PARACLÍNICA GENERAL en todo paciente con cardiomiopatía?",
+        respuesta: "• Gabinete: ECG, radiografía torácica y ecocardiograma bidimensional y Doppler.\n• Química y orina: sodio, potasio, glucosa, creatinina, nitrógeno ureico, calcio, magnesio; albúmina, proteínas totales, pruebas de función hepática, hierro sérico, ferritina; urianálisis; cinasa de creatina (CK); hormona tirotropa (TSH).\n• Hematología: hemoglobina/hematocrito, conteo leucocitario con diferencial (incluyendo eosinófilos) y velocidad de eritrosedimentación."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Concepto General y Evaluación Paraclínica",
+        numero: 3,
+        pregunta: "¿Qué estudios se solicitan en PACIENTES SELECTOS con cardiomiopatía según la sospecha clínica?",
+        respuesta: "• Serología para infecciones sospechadas: vírica aguda (coxsackievirus, echovirus, influenza), VIH y Epstein-Barr, enfermedad de Lyme, toxoplasmosis y enfermedad de Chagas.\n• Cateterismo con angiografía coronaria en pacientes con angina candidatos a intervención.\n• Estudios serológicos para enfermedad reumatológica activa.\n• Biopsia endomiocárdica."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 4,
+        pregunta: "¿Cómo se define la cardiomiopatía hipertrófica (CMH)?",
+        respuesta: "Hipertrofia ventricular izquierda inexplicable en ausencia de condiciones de carga anormal (valvulopatía, hipertensión, defectos cardiacos congénitos) suficientes para explicar el grado de hipertrofia."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 5,
+        pregunta: "¿Cuál es el patrón de herencia, porcentaje de casos sarcoméricos y región anatómica más afectada en la CMH?",
+        respuesta: "• Herencia: autosómica dominante.\n• Genética: mutaciones en genes de proteínas contráctiles sarcoméricas representan 50–60 % de los casos (> 400 mutaciones identificadas).\n• Localización: en la forma autosómica dominante común afecta usualmente al septo interventricular más que a otras regiones del VI."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 6,
+        pregunta: "¿Cuál es la tríada histológica distintiva de la CMH y qué alteración hemodinámica produce?",
+        respuesta: "• Tríada histológica: 1) hipertrofia miocitaria, 2) desagrupamiento de los miocitos y 3) fibrosis intersticial.\n• Consecuencia: disfunción ventricular diastólica con elevación de presiones telediastólicas ventriculares, síntomas de IC y disminución de tolerancia al ejercicio."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 7,
+        pregunta: "¿Cuál es la evolución habitual y cuáles son las manifestaciones clínicas posibles de la CMH?",
+        respuesta: "• Evolución: la mayoría están asintomáticos o con síntomas leves/intermitentes; progresión lenta relacionada con la edad.\n• Manifestaciones: dolor torácico (ejercicio, reposo o nocturno), angina posprandial, disnea de estrés leve-moderada, disnea paroxística nocturna, síncope, presíncope y palpitaciones."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 8,
+        pregunta: "¿Qué abarca la evaluación diagnóstica inicial y cuáles son los hallazgos electrocardiográficos más comunes en la CMH?",
+        respuesta: "• Evaluación inicial: investigación familiar de muerte o enfermedad cardiaca prematura en 3–4 generaciones, exploración física, ECG de 12 derivaciones y ecocardiograma 2D.\n• Hallazgos en ECG: incremento de voltaje QRS (hipertrofia VI), desviación izquierda del eje eléctrico, ondas Q anormales (más comúnmente en derivaciones inferolaterales) y cambios en ST o onda T."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 9,
+        pregunta: "¿Cuál es el estándar diagnóstico de imagen para la CMH y cuáles son los puntos de corte de espesor mural en adultos?",
+        respuesta: "• Estándar diagnóstico: ecocardiograma bidimensional (RM y TC son alternativas si es subóptimo); mide obstrucción del tracto de salida en reposo y tras maniobras provocativas.\n• Espesor mural diagnóstico: > 2 DE por encima de la media; en adultos típicamente ≥ 1.5 cm en varones y ≥ 1.3 cm en mujeres."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 10,
+        pregunta: "¿Cuáles son los criterios mayores y menores (ecocardiográficos y ECG) para diagnosticar CMH en familiares de primer grado?",
+        respuesta: "Diagnóstico requiere: 1 criterio mayor, o 2 criterios ecocardiográficos menores, o 1 criterio ecocardiográfico menor + 2 criterios ECG menores.\n• Criterios Mayores: ECO: espesor VI ≥ 13 mm en septo anterior/pared posterior o ≥ 15 mm en septo posterior/pared libre; movilidad anterior sistólica grave mitral (contacto septo-valva). ECG: HVI con cambios de repolarización; inversión T en I y aVL (≥ 3 mm con diferencia eje QRS-T ≥ 30°), V3-V6 (≥ 3 mm) o II, III, aVF (≥ 5 mm); ondas Q anormales (> 40 ms o > 25 % de R) en ≥ 2 derivaciones.\n• Criterios Menores: ECO: espesor VI ≥ 12 mm (septo anterior/pared posterior) o ≥ 14 mm (septo posterior/pared libre); movilidad anterior sistólica moderada sin contacto; redundancia de valvas mitrales. ECG/Clínica: bloqueo completo de rama/defecto conducción IV izquierdo; cambios menores repolarización; onda S profunda en V2 (≥ 25 mm); dolor torácico, disnea o síncope inexplicables."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 11,
+        pregunta: "¿A qué edad inicia la vigilancia en familiares de un caso índice de CMH, cuáles son las excepciones y qué etiologías tienen terapia específica?",
+        respuesta: "• Inicio habitual de vigilancia (ECO y ECG): a los 12 años de edad.\n• Excepciones para iniciar antes: historia familiar 'maligna' de muerte súbita prematura, niño sintomático o atleta competitivo.\n• Terapias específicas: enfermedades por depósito lisosomal como enfermedad de Pompe y enfermedad de Fabry."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 12,
+        pregunta: "¿Cómo se estratifica el tratamiento sintomático de la CMH según la obstrucción del tracto de salida y las arritmias supraventriculares?",
+        respuesta: "• Sin gradientes al flujo de salida: betabloqueadores (meta FC 50–70 lpm); BCC no dihidropiridínicos en refractarios; furosemida si hay elevación crónica de presiones pulmonares.\n• Con obstrucción al flujo de salida: inotrópicos negativos (betabloqueadores), miectomía septal ventricular, marcapasos AV secuencial y ablación etílica percutánea del septo interventricular.\n• Arritmia supraventricular (FA sostenida o paroxística): warfarina (INR 2–3) y amiodarona; añadir betabloqueadores (sotalol) o BCC no dihidropiridínicos para control de frecuencia."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Hipertrófica (CMH)",
+        numero: 13,
+        pregunta: "¿Qué medidas generales y qué 4 indicaciones de cardiovertor-desfibrilador (DAI) previenen la muerte súbita en la CMH?",
+        respuesta: "• Medidas generales: evitar deportes competitivos y ejercicios intensos.\n• Indicaciones de DAI: 1) Historia familiar de muerte súbita cardiaca prematura (< 40 años), 2) Síncope inexplicable (no neurocardiogénico), 3) Respuesta plana o hipotensiva al ejercicio en posición erecta, 4) Hipertrofia ventricular izquierda grave (espesor mural máximo ≥ 30 mm en ecocardiografía)."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Indicaciones Generales de Ecocardiografía",
+        numero: 14,
+        pregunta: "¿Cuáles son las indicaciones clínicas para la obtención de un ecocardiograma (Cuadro 31)?",
+        respuesta: "Soplo no funcional, disnea, edema, embolismo sistémico, dolor torácico, síncope inexplicable, tamaño cardiaco anormal en Rx tórax, ECG anormal con sospecha de IAM antiguo o pericarditis, evaluación de estenosis/regurgitación valvular, endocarditis infecciosa, prolapso mitral, válvulas protésicas, isquemia/IAM, disfunción VI coronaria, etiología/función en IC, enfermedad pericárdica, masas cardiacas, grandes vasos, enfermedad pulmonar, función VI en hipertensos y sospecha de arritmias."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Dilatada (CMD)",
+        numero: 15,
+        pregunta: "¿Cómo se define la cardiomiopatía dilatada (CMD) y cuál es su relevancia epidemiológica en niños y su forma más frecuente?",
+        respuesta: "• Definición: dilatación y disfunción sistólica del ventrículo izquierdo o ambos ventrículos, en ausencia de arteriopatía coronaria, anomalías valvulares o enfermedad pericárdica.\n• Epidemiología: cardiomiopatía más frecuente entre los niños (58 % de los casos); en la mayoría no hay causa identificable (CMD idiopática)."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Dilatada (CMD)",
+        numero: 16,
+        pregunta: "¿Cómo se clasifica la CMD según su origen (genética vs. adquirida) y qué porcentajes y etiologías abarca cada grupo?",
+        respuesta: "• Genética (20–50 % evidencia familiar): herencia autosómica dominante (68 % de formas familiares, aislada y con trastornos de conducción); ligada al cromosoma X (2–5 %); trastornos neuromusculares (26 %: distrofias de Duchenne, Becker y Emery-Dreifuss).\n• Adquirida: miocarditis infecciosa, quimioterapia, radioterapia, etanol, cocaína, deficiencias nutricionales, sobrecarga de hierro, trastornos inflamatorios/autoinmunes, endocrinopatías y embarazo."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Dilatada (CMD)",
+        numero: 17,
+        pregunta: "¿Cuál es el cuadro clínico de la CMD en adultos frente a niños, y qué presentaciones graves o arrítmicas pueden ocurrir?",
+        respuesta: "• Adultos: disminución de tolerancia al ejercicio y disnea progresiva hasta reposo, ortopnea, DPN, edema periférico y ascitis.\n• Niños: pueden predominar síntomas de isquemia mesentérica (dolor abdominal posprandial, náusea, vómito, anorexia).\n• A cualquier edad: síntomas arrítmicos (palpitaciones, presíncope, síncope), muerte súbita o accidente tromboembólico como presentación inicial."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Dilatada (CMD)",
+        numero: 18,
+        pregunta: "¿Cuáles son los hallazgos diagnósticos en ECG, radiografía de tórax, ecocardiografía y resonancia magnética en la CMD?",
+        respuesta: "• ECG: taquicardia sinusal, cambios inespecíficos ST-T (derivaciones inferiores y laterales), agrandamiento auricular, criterios de hipertrofia y arritmias supraventriculares/ventriculares.\n• Rx tórax: índice cardiotorácico > 0.5, aumento de tramas vasculares y derrame pleural.\n• Ecocardiograma: volumen telediastólico ventricular > 2 DE por encima de la media (o > 112 % del esperado) y acortamiento fraccionario < 25 %; regurgitaciones funcionales mitral y tricúspide.\n• Resonancia magnética: áreas de fibrosis."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Dilatada (CMD)",
+        numero: 19,
+        pregunta: "¿Cuál es el tratamiento de soporte, restricciones de ejercicio, anticoagulación y terapias avanzadas en la CMD?",
+        respuesta: "• Soporte: restricción hídrica y de sodio, evitar etanol y toxinas, tratamiento de IC establecida.\n• Ejercicio: evitarlo solo en miocarditis o cardiomiopatía periparto; el resto puede hacer ejercicio submáximo.\n• Anticoagulación (INR 2–3): en fibrilación auricular o trombosis mural auricular o ventricular izquierda.\n• Dispositivos/avanzado: DAI para arritmias; marcapasos biventricular, inotrópicos, asistencia ventricular y trasplante cardiaco en IC avanzada."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Dilatada (CMD)",
+        numero: 20,
+        pregunta: "¿Cuál es el esquema de tamizaje familiar y cuál es el pronóstico de supervivencia a 5 años en la CMD?",
+        respuesta: "• Tamizaje familiar: evaluación ecocardiográfica y ECG cada 5 años hasta los 50 años de edad (detección temprana permite iniciar IECA o betabloqueador).\n• Pronóstico: aunque la mayoría presenta mejoría inicial, la supervivencia a 5 años es < 50 %."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Restrictiva (CMR)",
+        numero: 21,
+        pregunta: "¿Cómo se define la cardiomiopatía restrictiva (CMR), qué porcentaje tiene origen familiar y cuáles son sus hallazgos macroscópicos?",
+        respuesta: "• Definición: rigidez miocárdica, alteración del llenado, elevación de presiones diastólicas del VI y disminución del volumen diastólico del VI o VD a pesar de función sistólica y grosor mural normales o casi normales.\n• Origen familiar: ~30 %.\n• Macroscopia: dilatación biauricular, cavidades ventriculares pequeñas, trombo en orejuelas auriculares y parches de fibrosis endocárdica."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Restrictiva (CMR)",
+        numero: 22,
+        pregunta: "¿Cuáles son las causas de cardiomiopatía restrictiva clasificadas por grupo etiológico?",
+        respuesta: "• Trastornos infiltrativos: amiloidosis y sarcoidosis.\n• Trastornos por depósito: hemocromatosis, enfermedad de Fabry y almacenamiento de glucógeno.\n• Trastornos fibróticos: radiación, esclerosis sistémica y fármacos (doxorrubicina, serotonina, ergotamina).\n• Trastornos metabólicos: deficiencia de creatina y defectos del metabolismo de ácidos grasos.\n• Trastornos endomiocárdicos: fibrosis endomiocárdica y síndrome hipereosinofílico (endocarditis de Löffler).\n• Misceláneas: síndrome carcinoide."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Restrictiva (CMR)",
+        numero: 23,
+        pregunta: "¿Cuáles son las manifestaciones clínicas y hallazgos en la exploración física de la CMR (incluyendo signo de Kussmaul)?",
+        respuesta: "• Síntomas: disnea con el ejercicio, infecciones respiratorias recurrentes, fatiga, debilidad, progresión a disnea en reposo, ortopnea, DPN, dolor torácico, palpitaciones, y menos comúnmente síncope y muerte súbita.\n• Exploración física: presión yugular elevada con ondas 'y' prominentes que no disminuye (o aumenta) en inspiración (signo de Kussmaul); P2 intenso si hay HP; S3 (y ocasionalmente S4); edema periférico, ascitis y hepatomegalia."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Restrictiva (CMR)",
+        numero: 24,
+        pregunta: "¿Qué alteraciones se observan en el ECG, imagen y búsqueda etiológica específica en la CMR?",
+        respuesta: "• ECG: ondas P mitrales y pulmonares, depresión ST e inversión T en derivaciones inferolaterales, retraso de conducción intraventricular y ondas Q anormales.\n• Imagen: dilatación notoria de ambas aurículas, función sistólica global normal y VI sin hipertrofia ni dilatación.\n• Búsqueda específica: proteína amiloide (amiloidosis), granulomas no caseosos (sarcoidosis), estudios de hierro (hemocromatosis) o disminución de α-galactosidasa A (enfermedad de Fabry)."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Restrictiva (CMR)",
+        numero: 25,
+        pregunta: "¿Cómo se diferencia la cardiomiopatía restrictiva de la pericarditis constrictiva?",
+        respuesta: "• Alcance terapéutico: CMR = paliación médica vs. Pericarditis constrictiva = cura con pericardiectomía.\n• Rx tórax: CMR = sin calcificación, agrandamiento atrial masivo vs. Constrictiva = calcificación pericárdica, agrandamiento moderado.\n• ECG: CMR = bloqueos de rama y AV vs. Constrictiva = repolarización anormal.\n• TC/RM: CMR = pericardio normal, patrones en RM vs. Constrictiva = engrosamiento pericárdico > 4 mm.\n• Hemodinámica: CMR = presiones diastólicas desiguales, efecto concordante respiratorio vs. Constrictiva = equilibrio diastólico ('dip-plateau').\n• Biopsia: CMR = fibrosis, hipertrofia, infiltración vs. Constrictiva = normal."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Cardiomiopatía Restrictiva (CMR)",
+        numero: 26,
+        pregunta: "¿Cuál es el tratamiento, indicación temprana de trasplante y pronóstico de la CMR?",
+        respuesta: "• Tratamiento: diuréticos como base (evitando reducir presiones de llenado hasta hipotensión); IECA y betabloqueadores; tratamiento específico de la causa sistémica.\n• Trasplante: referencia temprana porque puede desarrollarse hipertensión pulmonar que obligue a trasplante combinado de corazón y pulmones.\n• Pronóstico: supervivencia de 10 años desde el diagnóstico en adultos (excepto en amiloidosis, que progresa mucho más rápido)."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Integración Comparativa de Miocardiopatías",
+        numero: 27,
+        pregunta: "¿Cuál es la prevalencia y el grupo etario predominante de las tres miocardiopatías principales?",
+        respuesta: "• Miocardiopatía dilatada (CMD): prevalencia 0.4 %, mayor entre 20 a 50 años.\n• Miocardiopatía hipertrófica (CMH): prevalencia 0.2 %.\n• Miocardiopatía restrictiva (CMR): muy rara (la menos frecuente de las tres)."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Integración Comparativa de Miocardiopatías",
+        numero: 28,
+        pregunta: "¿Qué genes específicos y qué agentes farmacológicos o sistémicos adicionales destacan en la etiología de la MIOCARDIOPATÍA DILATADA?",
+        respuesta: "• Genes específicos (~50 % genético): gen de la titina (TTN) y gen de la lamina A/C (LMNA).\n• Agentes adquiridos/sistémicos: antraciclinas, imatinib, sarcoidosis, lupus y enfermedad de Chagas."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Integración Comparativa de Miocardiopatías",
+        numero: 29,
+        pregunta: "¿Qué umbral de FEVI y qué hallazgo de realce en resonancia magnética caracterizan al diagnóstico de la MIOCARDIOPATÍA DILATADA?",
+        respuesta: "Ecocardiograma con FEVI < 50 % (dilatación y disfunción sistólica del VI) y resonancia magnética cardiaca con fibrosis en patrón de realce tardío."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Integración Comparativa de Miocardiopatías",
+        numero: 30,
+        pregunta: "¿Cuáles son los genes sarcoméricos más frecuentes y las fenocopias de la MIOCARDIOPATÍA HIPERTRÓFICA, y cómo se comporta la FEVI?",
+        respuesta: "• Genes sarcoméricos clave (~60 % genético): MYH7 (miosina) y MYBPC3.\n• Fenocopias: amiloidosis y enfermedad de Fabry.\n• Imagen: hipertrofia asimétrica septal con FEVI normal o aumentada y fibrosis con realce tardío en RM."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Integración Comparativa de Miocardiopatías",
+        numero: 31,
+        pregunta: "¿Cuál es el mecanismo de los betabloqueadores en la MIOCARDIOPATÍA HIPERTRÓFICA y cuándo se indica ablación septal con alcohol frente a miectomía?",
+        respuesta: "• Mecanismo betabloqueadores: ↓ frecuencia cardiaca, ↓ contractilidad, ↓ obstrucción y ↑ tiempo diastólico (verapamilo/diltiazem si no tolera BB).\n• Intervención: miectomía con ablación septal quirúrgica; ablación septal con alcohol si la cirugía está contraindicada."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Integración Comparativa de Miocardiopatías",
+        numero: 32,
+        pregunta: "¿Qué etiología lisosomal adicional (con su enzima deficiente) y qué porcentaje de fibrilación auricular destacan en la MIOCARDIOPATÍA RESTRICTIVA?",
+        respuesta: "• Etiología lisosomal adicional: enfermedad de Gaucher (por déficit de β-glucosidasa).\n• Hallazgo arrítmico clave: fibrilación auricular presente hasta en el 75 % de los pacientes."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Miocarditis",
+        numero: 33,
+        pregunta: "¿Cómo se define la miocarditis, cuál es su evolución habitual y qué grupos de riesgo destacan para muerte súbita?",
+        respuesta: "• Definición: proceso inflamatorio NO isquémico del miocardio, de causa conocida o desconocida, asociado a grados variables de disfunción cardíaca.\n• Evolución y riesgo: la mayoría evoluciona a curación, pero es una causa importante de muerte súbita en jóvenes y atletas previamente sanos."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Miocarditis",
+        numero: 34,
+        pregunta: "¿Cuáles son las etiologías principales de la miocarditis?",
+        respuesta: "• Infecciosa (más frecuente — pensar primero en causa viral): Coxsackie / enterovirus, adenovirus, parvovirus B19, HHV-6; también bacterias, hongos, protozoarios y helmintos.\n• Inmunológica / inflamatoria: lupus, sarcoidosis, miocarditis eosinofílica y miocarditis de células gigantes.\n• Fármacos / tóxicos."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Miocarditis",
+        numero: 35,
+        pregunta: "¿Cuáles son las 4 formas clínicas de la miocarditis, sus síntomas más frecuentes (con porcentajes) y cuándo sospecharla?",
+        respuesta: "• Formas clínicas: fulminante, aguda, crónica activa y crónica persistente (hasta 60 % tiene antecedente de resfriado común).\n• Síntomas más frecuentes: disnea (72 %), dolor torácico (32 %) y arritmias (18 %).\n• Sospecha clínica: joven/atleta sano, síntomas cardíacos tras infección viral, dolor tipo infarto con coronarias sin lesiones, nueva IC/arritmias/bloqueo AV o muerte súbita inexplicable."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Miocarditis",
+        numero: 36,
+        pregunta: "¿Cuáles son los 5 pilares diagnósticos de la miocarditis (ECG, biomarcadores, ecocardiograma, RM y biopsia)?",
+        respuesta: "• ECG: cambios inespecíficos ST-T, elevación ST, arritmias, bloqueo AV.\n• Biomarcadores: troponinas elevadas.\n• Ecocardiograma: disfunción sistólica, alteraciones regionales/globales, dilatación o derrame pericárdico (eco normal NO descarta).\n• Resonancia magnética cardíaca: estudio clave para edema, inflamación y realce tardío NO isquémico (patrón no coronario).\n• Biopsia endomiocárdica: prueba confirmatoria en casos seleccionados."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Miocarditis",
+        numero: 37,
+        pregunta: "¿Cuáles son las indicaciones clásicas de biopsia endomiocárdica y los 4 elementos para confirmar miocarditis aguda?",
+        respuesta: "• Indicaciones biopsia (casos graves/seleccionados): IC de 2 semanas a 3 meses de evolución, VI dilatado, arritmia ventricular, bloqueo AV avanzado, no respuesta tras 2 semanas de tratamiento o compromiso hemodinámico.\n• 4 elementos confirmatorios (Daño + Estructura + Resonancia + Tejido): 1) Daño miocárdico reciente, 2) Anormalidad estructural sin enfermedad coronaria suficiente, 3) Captación anormal en RM, 4) Células inflamatorias infiltrativas o genoma viral en biopsia."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Miocarditis",
+        numero: 38,
+        pregunta: "¿Cómo se distingue la miocarditis del infarto agudo de miocardio en la evaluación diagnóstica?",
+        respuesta: "• Origen: Miocarditis = inflamación vs. Infarto = isquemia.\n• Antecedente: Miocarditis = viral reciente vs. Infarto = factores coronarios.\n• Troponinas: elevadas en ambos.\n• Resonancia: Miocarditis = patrón no isquémico vs. Infarto = patrón isquémico.\n• Coronarias: Miocarditis = normales o sin lesiones significativas vs. Infarto = lesión coronaria."
+      },
+      {
+        tema: "Tema 6: Cardiomiopatías y Miocarditis",
+        subtema: "Miocarditis",
+        numero: 39,
+        pregunta: "¿Cuál es el manejo terapéutico de la miocarditis y qué papel tienen los antivirales y la inmunosupresión?",
+        respuesta: "• Soporte: tratamiento de IC, soporte hemodinámico según gravedad, control de arritmias y manejo en 3er nivel si es moderada-grave o fulminante.\n• Antivirales: la miocarditis viral habitual NO recibe antivirales de rutina (solo en casos seleccionados con etiología demostrada).\n• Inmunosupresión: en etiologías específicas (lupus, células gigantes, eosinofílica, sarcoidosis); usar ciclofosfamida si está asociada a lupus."
+      }
+    ];
+
+    const TOPIC_SHORT_LABELS = {
+      "Tema 3: Insuficiencia Cardiaca Crónica y Aguda": "1. Insuficiencia Cardiaca",
+      "Tema 4: Cor Pulmonale Crónico": "2. Cor Pulmonale",
+      "Tema 5: Síndrome Cardiorrenal": "3. Síndrome Cardiorrenal",
+      "Tema 6: Cardiomiopatías y Miocarditis": "4. Cardiomiopatías"
+    };
+
+    const CARDIO3_PAIRS = cardiologiaDia3.map((item, index) => {
+      const shortTopic = TOPIC_SHORT_LABELS[item.tema] || item.tema;
+      return {
+        id: `c3_${index + 1}`,
+        topic: shortTopic,
+        fullTema: item.tema,
+        cat: `${shortTopic.replace(/^\d+\.\s*/, '')}: ${item.subtema}`,
+        left: item.pregunta,
+        right: item.respuesta
+      };
+    });
+
+    const game = {
+      xp: 0,
+      mastered: [],
+      mistakes: [],
+      selectedTopic: 'ALL',
+      currentCat: null,
+
+      ankiDeck: [],
+      ankiIndex: 0,
+      ankiFlipped: false,
+
+      matchPairs: [],
+      matchLeftOrder: [],
+      matchRightOrder: [],
+      matchSelLeft: null,
+      matchMatchedIds: [],
+      matchCombo: 0,
+      matchErrorFlash: false,
+
+      memoCards: [],
+      memoFlipped: [],
+      memoMatched: [],
+      memoMoves: 0,
+      memoLocked: false,
+
+      canvas: null,
+      ctx: null,
+      rafId: null,
+      shooterActive: false,
+      shooterSpeed: 'comfortable',
+      shooterQueue: [],
+      shooterIndex: 0,
+      shield: 100,
+      enemy: null,
+      turrets: [],
+      lasers: [],
+      particles: [],
+      stars: [],
+      feedbackMsg: '',
+      feedbackColor: '#f43f5e',
+      feedbackTimer: 0,
+
+      bossName: '',
+      bossHp: 100,
+      bossMaxHp: 100,
+      playerHp: 100,
+      bossQueue: [],
+      bossIdx: 0,
+      bossOptions: [],
+      bossAnswered: false,
+      bossLog: '',
+      bossTimer: 25,
+      bossTimerId: null,
+
+      init() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('cardiodefensa_c3_only_v1') || '{}');
+          if (typeof saved.xp === 'number') this.xp = saved.xp;
+          if (Array.isArray(saved.mastered)) this.mastered = saved.mastered;
+          if (Array.isArray(saved.mistakes)) this.mistakes = saved.mistakes;
+        } catch (e) {}
+        this.updateHUD();
+        this.showMenu();
+      },
+
+      saveProgress() {
+        try {
+          localStorage.setItem('cardiodefensa_c3_only_v1', JSON.stringify({
+            xp: this.xp,
+            mastered: this.mastered,
+            mistakes: this.mistakes
+          }));
+        } catch (e) {}
+        this.updateHUD();
+      },
+
+      updateHUD() {
+        const xpEl = document.getElementById('hud-xp');
+        const mEl = document.getElementById('hud-mastered');
+        const eEl = document.getElementById('hud-mistakes');
+        if (xpEl) xpEl.textContent = this.xp;
+        if (mEl) mEl.textContent = `${this.mastered.length}/${CARDIO3_PAIRS.length}`;
+        if (eEl) eEl.textContent = this.mistakes.length;
+      },
+
+      markMastered(id, bonus = 15) {
+        if (!this.mastered.includes(id)) this.mastered.push(id);
+        this.mistakes = this.mistakes.filter(m => m !== id);
+        this.xp += bonus;
+        this.saveProgress();
+      },
+
+      markMistake(id) {
+        if (!this.mistakes.includes(id)) this.mistakes.push(id);
+        this.saveProgress();
+      },
+
+      stopTimers() {
+        this.shooterActive = false;
+        if (this.rafId) {
+          cancelAnimationFrame(this.rafId);
+          this.rafId = null;
+        }
+        if (this.bossTimerId) {
+          clearInterval(this.bossTimerId);
+          this.bossTimerId = null;
+        }
+      },
+
+      shuffle(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      },
+
+      escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      },
+
+      getPairsByCat(cat) {
+        if (cat === 'ALL_MISTAKES') return CARDIO3_PAIRS.filter(p => this.mistakes.includes(p.id));
+        if (cat === 'ALL_CARDS') return [...CARDIO3_PAIRS];
+        return CARDIO3_PAIRS.filter(p => p.cat === cat);
+      },
+
+      getDistractors(pair, count = 3) {
+        let pool = CARDIO3_PAIRS.filter(p => p.id !== pair.id && p.topic === pair.topic);
+        if (pool.length < count) pool = CARDIO3_PAIRS.filter(p => p.id !== pair.id);
+        return this.shuffle(pool).slice(0, count);
+      },
+
+      selectTopic(topic) {
+        sfx.click();
+        this.selectedTopic = topic;
+        this.showMenu();
+      },
+
+      showMenu() {
+        this.stopTimers();
+        const root = document.getElementById('game-root');
+
+        const topics = ['ALL', ...new Set(CARDIO3_PAIRS.map(p => p.topic))];
+        const topicLabels = {};
+        topics.forEach(t => {
+          topicLabels[t] = t === 'ALL'
+            ? `Todos (${CARDIO3_PAIRS.length})`
+            : `${t} (${CARDIO3_PAIRS.filter(p => p.topic === t).length})`;
+        });
+
+        const visiblePairs = this.selectedTopic === 'ALL'
+          ? CARDIO3_PAIRS
+          : CARDIO3_PAIRS.filter(p => p.topic === this.selectedTopic);
+
+        const cats = [...new Set(visiblePairs.map(p => p.cat))];
+        const doneTotal = this.mastered.length;
+        const pctTotal = Math.round((doneTotal / CARDIO3_PAIRS.length) * 100);
+
+        const tabsHtml = topics.map(t => {
+          const active = this.selectedTopic === t;
+          return `<button onclick="game.selectTopic('${t}')" class="btn-arcade px-3 py-2 rounded-xl text-xs font-arcade font-bold uppercase tracking-wide border ${
+            active
+              ? 'bg-rose-500 text-white border-rose-300'
+              : 'bg-slate-900/90 text-slate-300 border-slate-700 hover:border-rose-500/50'
+          }">${topicLabels[t]}</button>`;
+        }).join('');
+
+        const cardsHtml = cats.map((cat, idx) => {
+          const items = CARDIO3_PAIRS.filter(p => p.cat === cat);
+          const done = items.filter(p => this.mastered.includes(p.id)).length;
+          const pct = Math.round((done / items.length) * 100);
+          const safeCat = cat.replace(/'/g, "\\'");
+          return `
+            <div class="arcade-panel rounded-2xl p-4 flex flex-col justify-between gap-3 pop-in">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <span class="font-mono-code text-[11px] text-rose-300 uppercase">${items[0].topic} • Nivel ${idx + 1}</span>
+                  <span class="font-mono-code text-xs font-bold ${pct === 100 ? 'text-emerald-400' : 'text-slate-300'}">${done}/${items.length} (${pct}%)</span>
+                </div>
+                <h3 class="font-arcade text-base font-bold text-white leading-snug">${this.escapeHtml(cat)}</h3>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-2">
+                  <div class="h-full bg-gradient-to-r from-rose-400 to-amber-400 transition-all duration-300" style="width:${pct}%"></div>
+                </div>
+              </div>
+              <div class="grid grid-cols-5 gap-1.5 pt-1">
+                <button onclick="game.startAnki('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/40 text-indigo-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>🃏</span><span>Anki</span>
+                </button>
+                <button onclick="game.startMatch('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/40 text-amber-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>⚡</span><span>Pares</span>
+                </button>
+                <button onclick="game.startMemo('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/40 text-emerald-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>🧠</span><span>Memo</span>
+                </button>
+                <button onclick="game.startShooter('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/40 text-cyan-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>🚀</span><span>Nave</span>
+                </button>
+                <button onclick="game.startBoss('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/40 text-rose-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>👾</span><span>Jefe</span>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        const mistakesBanner = this.mistakes.length > 0 ? `
+          <div class="arcade-panel rounded-2xl p-4 border-rose-500/40 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p class="font-arcade text-sm font-bold text-rose-300 uppercase">Repaso de Fallos Pendientes (${this.mistakes.length})</p>
+              <p class="text-xs text-slate-400">Refuerza únicamente las tarjetas que has fallado para dejarlas en verde.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="game.startAnki('ALL_MISTAKES')" class="btn-arcade px-3 py-2 rounded-xl bg-rose-500/25 border border-rose-400/50 text-rose-200 text-xs font-bold">🃏 Repasar en Anki</button>
+              <button onclick="game.startBoss('ALL_MISTAKES')" class="btn-arcade px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">👾 Jefe de Fallos</button>
+            </div>
+          </div>
+        ` : '';
+
+        root.innerHTML = `
+          <div class="space-y-5">
+            <div class="arcade-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="space-y-1">
+                <h2 class="font-arcade text-xl sm:text-2xl font-bold text-white uppercase">Cardiología 3 • Día 3 ENARM</h2>
+                <p class="text-xs sm:text-sm text-slate-300">Domina las <strong>${CARDIO3_PAIRS.length} tarjetas completas</strong>: Insuficiencia Cardiaca (74), Cor Pulmonale (18), Síndrome Cardiorrenal (16) y Cardiomiopatías/Miocarditis (39) en 5 modos.</p>
+              </div>
+              <div class="sm:w-56 shrink-0">
+                <div class="flex justify-between font-mono-code text-xs mb-1">
+                  <span class="text-slate-400">Progreso Módulo 3</span>
+                  <span class="text-emerald-400 font-bold">${doneTotal}/${CARDIO3_PAIRS.length} (${pctTotal}%)</span>
+                </div>
+                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700">
+                  <div class="h-full bg-gradient-to-r from-rose-400 to-amber-400" style="width:${pctTotal}%"></div>
+                </div>
+              </div>
+            </div>
+
+            ${mistakesBanner}
+
+            <div class="flex flex-wrap gap-2">
+              ${tabsHtml}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${cardsHtml}
+            </div>
+          </div>
+        `;
+      },
+
+      startAnki(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        this.ankiDeck = this.shuffle(this.getPairsByCat(cat)); this.ankiIndex = 0; this.ankiFlipped = false;
+        this.renderAnki();
+      },
+
+      renderAnki() {
+        const root = document.getElementById('game-root');
+        if (!this.ankiDeck.length) { this.showMenu(); return; }
+        if (this.ankiIndex >= this.ankiDeck.length) {
+          root.innerHTML = `
+            <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+              <div class="text-5xl">🏆</div>
+              <h2 class="font-arcade text-2xl font-bold text-emerald-400 uppercase">¡Ronda Anki Completada!</h2>
+              <p class="text-sm text-slate-300">Has repasado todas las tarjetas de <strong>${this.escapeHtml(this.currentCat)}</strong>.</p>
+              <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="game.startAnki('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-indigo-500 text-white font-bold text-sm">Repetir Ronda</button>
+                <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        const card = this.ankiDeck[this.ankiIndex];
+        root.innerHTML = `
+          <div class="max-w-2xl mx-auto w-full space-y-4 pop-in">
+            <div class="flex items-center justify-between">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-mono-code text-xs text-rose-300">${this.escapeHtml(card.cat)}</span>
+              <span class="font-mono-code text-xs text-slate-400">Tarjeta ${this.ankiIndex + 1} / ${this.ankiDeck.length}</span>
+            </div>
+            <div onclick="game.flipAnki()" class="arcade-panel rounded-2xl p-6 sm:p-8 min-h-[280px] flex flex-col justify-between cursor-pointer border-rose-500/40 hover:border-amber-400/60 transition">
+              <div class="flex justify-between items-center text-[11px] font-mono-code text-slate-400">
+                <span>${this.ankiFlipped ? 'RESPUESTA CLÍNICA' : 'PREGUNTA'}</span>
+                <span class="text-rose-300">Toca para voltear</span>
+              </div>
+              <div class="my-6 space-y-4">
+                <p class="text-lg sm:text-xl font-bold text-white leading-relaxed">${this.escapeHtml(card.left)}</p>
+                ${this.ankiFlipped ? `<div class="pt-4 border-t border-slate-700/80"><p class="text-base sm:text-lg text-emerald-300 leading-relaxed font-medium whitespace-pre-line">${this.escapeHtml(card.right)}</p></div>` : `<p class="text-xs text-slate-400 italic pt-2">Piensa tu respuesta y haz clic en la tarjeta para verificar...</p>`}
+              </div>
+              <div class="text-right font-mono-code text-[11px] text-slate-500">ID: ${card.id}</div>
+            </div>
+            ${this.ankiFlipped ? `
+              <div class="grid grid-cols-2 gap-3">
+                <button onclick="game.answerAnki(false)" class="btn-arcade py-3.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-500/60 text-rose-200 font-arcade font-bold text-sm">🔁 Otra vez (Repasar)</button>
+                <button onclick="game.answerAnki(true)" class="btn-arcade py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-arcade font-bold text-sm">✅ ¡Me la sé! (+15 XP)</button>
+              </div>
+            ` : `<button onclick="game.flipAnki()" class="btn-arcade w-full py-3.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-arcade font-bold text-sm">Mostrar Respuesta</button>`}
+          </div>
+        `;
+      },
+
+      flipAnki() { sfx.click(); this.ankiFlipped = !this.ankiFlipped; this.renderAnki(); },
+      answerAnki(known) {
+        const card = this.ankiDeck[this.ankiIndex];
+        if (known) { sfx.hit(); this.markMastered(card.id, 15); }
+        else { sfx.boom(); this.markMistake(card.id); this.ankiDeck.push(card); }
+        this.ankiIndex++; this.ankiFlipped = false; this.renderAnki();
+      },
+
+      startMatch(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        const pool = this.shuffle(this.getPairsByCat(cat)).slice(0, 5);
+        this.matchPairs = pool; this.matchLeftOrder = this.shuffle(pool); this.matchRightOrder = this.shuffle(pool);
+        this.matchSelLeft = null; this.matchMatchedIds = []; this.matchCombo = 0;
+        this.renderMatch();
+      },
+
+      renderMatch() {
+        const root = document.getElementById('game-root');
+        if (this.matchMatchedIds.length === this.matchPairs.length) {
+          root.innerHTML = `
+            <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+              <div class="text-5xl">⚡</div>
+              <h2 class="font-arcade text-2xl font-bold text-amber-400 uppercase">¡Tablero Conectado!</h2>
+              <p class="text-sm text-slate-300">Combo final: <strong>x${this.matchCombo}</strong> en <strong>${this.escapeHtml(this.currentCat)}</strong>.</p>
+              <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="game.startMatch('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm">Siguiente Tablero</button>
+                <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        const leftHtml = this.matchLeftOrder.map(p => {
+          const done = this.matchMatchedIds.includes(p.id); const sel = this.matchSelLeft === p.id;
+          return `<button ${done ? 'disabled' : ''} onclick="game.selectMatchLeft('${p.id}')" class="w-full text-left p-3 rounded-xl border text-xs sm:text-sm leading-snug transition ${done ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400/50 line-through opacity-50' : sel ? 'bg-rose-500/25 border-rose-400 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-900/90 border-slate-700 text-slate-200 hover:border-rose-500/60'}">${this.escapeHtml(p.left)}</button>`;
+        }).join('');
+        const rightHtml = this.matchRightOrder.map(p => {
+          const done = this.matchMatchedIds.includes(p.id);
+          return `<button ${done ? 'disabled' : ''} onclick="game.selectMatchRight('${p.id}')" class="w-full text-left p-3 rounded-xl border text-xs sm:text-sm leading-snug whitespace-pre-line transition ${done ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400/50 line-through opacity-50' : 'bg-slate-900/90 border-slate-700 text-emerald-200 hover:border-amber-400/70'}">${this.escapeHtml(p.right)}</button>`;
+        }).join('');
+        root.innerHTML = `
+          <div class="space-y-4 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-arcade text-sm text-amber-400 uppercase">⚡ Conecta-Pares • ${this.escapeHtml(this.currentCat)}</span>
+              <span class="font-mono-code text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">Combo x${this.matchCombo}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 ${this.matchErrorFlash ? 'animate-shake' : ''}">
+              <div class="space-y-2.5"><div class="font-mono-code text-[11px] text-rose-300 uppercase">Preguntas</div>${leftHtml}</div>
+              <div class="space-y-2.5"><div class="font-mono-code text-[11px] text-emerald-400 uppercase">Respuestas</div>${rightHtml}</div>
+            </div>
+          </div>
+        `;
+        this.matchErrorFlash = false;
+      },
+
+      selectMatchLeft(id) { sfx.click(); this.matchSelLeft = id; this.renderMatch(); },
+      selectMatchRight(id) {
+        if (!this.matchSelLeft) return;
+        if (this.matchSelLeft === id) { sfx.hit(); this.matchMatchedIds.push(id); this.matchCombo++; this.markMastered(id, 10 + this.matchCombo * 2); this.matchSelLeft = null; }
+        else { sfx.boom(); this.matchCombo = 0; this.matchErrorFlash = true; this.markMistake(this.matchSelLeft); this.matchSelLeft = null; }
+        this.renderMatch();
+      },
+
+      startMemo(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        const chosen = this.shuffle(this.getPairsByCat(cat)).slice(0, 6);
+        const deck = [];
+        chosen.forEach(p => { deck.push({ uid: p.id + '_L', pairId: p.id, side: 'P', text: p.left }); deck.push({ uid: p.id + '_R', pairId: p.id, side: 'R', text: p.right }); });
+        this.memoCards = this.shuffle(deck); this.memoFlipped = []; this.memoMatched = []; this.memoMoves = 0; this.memoLocked = false;
+        this.renderMemo();
+      },
+
+      renderMemo() {
+        const root = document.getElementById('game-root');
+        const totalPairs = this.memoCards.length / 2;
+        if (this.memoMatched.length === totalPairs && totalPairs > 0) {
+          root.innerHTML = `
+            <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+              <div class="text-5xl">🧠</div>
+              <h2 class="font-arcade text-2xl font-bold text-emerald-400 uppercase">¡Memorama Completado!</h2>
+              <p class="text-sm text-slate-300">Encontraste las ${totalPairs} parejas en <strong>${this.memoMoves} intentos</strong>.</p>
+              <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="game.startMemo('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-sm">Jugar Otro Memorama</button>
+                <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        const gridHtml = this.memoCards.map((c, idx) => {
+          const isMatched = this.memoMatched.includes(c.pairId);
+          const isOpen = isMatched || this.memoFlipped.includes(idx);
+          return `<button onclick="game.flipMemo(${idx})" class="min-h-[120px] p-3 rounded-xl border text-left transition flex flex-col justify-between ${isMatched ? 'bg-emerald-950/60 border-emerald-400/60 text-emerald-200' : isOpen ? (c.side === 'P' ? 'bg-rose-950/80 border-rose-400 text-white' : 'bg-amber-950/70 border-amber-400 text-amber-100') : 'bg-slate-900 border-slate-700 hover:border-rose-500/60 items-center justify-center'}">${isOpen ? `<span class="font-mono-code text-[10px] uppercase ${c.side === 'P' ? 'text-rose-300' : 'text-amber-300'}">${c.side === 'P' ? 'Pregunta' : 'Respuesta'}</span><span class="text-[11px] sm:text-xs leading-snug mt-1 whitespace-pre-line">${this.escapeHtml(c.text)}</span>` : `<span class="text-2xl opacity-70">🫀</span><span class="font-mono-code text-[10px] text-slate-500 mt-1">Voltear</span>`}</button>`;
+        }).join('');
+        root.innerHTML = `
+          <div class="space-y-4 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-arcade text-sm text-emerald-400 uppercase">🧠 Memorama • ${this.escapeHtml(this.currentCat)}</span>
+              <span class="font-mono-code text-xs text-slate-300">Parejas: ${this.memoMatched.length}/${totalPairs} • Intentos: ${this.memoMoves}</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">${gridHtml}</div>
+          </div>
+        `;
+      },
+
+      flipMemo(idx) {
+        if (this.memoLocked) return;
+        const card = this.memoCards[idx];
+        if (this.memoMatched.includes(card.pairId) || this.memoFlipped.includes(idx)) return;
+        sfx.click(); this.memoFlipped.push(idx); this.renderMemo();
+        if (this.memoFlipped.length === 2) {
+          this.memoMoves++; this.memoLocked = true;
+          const [i1, i2] = this.memoFlipped; const c1 = this.memoCards[i1]; const c2 = this.memoCards[i2];
+          if (c1.pairId === c2.pairId && c1.side !== c2.side) { sfx.hit(); this.memoMatched.push(c1.pairId); this.markMastered(c1.pairId, 20); this.memoFlipped = []; this.memoLocked = false; this.renderMemo(); }
+          else { setTimeout(() => { this.memoFlipped = []; this.memoLocked = false; this.renderMemo(); }, 1300); }
+        }
+      },
+
+      startShooter(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        this.shooterQueue = this.shuffle(this.getPairsByCat(cat)); this.shooterIndex = 0; this.shield = 100;
+        this.lasers = []; this.particles = []; this.feedbackMsg = ''; this.feedbackTimer = 0; this.shooterActive = true;
+        const root = document.getElementById('game-root');
+        root.innerHTML = `
+          <div class="space-y-3 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-arcade text-sm text-rose-300 uppercase">🚀 Defensa Láser • ${this.escapeHtml(cat)}</span>
+              <div class="flex items-center gap-2">
+                <button onclick="game.setShooterSpeed('slow')" id="btn-spd-slow" class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ${this.shooterSpeed === 'slow' ? 'bg-emerald-500 text-slate-950 border-emerald-300' : 'bg-slate-900 text-slate-300 border-slate-700'}">🐢 LENTO</button>
+                <button onclick="game.setShooterSpeed('comfortable')" id="btn-spd-comf" class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ${this.shooterSpeed === 'comfortable' ? 'bg-rose-500 text-white border-rose-300' : 'bg-slate-900 text-slate-300 border-slate-700'}">🚀 CÓMODO</button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between font-mono-code text-xs px-1">
+              <span id="shooter-progress" class="text-slate-300">Nave 1 / ${this.shooterQueue.length}</span>
+              <span id="shooter-shield" class="text-emerald-400 font-bold">Escudo: 100%</span>
+            </div>
+            <div class="arcade-panel rounded-2xl p-2"><canvas id="shooter-canvas"></canvas></div>
+            <div id="shooter-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+          </div>
+        `;
+        this.canvas = document.getElementById('shooter-canvas'); this.ctx = this.canvas.getContext('2d'); this.resizeCanvas();
+        this.stars = Array.from({ length: 45 }, () => ({ x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height, r: Math.random() * 1.6 + 0.5, vy: Math.random() * 0.4 + 0.15 }));
+        this.spawnEnemy(); this.shooterLoop();
+      },
+
+      setShooterSpeed(spd) {
+        sfx.click(); this.shooterSpeed = spd;
+        if (this.enemy) this.enemy.vy = spd === 'slow' ? 0.18 : 0.34;
+        const bSlow = document.getElementById('btn-spd-slow'); const bComf = document.getElementById('btn-spd-comf');
+        if (bSlow && bComf) {
+          bSlow.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border ${spd === 'slow' ? 'bg-emerald-500 text-slate-950 border-emerald-300' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
+          bComf.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border ${spd === 'comfortable' ? 'bg-rose-500 text-white border-rose-300' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
+        }
+      },
+
+      resizeCanvas() {
+        if (!this.canvas || !this.canvas.parentElement) return;
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        this.canvas.width = Math.max(300, Math.floor(rect.width - 16)); this.canvas.height = 360;
+        if (this.enemy) this.enemy.x = this.canvas.width / 2;
+        if (this.turrets && this.turrets.length === 4) this.turrets.forEach((t, idx) => { t.x = (this.canvas.width / 4) * idx + (this.canvas.width / 8); });
+      },
+
+      spawnEnemy() {
+        if (this.shooterIndex >= this.shooterQueue.length || this.shield <= 0) { this.finishShooter(); return; }
+        const pair = this.shooterQueue[this.shooterIndex]; const w = this.canvas ? this.canvas.width : 640;
+        this.enemy = { pair, x: w / 2, y: 58, vy: this.shooterSpeed === 'slow' ? 0.18 : 0.34, pulse: 0 };
+        const distractors = this.getDistractors(pair, 3);
+        const options = this.shuffle([{ text: pair.right, correct: true }, ...distractors.map(d => ({ text: d.right, correct: false }))]);
+        this.turrets = options.map((opt, idx) => ({ idx, text: opt.text, correct: opt.correct, x: (w / 4) * idx + (w / 8), y: 318 }));
+        const progEl = document.getElementById('shooter-progress'); const shEl = document.getElementById('shooter-shield');
+        if (progEl) progEl.textContent = `Nave ${this.shooterIndex + 1} / ${this.shooterQueue.length}`;
+        if (shEl) { shEl.textContent = `Escudo: ${this.shield}%`; shEl.className = `font-bold ${this.shield > 50 ? 'text-emerald-400' : this.shield > 25 ? 'text-amber-400' : 'text-rose-400'}`; }
+        const btnBox = document.getElementById('shooter-buttons');
+        if (btnBox) {
+          const labels = ['A', 'B', 'C', 'D'];
+          btnBox.innerHTML = this.turrets.map((t, idx) => `<button onclick="game.fireTurret(${idx})" class="btn-arcade text-left p-3 rounded-xl bg-slate-900/95 hover:bg-slate-800 border border-rose-500/35 hover:border-rose-400 text-xs sm:text-sm text-slate-100 flex items-start gap-2.5 leading-snug whitespace-pre-line"><span class="shrink-0 w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-400/50 text-rose-300 font-arcade font-bold flex items-center justify-center text-xs">${labels[idx]}</span><span>${this.escapeHtml(t.text)}</span></button>`).join('');
+        }
+      },
+
+      fireTurret(idx) {
+        if (!this.shooterActive || !this.enemy || !this.turrets[idx]) return;
+        const turret = this.turrets[idx]; sfx.laser();
+        this.lasers.push({ x: turret.x, y: turret.y - 12, tx: this.enemy.x, ty: this.enemy.y, progress: 0, color: turret.correct ? '#34d399' : '#f43f5e' });
+        if (turret.correct) {
+          sfx.hit(); this.spawnExplosion(this.enemy.x, this.enemy.y, '#34d399'); this.markMastered(this.enemy.pair.id, 20);
+          this.feedbackMsg = '¡IMPACTO DIRECTO! +20 XP'; this.feedbackColor = '#34d399'; this.feedbackTimer = 60;
+          this.shooterIndex++; this.enemy = null;
+          setTimeout(() => { if (this.shooterActive) this.spawnEnemy(); }, 320);
+        } else {
+          sfx.boom(); this.shield = Math.max(0, this.shield - 20); this.markMistake(this.enemy.pair.id);
+          this.spawnExplosion(turret.x, turret.y - 20, '#f43f5e');
+          this.feedbackMsg = '¡FALLO! -20% ESCUDO'; this.feedbackColor = '#f43f5e'; this.feedbackTimer = 60;
+          const shEl = document.getElementById('shooter-shield'); if (shEl) shEl.textContent = `Escudo: ${this.shield}%`;
+          if (this.shield <= 0) this.finishShooter();
+        }
+      },
+
+      spawnExplosion(x, y, color) {
+        for (let i = 0; i < 18; i++) {
+          const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 3.5 + 1;
+          this.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 28, color });
+        }
+      },
+
+      wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' '); let line = ''; const lines = [];
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          if (ctx.measureText(testLine).width > maxWidth && n > 0) { lines.push(line.trim()); line = words[n] + ' '; }
+          else { line = testLine; }
+        }
+        lines.push(line.trim());
+        const startY = y - ((lines.length - 1) * lineHeight) / 2;
+        lines.forEach((l, i) => ctx.fillText(l, x, startY + i * lineHeight));
+        return lines.length;
+      },
+
+      shooterLoop() {
+        if (!this.shooterActive || !this.ctx || !this.canvas) return;
+        const ctx = this.ctx; const w = this.canvas.width; const h = this.canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.55)';
+        this.stars.forEach(s => { s.y += s.vy; if (s.y > h) { s.y = 0; s.x = Math.random() * w; } ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill(); });
+        ctx.strokeStyle = this.shield > 40 ? 'rgba(52, 211, 153, 0.5)' : 'rgba(244, 63, 94, 0.7)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(16, h - 42); ctx.lineTo(w - 16, h - 42); ctx.stroke();
+        const tLabels = ['A', 'B', 'C', 'D'];
+        this.turrets.forEach((t, i) => {
+          ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(t.x, h - 22, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fecdd3'; ctx.font = 'bold 12px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(tLabels[i], t.x, h - 22);
+        });
+        if (this.enemy) {
+          this.enemy.y += this.enemy.vy;
+          const boxW = Math.min(w - 24, 560); ctx.font = 'bold 13px "Inter", sans-serif';
+          const words = this.enemy.pair.left.split(' '); let tmpLine = ''; let lineCount = 1;
+          for (let n = 0; n < words.length; n++) {
+            const test = tmpLine + words[n] + ' ';
+            if (ctx.measureText(test).width > boxW - 28 && n > 0) { lineCount++; tmpLine = words[n] + ' '; }
+            else { tmpLine = test; }
+          }
+          const boxH = Math.max(68, lineCount * 17 + 34); const bx = this.enemy.x - boxW / 2; const by = this.enemy.y - boxH / 2;
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.96)'; ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 2.5;
+          ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(bx, by, boxW, boxH, 12); else ctx.rect(bx, by, boxW, boxH); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fda4af'; ctx.font = 'bold 10px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(this.enemy.pair.cat.toUpperCase(), this.enemy.x, by + 15);
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 13px "Inter", sans-serif';
+          this.wrapCanvasText(ctx, this.enemy.pair.left, this.enemy.x, by + 24 + (boxH - 26) / 2, boxW - 28, 17);
+          if (this.enemy.y + boxH / 2 >= h - 42) {
+            sfx.boom(); this.shield = Math.max(0, this.shield - 25); this.markMistake(this.enemy.pair.id);
+            this.spawnExplosion(this.enemy.x, h - 46, '#f43f5e'); this.feedbackMsg = '¡IMPACTO EN ESCUDO! -25%'; this.feedbackColor = '#f43f5e'; this.feedbackTimer = 60;
+            this.shooterIndex++; this.enemy = null;
+            if (this.shield <= 0) { this.finishShooter(); return; }
+            setTimeout(() => { if (this.shooterActive) this.spawnEnemy(); }, 350);
+          }
+        }
+        this.lasers = this.lasers.filter(l => {
+          l.progress += 0.22; const cx = l.x + (l.tx - l.x) * l.progress; const cy = l.y + (l.ty - l.y) * l.progress;
+          ctx.strokeStyle = l.color; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.lineTo(cx, cy); ctx.stroke();
+          return l.progress < 1;
+        });
+        this.particles = this.particles.filter(p => {
+          p.x += p.vx; p.y += p.vy; p.life--; ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life / 28);
+          ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+          return p.life > 0;
+        });
+        if (this.feedbackTimer > 0) {
+          this.feedbackTimer--; ctx.fillStyle = this.feedbackColor; ctx.font = 'bold 14px "Chakra Petch", sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText(this.feedbackMsg, w / 2, 24);
+        }
+        this.rafId = requestAnimationFrame(() => this.shooterLoop());
+      },
+
+      finishShooter() {
+        this.stopTimers(); const won = this.shield > 0; const root = document.getElementById('game-root');
+        root.innerHTML = `
+          <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+            <div class="text-5xl">${won ? '🚀' : '💥'}</div>
+            <h2 class="font-arcade text-2xl font-bold ${won ? 'text-emerald-400' : 'text-rose-400'} uppercase">${won ? '¡Sector Defendido!' : 'Escudo Caído'}</h2>
+            <p class="text-sm text-slate-300">Escudo restante: <strong>${this.shield}%</strong> en <strong>${this.escapeHtml(this.currentCat)}</strong>.</p>
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+              <button onclick="game.startShooter('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-sm">Volver a Jugar</button>
+              <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+            </div>
+          </div>
+        `;
+      },
+
+      startBoss(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        this.bossQueue = this.shuffle(this.getPairsByCat(cat)); this.bossIdx = 0;
+        this.bossMaxHp = this.bossQueue.length * 100; this.bossHp = this.bossMaxHp; this.playerHp = 100;
+        this.bossLog = '¡El Jefe de Cardiología 3 ha aparecido! Responde en menos de 15s para golpe crítico.';
+        this.bossName = cat === 'ALL_MISTAKES' ? 'Tormenta de Fallos' : `Jefe: ${cat}`;
+        this.prepareBossTurn();
+      },
+
+      prepareBossTurn() {
+        if (this.bossTimerId) clearInterval(this.bossTimerId);
+        if (this.bossHp <= 0 || this.playerHp <= 0 || this.bossIdx >= this.bossQueue.length) { this.renderBossResult(); return; }
+        const pair = this.bossQueue[this.bossIdx]; const distractors = this.getDistractors(pair, 3);
+        this.bossOptions = this.shuffle([{ text: pair.right, correct: true }, ...distractors.map(d => ({ text: d.right, correct: false }))]);
+        this.bossAnswered = false; this.bossTimer = 25; this.renderBoss();
+        this.bossTimerId = setInterval(() => {
+          if (this.bossAnswered) return;
+          this.bossTimer--; const tEl = document.getElementById('boss-timer'); if (tEl) tEl.textContent = `${this.bossTimer}s`;
+          if (this.bossTimer <= 0) { clearInterval(this.bossTimerId); this.answerBoss(-1); }
+        }, 1000);
+      },
+
+      renderBoss() {
+        const root = document.getElementById('game-root'); const pair = this.bossQueue[this.bossIdx];
+        const bossPct = Math.max(0, Math.round((this.bossHp / this.bossMaxHp) * 100)); const labels = ['A', 'B', 'C', 'D'];
+        const optsHtml = this.bossOptions.map((opt, idx) => `<button ${this.bossAnswered ? 'disabled' : ''} onclick="game.answerBoss(${idx})" class="btn-arcade w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm leading-snug whitespace-pre-line flex items-start gap-2.5 ${this.bossAnswered ? (opt.correct ? 'bg-emerald-500/25 border-emerald-400 text-emerald-100' : 'bg-slate-900/60 border-slate-800 text-slate-500') : 'bg-slate-900/95 hover:bg-slate-800 border-rose-500/35 hover:border-amber-400 text-slate-100'}"><span class="shrink-0 w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-400/50 text-rose-300 font-arcade font-bold flex items-center justify-center text-xs">${labels[idx]}</span><span>${this.escapeHtml(opt.text)}</span></button>`).join('');
+        root.innerHTML = `
+          <div class="max-w-3xl mx-auto w-full space-y-4 pop-in">
+            <div class="flex items-center justify-between">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-mono-code text-xs text-slate-400">Turno ${this.bossIdx + 1} / ${this.bossQueue.length}</span>
+              <span id="boss-timer" class="font-mono-code text-sm font-bold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">${this.bossTimer}s</span>
+            </div>
+            <div class="arcade-panel rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 border-rose-500/40">
+              <div>
+                <div class="flex justify-between text-xs font-arcade font-bold mb-1"><span class="text-rose-400 uppercase">👾 ${this.escapeHtml(this.bossName)}</span><span class="text-rose-300">${this.bossHp} / ${this.bossMaxHp} HP</span></div>
+                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-rose-900"><div class="h-full bg-gradient-to-r from-rose-600 to-amber-500 transition-all duration-300" style="width:${bossPct}%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-arcade font-bold mb-1"><span class="text-emerald-400 uppercase">🛡️ Tu Escudo Cardíaco</span><span class="text-emerald-300">${this.playerHp} / 100 HP</span></div>
+                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-emerald-900"><div class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-300" style="width:${this.playerHp}%"></div></div>
+              </div>
+            </div>
+            <div class="text-center font-mono-code text-xs text-rose-300">${this.escapeHtml(this.bossLog)}</div>
+            <div class="arcade-panel rounded-2xl p-5"><p class="text-base sm:text-lg font-bold text-white leading-relaxed">${this.escapeHtml(pair.left)}</p></div>
+            <div class="space-y-2.5">${optsHtml}</div>
+            ${this.bossAnswered ? `<button onclick="game.nextBossTurn()" class="btn-arcade w-full py-3 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-arcade font-bold text-sm">Siguiente Turno →</button>` : ''}
+          </div>
+        `;
+      },
+
+      answerBoss(idx) {
+        if (this.bossAnswered) return;
+        this.bossAnswered = true; if (this.bossTimerId) clearInterval(this.bossTimerId);
+        const pair = this.bossQueue[this.bossIdx];
+        const isCorrect = idx >= 0 && this.bossOptions[idx] && this.bossOptions[idx].correct;
+        if (isCorrect) {
+          sfx.hit(); const crit = this.bossTimer >= 10; const dmg = crit ? 130 : 100;
+          this.bossHp = Math.max(0, this.bossHp - dmg); this.markMastered(pair.id, crit ? 25 : 15);
+          this.bossLog = crit ? `¡ATAQUE CRÍTICO (-${dmg} HP al Jefe)! +25 XP` : `¡Golpe certero (-${dmg} HP al Jefe)! +15 XP`;
+        } else {
+          sfx.boom(); this.playerHp = Math.max(0, this.playerHp - 25); this.markMistake(pair.id);
+          this.bossLog = idx === -1 ? '¡Se acabó el tiempo! El Jefe contraataca (-25 HP).' : '¡Respuesta incorrecta! El Jefe contraataca (-25 HP).';
+        }
+        this.renderBoss();
+      },
+
+      nextBossTurn() { sfx.click(); this.bossIdx++; this.prepareBossTurn(); },
+      renderBossResult() {
+        this.stopTimers(); const won = this.playerHp > 0; const root = document.getElementById('game-root');
+        root.innerHTML = `
+          <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+            <div class="text-5xl">${won ? '👑' : '💀'}</div>
+            <h2 class="font-arcade text-2xl font-bold ${won ? 'text-emerald-400' : 'text-rose-400'} uppercase">${won ? '¡Jefe Derrotado!' : 'Derrota Clínica'}</h2>
+            <p class="text-sm text-slate-300">${won ? 'Dominaste la batalla contra' : 'El jefe te superó en'} <strong>${this.escapeHtml(this.bossName)}</strong>.</p>
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+              <button onclick="game.startBoss('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-sm">Revancha</button>
+              <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+            </div>
+          </div>
+        `;
+      },
+
+      openAnkiModal() { sfx.click(); const m = document.getElementById('anki-modal'); if (m) m.classList.remove('hidden'); this.setAnkiExport(this.mistakes.length > 0 ? 'mistakes' : 'all'); },
+      closeAnkiModal() { sfx.click(); const m = document.getElementById('anki-modal'); if (m) m.classList.add('hidden'); const st = document.getElementById('anki-status'); if (st) st.classList.add('hidden'); },
+      setAnkiExport(mode) {
+        const list = mode === 'mistakes' ? CARDIO3_PAIRS.filter(p => this.mistakes.includes(p.id)) : CARDIO3_PAIRS;
+        const ta = document.getElementById('anki-textarea'); if (!ta) return;
+        ta.value = list.length ? list.map(p => `${p.left.replace(/;/g, ',')} ; ${p.right.replace(/\n/g, ' ').replace(/;/g, ',')}`).join('\n') : 'No tienes fallos registrados todavía.';
+      },
+      copyAnkiText() {
+        const ta = document.getElementById('anki-textarea'); const st = document.getElementById('anki-status'); if (!ta) return;
+        ta.select(); ta.setSelectionRange(0, 99999);
+        try { document.execCommand('copy'); sfx.hit(); if (st) st.classList.remove('hidden'); } catch (e) {}
+      }
+    };
+
+    window.addEventListener('resize', () => game.resizeCanvas());
+    window.addEventListener('keydown', (e) => {
+      if (game.shooterActive && ['1', '2', '3', '4'].includes(e.key)) game.fireTurret(parseInt(e.key, 10) - 1);
+      else if (game.bossQueue.length > 0 && !game.bossAnswered && document.getElementById('boss-timer') && ['1', '2', '3', '4'].includes(e.key)) game.answerBoss(parseInt(e.key, 10) - 1);
+      else if (game.ankiDeck.length > 0 && game.ankiIndex < game.ankiDeck.length && e.code === 'Space' && !game.shooterActive && !document.getElementById('boss-timer')) { e.preventDefault(); game.flipAnki(); }
+    });
+    window.onload = () => game.init();
+  </script>
+</body>
+</html>
