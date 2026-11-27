@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardioDefensa • Cardiología 2 (79 Tarjetas)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #070b14;
+      color: #f8fafc;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.09) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+    }
+    .font-arcade { font-family: 'Chakra Petch', sans-serif; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+    .arcade-panel {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 13, 24, 0.98) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .btn-arcade {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.55);
+    }
+    .btn-arcade:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pop-in { animation: popIn 0.22s ease-out forwards; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake { animation: shake 0.35s ease-in-out; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 360px;
+      border-radius: 0.75rem;
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-white">
+
+  <!-- Barra Superior HUD -->
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-purple-500/25 px-4 py-3">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="game.showMenu()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400 to-cyan-500 flex items-center justify-center text-slate-950 font-arcade font-bold text-xl shadow-lg shadow-purple-500/25">
+          ⚡
+        </div>
+        <div>
+          <h1 class="font-arcade text-lg sm:text-xl font-bold tracking-wider uppercase text-white leading-none">
+            CARDIO<span class="text-purple-400">DEFENSA</span>
+          </h1>
+          <span class="font-mono-code text-[11px] text-purple-300">Cardiología 2 • Arritmias (48) y Valvulopatías (31)</span>
+        </div>
+      </div>
+
+      <!-- Indicadores -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="index.html" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-arcade font-bold text-xs">
+          ← Agenda
+        </a>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-2 font-mono-code text-xs">
+          <span class="text-amber-400">★ XP:</span>
+          <span id="hud-xp" class="font-bold text-white">0</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-2 font-mono-code text-xs">
+          <span class="text-purple-300">Dominados:</span>
+          <span id="hud-mastered" class="font-bold text-emerald-400">0/79</span>
+        </div>
+        <button onclick="game.openAnkiModal()" class="btn-arcade px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 font-arcade font-bold text-xs flex items-center gap-1.5">
+          <span>Exportar Anki</span>
+          <span id="hud-mistakes" class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-mono-code text-[11px]">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Escenario Principal -->
+  <main id="game-root" class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 flex flex-col justify-start">
+    <!-- Renderizado dinámico -->
+  </main>
+
+  <!-- Modal Exportar Anki -->
+  <div id="anki-modal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="arcade-panel rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-arcade text-lg font-bold text-amber-400 uppercase">Exportar Cardiología 2 a Anki (Pregunta ; Respuesta)</h3>
+        <button onclick="game.closeAnkiModal()" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-sm">✕</button>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="game.setAnkiExport('mistakes')" class="px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/50 text-rose-300 text-xs font-bold">Solo Fallos</button>
+        <button onclick="game.setAnkiExport('all')" class="px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-500/50 text-purple-300 text-xs font-bold">Todo Cardiología 2 (79)</button>
+        <button onclick="game.copyAnkiText()" class="ml-auto px-4 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold">Copiar Texto</button>
+      </div>
+      <textarea id="anki-textarea" readonly rows="9" class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono-code text-xs text-slate-200 focus:outline-none"></textarea>
+      <p id="anki-status" class="text-xs text-emerald-400 hidden font-bold">¡Copiado al portapapeles! Importa en Anki separando por punto y coma (;).</p>
+    </div>
+  </div>
+
+  <!-- Pie -->
+  <footer class="border-t border-slate-900 py-3 px-4 text-center text-[11px] font-mono-code text-slate-500">
+    CardioDefensa • Módulo 2: Cardiología 2 (79 tarjetas: Arritmias y Valvulopatías)
+  </footer>
+
+  <script>
+    const sfx = {
+      ctx: null,
+      playTone(freq, type, duration, vol = 0.08) {
+        try {
+          if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      },
+      click() { this.playTone(540, 'triangle', 0.08, 0.06); },
+      laser() { this.playTone(880, 'sawtooth', 0.12, 0.07); },
+      hit()   { this.playTone(620, 'sine', 0.14, 0.09); setTimeout(() => this.playTone(930, 'sine', 0.18, 0.09), 70); },
+      boom()  { this.playTone(150, 'sawtooth', 0.28, 0.11); }
+    };
+
+    const CARDIO2_PAIRS = [
+      // ==================== MÓDULO I: ARRITMIAS Y TRASTORNOS DE LA CONDUCCIÓN (1–48) ====================
+      // 1. Generalidades y Bradiarritmias: Definición y Abordaje (Preguntas 1–7)
+      { id: 'c2_1', topic: 'Módulo I: Arritmias', cat: '1. Generalidades y Bradiarritmias (P1–7)', left: '¿Cómo se clasifican las arritmias supraventriculares y qué criterio anatómico las define?', right: 'Se clasifican en bradiarritmias y taquiarritmias, y abarcan cualquier ritmo originado proximal a la bifurcación del haz de His en sus ramas derecha e izquierda.' },
+      { id: 'c2_2', topic: 'Módulo I: Arritmias', cat: '1. Generalidades y Bradiarritmias (P1–7)', left: '¿Cómo se define bradiarritmia y cuál es su diferencia con la bradicardia clásica?', right: 'Bradiarritmia es cualquier frecuencia cardíaca menor a 50 latidos por minuto (< 50 lpm); la bradicardia clásica se define como una frecuencia cardíaca < 60 lpm.' },
+      { id: 'c2_3', topic: 'Módulo I: Arritmias', cat: '1. Generalidades y Bradiarritmias (P1–7)', left: '¿Cuáles son los 5 pasos iniciales de qué hacer ante una bradiarritmia?', right: '1) Identificar al paciente, 2) Revisar la frecuencia cardíaca (< 50 lpm), 3) Identificar el tipo de bloqueo, 4) Evaluar si está inestable y 5) Tratar inmediatamente.' },
+      { id: 'c2_4', topic: 'Módulo I: Arritmias', cat: '1. Generalidades y Bradiarritmias (P1–7)', left: '¿Cuál es la regla clave ante una bradicardia sintomática e inestable?', right: 'Bradicardia sintomática e inestable (< 50 lpm con síntomas) = tratar de inmediato.' },
+      { id: 'c2_5', topic: 'Módulo I: Arritmias', cat: '1. Generalidades y Bradiarritmias (P1–7)', left: '¿Cuáles son los 5 signos de inestabilidad (compromiso cardiopulmonar) en bradiarritmias?', right: 'Hipotensión, alteración aguda del estado mental, signos de choque, molestia o dolor torácico isquémico e insuficiencia cardíaca aguda.' },
+      { id: 'c2_6', topic: 'Módulo I: Arritmias', cat: '1. Generalidades y Bradiarritmias (P1–7)', left: '¿Cuál es el algoritmo general de manejo ante una FC < 50 lpm según la estabilidad?', right: 'Si SÍ está inestable: ir a manejo de bradicardia inestable. Si NO está inestable: ir a manejo de bradicardia estable (monitorizar, buscar y corregir la causa).' },
+      { id: 'c2_7', topic: 'Módulo I: Arritmias', cat: '1. Generalidades y Bradiarritmias (P1–7)', left: '¿Qué medidas diagnósticas y terapéutica general aplican en las bradiarritmias?', right: 'Diagnóstico: electrocardiograma (ECG), monitorización Holter, monitorización de asa prolongada y estudio electrofisiológico. Tratamiento obligatorio: siempre incluye el retiro de los factores precipitantes (buscar y tratar la causa reversible).' },
+
+      // 2. Manejo de Bradicardia Inestable, Estable y Causas Reversibles (Preguntas 8–13)
+      { id: 'c2_8', topic: 'Módulo I: Arritmias', cat: '2. Manejo Bradicardia y Causas (P8–13)', left: '¿Cuáles son las medidas iniciales (ABCD) en todo paciente con bradicardia inestable?', right: 'A (Vía aérea): permeable; B (Respiración): oxígeno si hay hipoxemia; C (Circulación): monitor cardíaco y presión arterial, acceso IV; D (Diagnóstico): tomar ECG de 12 derivaciones (si no retrasa el tratamiento).' },
+      { id: 'c2_9', topic: 'Módulo I: Arritmias', cat: '2. Manejo Bradicardia y Causas (P8–13)', left: '¿Qué es la atropina, cuál es su mecanismo de acción y su posología exacta?', right: 'Mecanismo: antagonista competitivo de receptores muscarínicos M2 que bloquea el efecto vagal (acetilcolina) sobre el nodo SA y AV, aumentando el automatismo sinusal, la conducción AV y la frecuencia cardíaca. Dosis: 1 mg IV en bolo, repetir cada 3 a 5 minutos, dosis máxima de 3 mg. Conducta: si responde → vigilar y tratar causa; si no responde → marcapasos o fármacos alternativos.' },
+      { id: 'c2_10', topic: 'Módulo I: Arritmias', cat: '2. Manejo Bradicardia y Causas (P8–13)', left: '¿Cuándo se indica marcapasos de forma TEMPRANA, cuál es su secuencia y qué advertencia aplica?', right: 'Indicaciones tempranas: Mobitz II, bloqueo AV avanzado, bloqueo AV completo (3.º grado) y bradicardia inestable refractaria a atropina. Secuencia: 1) Marcapasos transcutáneo (puente), 2) Marcapasos transvenoso temporal si persiste inestabilidad y 3) Valorar marcapasos permanente. Advertencia: en Mobitz II, bloqueo AV avanzado y completo no confiar en atropina; preparar marcapasos desde el inicio.' },
+      { id: 'c2_11', topic: 'Módulo I: Arritmias', cat: '2. Manejo Bradicardia y Causas (P8–13)', left: '¿Cuáles son los fármacos alternativos en infusión continua y su mecanismo de acción exacto?', right: 'Dopamina (agonista D1/beta-1): 5–20 mcg/kg/min IV en infusión continua (aumenta automatismo sinusal, conducción AV, contractilidad y PA). Adrenalina/epinefrina (agonista alfa y beta): 2–10 mcg/min IV en infusión continua (estimula receptores beta-1 en nodo SA/AV y alfa-1 vasoconstrictores).' },
+      { id: 'c2_12', topic: 'Módulo I: Arritmias', cat: '2. Manejo Bradicardia y Causas (P8–13)', left: '¿En qué consiste el manejo de la bradicardia estable y qué advertencia aplica en bloqueos altos?', right: 'Manejo: monitorización y observación, ECG seriados, Holter/monitorización ambulatoria si los síntomas son intermitentes, buscar y corregir la causa, y valoración por cardiología/electrofisiología. Advertencia: "estable" no significa mandarlo a casa; un Mobitz II, bloqueo AV avanzado o completo sigue siendo de alto riesgo y requiere evaluación urgente.' },
+      { id: 'c2_13', topic: 'Módulo I: Arritmias', cat: '2. Manejo Bradicardia y Causas (P8–13)', left: '¿Cuáles son las causas reversibles de bradicardia por categoría?', right: 'Cardíacas: isquemia miocárdica, IAM, miocarditis, enfermedad degenerativa, cirugía cardíaca, valvulopatías (EAo) e infiltrativas (amiloidosis, sarcoidosis). Fármacos/tóxicos: betabloqueadores, verapamilo, diltiazem, digoxina, amiodarona, ivabradina, litio, opioides, clonidina. Hipoxia: EPOC, neumonía, embolia pulmonar, apnea del sueño. Electrolíticas: hiperpotasemia, hipercalcemia, hipomagnesemia. Otras: hipotiroidismo, hipotermia, PIC elevada, Coxsackie o Lyme.' },
+
+      // 3. Disfunción del Nodo Sinusal (DNS) e Hipersensibilidad del Seno Carotídeo (Preguntas 14–21)
+      { id: 'c2_14', topic: 'Módulo I: Arritmias', cat: '3. Disfunción Nodo Sinusal y Seno Carotídeo (P14–21)', left: '¿Qué caracteriza a la bradicardia sinusal fisiológica y cuándo es frecuente?', right: 'Ritmo sinusal lento con FC < 60 lpm, frecuente durante el sueño y en atletas entrenados.' },
+      { id: 'c2_15', topic: 'Módulo I: Arritmias', cat: '3. Disfunción Nodo Sinusal y Seno Carotídeo (P14–21)', left: '¿Cómo regula el sistema nervioso autónomo la frecuencia del nódulo sinoauricular (SA)?', right: 'El parasimpático (nervios vagos) disminuye la frecuencia del marcapasos SA y domina en reposo; el simpático y las catecolaminas de la médula suprarrenal aumentan la frecuencia sinusal durante el ejercicio y el estrés.' },
+      { id: 'c2_16', topic: 'Módulo I: Arritmias', cat: '3. Disfunción Nodo Sinusal y Seno Carotídeo (P14–21)', left: '¿Cómo se define la Disfunción del Nodo Sinusal (DNS), cuál es su causa más común y qué otras etiologías la provocan?', right: 'Definición: anomalías en el ECG asociadas con signos y síntomas clínicos por disfunción del nodo SA que provoca formación o propagación inadecuada del impulso auricular (trastornos de automaticidad, conducción o ambos). Causa más común: senescencia y fibrosis del nódulo sinusal y miocardio auricular circundante. Otras causas: medicamentos, toxinas y enfermedades sistémicas.' },
+      { id: 'c2_17', topic: 'Módulo I: Arritmias', cat: '3. Disfunción Nodo Sinusal y Seno Carotídeo (P14–21)', left: '¿Cuál es el perfil clínico, historia natural y riesgos evolutivos de la DNS?', right: 'Perfil: pacientes mayores (7.ª u 8.ª década de la vida) con enfermedades comórbidas frecuentes. Historia natural y pronóstico: trastornos intermitentes pero progresivos que evolucionan con el tiempo, asociándose con mayor probabilidad de eventos tromboembólicos, tasas más altas de otros eventos cardiovasculares y mayor mortalidad.' },
+      { id: 'c2_18', topic: 'Módulo I: Arritmias', cat: '3. Disfunción Nodo Sinusal y Seno Carotídeo (P14–21)', left: '¿Cuáles son los síntomas y los hallazgos típicos en el ECG de la DNS?', right: 'Síntomas (inespecíficos, intermitentes y progresivos): fatiga, mareos, palpitaciones, presíncope, síncope, disnea de esfuerzo o angina. Hallazgos en ECG (5 alteraciones): 1) Bradicardia sinusal (o inapropiada), 2) Pausas, paro o arresto sinusal, 3) Bloqueo de salida SA, 4) Incompetencia cronotrópica y 5) Síndrome bradicardia-taquicardia.' },
+      { id: 'c2_19', topic: 'Módulo I: Arritmias', cat: '3. Disfunción Nodo Sinusal y Seno Carotídeo (P14–21)', left: '¿Cuál es la clave diagnóstica de la DNS y qué estudio se indica si el ECG inicial no es diagnóstico?', right: 'No existen criterios estandarizados; las pistas iniciales vienen de la historia clínica y la clave es establecer una correlación entre los síntomas y el ritmo subyacente en el momento exacto de los síntomas. Si el ECG inicial no es diagnóstico, se indica monitorización ambulatoria del ECG (monitor de eventos ambulatorios durante 2 a 4 semanas).' },
+      { id: 'c2_20', topic: 'Módulo I: Arritmias', cat: '3. Disfunción Nodo Sinusal y Seno Carotídeo (P14–21)', left: '¿Cuándo se indica marcapasos permanente en la DNS y de qué depende su selección y programación?', right: 'Asintomáticos: no se requiere marcapasos permanente. Sintomáticos con bradicardia documentada: se recomienda implantación de marcapasos permanente. Selección y programación dependen de 4 factores: 1) Anomalías de conducción AV, 2) Arritmias auriculares, 3) Deseo de mantener sincronía AV y 4) Necesidad de respuesta en frecuencia.' },
+      { id: 'c2_21', topic: 'Módulo I: Arritmias', cat: '3. Disfunción Nodo Sinusal y Seno Carotídeo (P14–21)', left: '¿Qué es la hipersensibilidad del seno carotídeo y cuál es su mecanismo fisiopatológico?', right: 'Respuesta exagerada del reflejo del seno carotídeo ante su estimulación: produce aumento de la descarga vagal (disminuye frecuencia cardíaca) y disminución del tono simpático (vasodilatación que disminuye presión arterial).' },
+
+      // 4. Bloqueo Auriculoventricular (BAV) y Bloqueos de Rama (Preguntas 22–26)
+      { id: 'c2_22', topic: 'Módulo I: Arritmias', cat: '4. Bloqueo AV y Bloqueos de Rama (P22–26)', left: '¿Qué es el bloqueo auriculoventricular (BAV) y qué caracteriza a cada uno de sus 3 grados?', right: '1.º grado: todas las P conducen con PR > 0.20 s (200 ms) sin bloqueo; origen nodo AV; benigno. 2.º grado Mobitz I (Wenckebach): el PR se alarga progresivamente hasta que una P no conduce; origen nodo AV (tono vagal); buen pronóstico. 2.º grado Mobitz II: PR constante antes y después de una P bloqueada súbitamente; origen His-Purkinje (infranodal); mal pronóstico. 3.º grado (completo): ninguna P conduce, disociación AV completa con escape ventricular; grave, requiere marcapasos.' },
+      { id: 'c2_23', topic: 'Módulo I: Arritmias', cat: '4. Bloqueo AV y Bloqueos de Rama (P22–26)', left: '¿Cómo es la epidemiología, factores de riesgo y etiología del BAV?', right: 'Prevalencia: 1.º grado hasta 5% en adultos mayores; 2.º grado 2.7% en cardiopatía estructural; 3.º grado raro (> 50 años; congénito 1 en 15,000 a 25,000 nacimientos). Factores de riesgo: cardiopatía isquémica, valvulopatías, betabloqueadores e hipercalemia. Etiología: adquirida (fibrosis progresiva, isquemia, valvulopatías), congénita o inducida (digoxina, trastornos metabólicos).' },
+      { id: 'c2_24', topic: 'Módulo I: Arritmias', cat: '4. Bloqueo AV y Bloqueos de Rama (P22–26)', left: '¿Cuál es la clínica, diagnóstico y tratamiento del BAV?', right: 'Clínica: asintomáticos o fatiga, mareos, síncope, IC o ritmo idioventricular. Diagnóstico: ECG, Holter y estudios electrofisiológicos. Manejo: tratar condiciones subyacentes (hipercalemia) y suspender fármacos causales. Marcapasos permanente: BAV de 3.º grado sintomático, Mobitz II o avanzado con síntomas, bradicardia severa (< 40 lpm) o asistolia prolongada (> 3 segundos).' },
+      { id: 'c2_25', topic: 'Módulo I: Arritmias', cat: '4. Bloqueo AV y Bloqueos de Rama (P22–26)', left: '¿Cuál es el pronóstico, criterios de referencia por nivel y prevención del BAV?', right: 'Pronóstico: adquirido asociado a IAM tiene peor pronóstico; congénito generalmente benigno pero puede evolucionar a IC o muerte súbita sin tratamiento. Referencia: estable → segundo nivel; inestable o sintomático → manejo inmediato (marcapasos temporal); complicaciones o marcapasos avanzado → tercer nivel. Prevención: control de riesgo CV, monitoreo periódico con ECG y uso cauteloso de fármacos.' },
+      { id: 'c2_26', topic: 'Módulo I: Arritmias', cat: '4. Bloqueo AV y Bloqueos de Rama (P22–26)', left: '¿Cuáles son los criterios electrocardiográficos del Bloqueo de Rama Derecha (BRD) y Bloqueo de Rama Izquierda (BRI)?', right: 'BRD: eje normal o indeterminado, QRS ≥ 0.12 s (120 ms), patrón rsR\' en V1–V2 ("orejas de conejo") y onda S ancha y empastada en DI, aVL y V6. BRI: QRS ≥ 0.12 s (120 ms), ausencia de ondas q normales en DI, aVL, V5–V6, onda R ancha, mellada o empastada en DI, aVL, V5–V6, y complejo QS o rS ancho negativo en V1–V2.' },
+
+      // 5. Taquiarritmias: Definición, Clasificación por QRS y Algoritmo de Manejo (Preguntas 27–30)
+      { id: 'c2_27', topic: 'Módulo I: Arritmias', cat: '5. Taquiarritmias y Algoritmo QRS (P27–30)', left: '¿Cómo se definen electrocardiográficamente y clínicamente las taquiarritmias y cuáles son sus causas?', right: 'Definición: ≥ 3 latidos con FC > 100 lpm (clínicamente significativa ≥ 150 lpm); complejos QRS regulares o irregulares, usualmente estrechos (amplios si bloqueo de rama o vía accesoria). Causas: dilatación auricular, IAM, embolismo pulmonar, estados inflamatorios agudos o crónicos, o cicatrices quirúrgicas auriculares/pericárdicas.' },
+      { id: 'c2_28', topic: 'Módulo I: Arritmias', cat: '5. Taquiarritmias y Algoritmo QRS (P27–30)', left: '¿Qué ritmos pertenecen a QRS estrecho (< 0.12 s) vs. QRS ancho (≥ 0.12 s) y cuáles son sus reglas?', right: 'QRS estrecho (< 0.12 s = origen supraventricular): taquicardia sinusal, fibrilación auricular, flúter auricular, TSV y taquicardia auricular. QRS ancho (≥ 0.12 s = tratar como TV hasta demostrar lo contrario): TV monomórfica, TV polimórfica, Torsades de pointes, TSV con aberrancia y taquicardia de complejo ancho de origen incierto.' },
+      { id: 'c2_29', topic: 'Módulo I: Arritmias', cat: '5. Taquiarritmias y Algoritmo QRS (P27–30)', left: '¿Cuál es el manejo de la taquiarritmia INESTABLE (FC ≥ 150 lpm con hipotensión, alteración mental, choque, isquemia o IC aguda) y qué contraindicaciones existen?', right: 'Medidas: ABCD + monitor + TA + SpO2 + acceso IV + ECG 12 derivaciones. Con pulso: cardioversión eléctrica sincronizada (excepción: TV polimórfica / Torsades → descarga no sincronizada). Sin pulso (paro): FV/TV sin pulso → desfibrilación + RCP; AESP/asistolia → RCP + adrenalina. 4 contraindicaciones de cardioversión sincronizada: 1) Taquicardia sinusal, 2) TSV sin pulso, 3) TV polimórfica con QRS ancho (Torsades) y 4) Fibrilación ventricular.' },
+      { id: 'c2_30', topic: 'Módulo I: Arritmias', cat: '5. Taquiarritmias y Algoritmo QRS (P27–30)', left: '¿Cuál es el algoritmo de manejo de la taquiarritmia ESTABLE según el ancho y regularidad del QRS?', right: 'QRS estrecho (< 0.12 s) y REGULAR: 1) Maniobras vagales, 2) Adenosina 6 mg IV bolo rápido + lavado SS → si falla, 12 mg IV. QRS estrecho e IRREGULAR (FA, flúter variable, TAM): betabloqueador, diltiazem o verapamilo. QRS ancho (≥ 0.12 s) REGULAR + MONOMÓRFICO: considerar adenosina + antiarrítmico (procainamida, amiodarona o sotalol) + experto. QRS ancho IRREGULAR/POLIMÓRFICO: NO adenosina, pensar en Torsades de pointes.' },
+
+      // 6. Taquicardias Auriculares, Supraventriculares (TSV) y Flutter Auricular (Preguntas 31–34)
+      { id: 'c2_31', topic: 'Módulo I: Arritmias', cat: '6. Taquicardias Auriculares, TSV y Flutter (P31–34)', left: '¿Qué caracteriza a la taquicardia sinusal, taquicardia sinusal inapropiada y reentrada del nodo sinusal?', right: 'Taquicardia sinusal: incremento gradual de FC (> 100 lpm, suele no superar 150 lpm), RR regular, P antes de cada QRS (positiva DI, DII, DIII, aVF; negativa aVR), eje P 0° a +90°, respuesta fisiológica a ejercicio, ansiedad, fiebre, dolor, hipovolemia, hipotensión, anemia, hipoxia, tirotoxicosis, falla cardíaca, cocaína/cafeína → tratar la causa (betabloqueadores si sintomática). Inapropiada: estrés mínimo. Reentrada del nodo sinusal: inicio y fin abruptos con P idéntica a sinusal → betabloqueadores.' },
+      { id: 'c2_32', topic: 'Módulo I: Arritmias', cat: '6. Taquicardias Auriculares, TSV y Flutter (P31–34)', left: '¿Qué caracteriza a la Taquicardia Supraventricular (TSV)?', right: 'Origen por encima de los ventrículos; mecanismos de automatismo anormal, actividad desencadenada y reentrada (hasta 60%); duración paroxística (inicio y fin súbitos) o permanente; más frecuente en edades avanzadas; clínica con palpitaciones súbitas, mareo/presíncope, disnea, dolor torácico, síncope y "sensación de muerte".' },
+      { id: 'c2_33', topic: 'Módulo I: Arritmias', cat: '6. Taquicardias Auriculares, TSV y Flutter (P31–34)', left: '¿Qué es el flutter auricular, su epidemiología, factores de riesgo y mecanismos típico vs. atípico?', right: 'Definición y ECG: circuito de reentrada auricular con activación auricular rápida y regular (240 a 350 lpm); ondas en "dientes de sierra" (ondas F) sin línea isoeléctrica, negativas en II, III y aVF en el típico. Epidemiología: más común en hombres > 60 años; riesgo por HTA, IC, cardiopatía estructural, EPOC y alcohol. Típico: macro-reentrada en aurícula derecha dependiente del istmo cavotricuspídeo; Atípico: circuitos por cicatrices postquirúrgicas o ablaciones.' },
+      { id: 'c2_34', topic: 'Módulo I: Arritmias', cat: '6. Taquicardias Auriculares, TSV y Flutter (P31–34)', left: '¿Cuál es la clínica, diagnóstico y manejo completo del flutter auricular?', right: 'Clínica: palpitaciones rápidas regulares, disnea, fatiga, intolerancia al ejercicio o síncope/IC. Diagnóstico: ECG (vagales o adenosina resaltan ondas F), ETT/ETE antes de cardioversión y estudios electrofisiológicos. Tratamiento: control de frecuencia con betabloqueadores (metoprolol), verapamilo, diltiazem o digoxina en IC; cardioversión eléctrica (> 90% éxito) o ibutilida/dofetilida (vigilar Torsades); elección en recurrentes: ablación del istmo cavotricuspídeo (~95% éxito); anticoagular según CHA2DS2-VASc.' },
+
+      // 7. Fibrilación Auricular (FA) y Clasificación Antiarrítmica (Preguntas 35–40)
+      { id: 'c2_35', topic: 'Módulo I: Arritmias', cat: '7. Fibrilación Auricular y Antiarrítmicos (P35–40)', left: '¿Qué es la fibrilación auricular (FA), su epidemiología, fisiopatología y hallazgos en ECG?', right: 'Definición: taquiarritmia supraventricular sostenida más común; activación auricular rápida y desorganizada (> 300 lpm) sin contracción efectiva. ECG: ausencia de ondas P, ondas fibrilatorias (f), intervalo RR irregularmente irregular y QRS generalmente estrecho. Epidemiología: 1–2% población general y hasta 15% en > 80 años. Fisiopatología: automatismo en venas pulmonares + múltiples reentradas + remodelado eléctrico y fibrosis.' },
+      { id: 'c2_36', topic: 'Módulo I: Arritmias', cat: '7. Fibrilación Auricular y Antiarrítmicos (P35–40)', left: '¿Cuáles son las clasificaciones clínica/temporal y sintomática (EHRA) de la FA, y su abordaje diagnóstico?', right: 'Clasificación temporal (5 tipos): Primer diagnóstico, Paroxística (≤ 7 días), Persistente (> 7 días), Persistente de larga duración (≥ 12 meses) y Permanente. Escala EHRA: I (sin síntomas), II (leves, actividad normal no afectada), III (graves, actividad diaria afectada), IV (incapacitantes). Principal complicación: tromboembolismo/EVC (trombo en orejuela auricular izquierda). Diagnóstico: ECG, Holter, ETT y ETE (descarta trombos en orejuela).' },
+      { id: 'c2_37', topic: 'Módulo I: Arritmias', cat: '7. Fibrilación Auricular y Antiarrítmicos (P35–40)', left: '¿Cómo se realiza el control del ritmo y la cardioversión según duración e inestabilidad en la FA?', right: 'FA inestable: cardioversión eléctrica sincronizada inmediata + sedoanalgesia + heparina. FA estable < 48 h: con anormalidad estructural → Amiodarona IV; sin anormalidad estructural → Flecainida, propafenona o ibutilida IV + anticoagulación posterior 4 semanas. FA > 48 h o desconocida: ETE sin trombos → cardioversión + 4 semanas AC; con trombos o sin ETE → anticoagular al menos 3 semanas antes y 4 semanas después.' },
+      { id: 'c2_38', topic: 'Módulo I: Arritmias', cat: '7. Fibrilación Auricular y Antiarrítmicos (P35–40)', left: '¿Cuál es la meta del control de frecuencia en FA y cómo se eligen los fármacos según el perfil del paciente (Figura 8)?', right: 'Meta: frecuencia ventricular promedio en reposo < 110 lpm. Perfil inactivo/sedentario: digoxina; Activo sin enfermedad o con HTA: betabloqueadores (metoprolol, bisoprolol), diltiazem, verapamilo o digoxina; Insuficiencia cardíaca (FEVI baja): betabloqueadores o digoxina (evitar BCC no DHP); EPOC: diltiazem, verapamilo, digoxina o betabloqueadores selectivos.' },
+      { id: 'c2_39', topic: 'Módulo I: Arritmias', cat: '7. Fibrilación Auricular y Antiarrítmicos (P35–40)', left: '¿Cómo se estratifica el riesgo tromboembólico (CHA2DS2-VASc) y hemorrágico (HAS-BLED) y cómo se anticoagula la FA?', right: 'CHA2DS2-VASc: falla cardíaca (1), HTA (1), edad ≥ 75 (2), DM (1), EVC/AIT/tromboembolismo previo (2), enfermedad vascular (1), edad 65–74 (1), sexo femenino (1). Conducta: 0 pts → no AC; 1 pt → considerar si no es solo mujer y sin riesgo sangrado; ≥ 2 pts → AC recomendada (aspirina NO sustituye AC). Elección: ACOD (apixabán, rivaroxabán, dabigatrán, edoxabán); Warfarina (INR 2–3) si prótesis mecánica o EM reumática mod-grave (oclusor orejuela si contraindicación). HAS-BLED ≥ 3 = alto riesgo sangrado.' },
+      { id: 'c2_40', topic: 'Módulo I: Arritmias', cat: '7. Fibrilación Auricular y Antiarrítmicos (P35–40)', left: '¿Cómo se clasifican los fármacos antiarrítmicos según Vaughan Williams?', right: 'Clase IA (Na+, ↑PR, QRS y QT): disopiramida, procainamida, quinidina; Clase IB (Na+, ↓QT): lidocaína, mexiletina; Clase IC (Na+, ↑↑PR y QRS): propafenona, flecainida; Clase II (Betabloqueadores fase 4): metoprolol, atenolol, propranolol, bisoprolol, carvedilol, esmolol; Clase III (K+ fase 3, ↑QT): amiodarona, sotalol, dofetilida, ibutilida; Clase IV (Ca2+ no DHP nodo AV): verapamilo, diltiazem.' },
+
+      // 8. Síndromes de Preexcitación y Síndrome de Wolff-Parkinson-White (WPW) (Preguntas 41–44)
+      { id: 'c2_41', topic: 'Módulo I: Arritmias', cat: '8. Preexcitación y Síndrome WPW (P41–44)', left: '¿Qué son los síndromes de preexcitación ventricular y qué vías accesorias existen?', right: 'Activación ventricular precoz por una vía alterna al sistema normal tras fracaso embriológico en la separación fibrosa AV: Haz de Kent (WPW, conducción anterógrada y retrógrada), Vía de Mahaim (solo anterógrada A → V) y Vía oculta (solo retrógrada A ← V).' },
+      { id: 'c2_42', topic: 'Módulo I: Arritmias', cat: '8. Preexcitación y Síndrome WPW (P41–44)', left: '¿Cuál es la epidemiología, factores de riesgo y tríada electrocardiográfica del WPW?', right: 'Epidemiología: 1 a 3 por 1,000 habitantes, más en varones; factores de riesgo: antecedentes familiares, enfermedad de Ebstein y digoxina. Tríada clásica en ritmo sinusal: 1) Intervalo PR corto (< 0.12 s en adultos, < 0.09 s en niños), 2) Onda delta y 3) QRS ancho (≥ 0.12 s) con alteraciones secundarias de repolarización.' },
+      { id: 'c2_43', topic: 'Módulo I: Arritmias', cat: '8. Preexcitación y Síndrome WPW (P41–44)', left: '¿Cómo se diferencian las taquicardias ortodrómica y antidrómica en el WPW y cuál es el mecanismo de muerte súbita?', right: 'Ortodrómica (80%, más frecuente): baja por el nodo AV y sube por la vía accesoria → QRS estrecho. Antidrómica: baja por la vía accesoria y sube por el nodo AV → QRS ancho. Riesgo acumulativo de muerte súbita sin tratamiento hasta 4%: en FA + WPW + conducción anterógrada (URGENCIA), la conducción rápida por la vía accesoria degenera en fibrilación ventricular.' },
+      { id: 'c2_44', topic: 'Módulo I: Arritmias', cat: '8. Preexcitación y Síndrome WPW (P41–44)', left: '¿Cómo se diagnostica, estratifica y trata el WPW (agudo y definitivo)?', right: 'Diagnóstico: ECG, Eco, Holter, prueba de esfuerzo y estudio electrofisiológico. Mal pronóstico: periodo refractario accesorio ≤ 250 ms, vías múltiples, FA, taquicardia > 240/min, cardiopatías o taquicardias inducibles. Definitivo: ablación con catéter (éxito ≥ 95%; urgente si sintomático con mal pronóstico). Agudo: TSV ortodrómica → vagales o adenosina; FA preexcitada inestable → cardioversión sincronizada; FA preexcitada estable → procainamida IV o amiodarona. Contraindicación absoluta: NUNCA bloqueadores nodales AV (adenosina, vagales, digoxina, verapamilo, diltiazem) en FA preexcitada.' },
+
+      // 9. Arritmias Ventriculares (Extrasístoles, TV, Torsades y FV) (Preguntas 45–48)
+      { id: 'c2_45', topic: 'Módulo I: Arritmias', cat: '9. Arritmias Ventriculares (P45–48)', left: '¿Qué son las arritmias ventriculares, su incidencia de muerte súbita, factores de riesgo y mecanismos?', right: 'Espectro desde extrasístoles hasta TV sostenida y FV; incidencia anual de muerte súbita cardíaca (MSC) de 1–2 casos por 1,000 personas. Factores de riesgo: cardiopatía isquémica, miocardiopatías, Brugada, QT largo, antecedentes familiares de MSC, electrolitos y fármacos. 3 mecanismos: 1) Reentrada (más frecuente, por cicatriz de IAM), 2) Automatismo anómalo y 3) Actividad desencadenada (aumento de Ca2+ intracelular).' },
+      { id: 'c2_46', topic: 'Módulo I: Arritmias', cat: '9. Arritmias Ventriculares (P45–48)', left: '¿Cuáles son las características diagnósticas en ECG de cada tipo de arritmia ventricular?', right: 'Extrasístoles ventriculares: QRS prematuros anchos (≥ 120 ms) seguidos de pausa compensatoria completa. TV no sostenida: ≥ 3 latidos ventriculares consecutivos, FC > 100 lpm y duración < 30 s. TV sostenida: duración > 30 s o compromiso hemodinámico/síntomas (monomórfica, polimórfica o bidireccional; pistas: disociación AV). Fibrilación ventricular: actividad eléctrica caótica sin contracción efectiva.' },
+      { id: 'c2_47', topic: 'Módulo I: Arritmias', cat: '9. Arritmias Ventriculares (P45–48)', left: '¿Qué estudios complementarios y de estratificación de riesgo se usan en arritmias ventriculares?', right: 'ECG de 12 derivaciones, Holter/monitoreo ambulatorio prolongado, ecocardiografía y resonancia magnética cardíaca (detectan cicatrices o displasia de VD), pruebas genéticas, estudio electrofisiológico y medición de FEVI (FEVI < 35% = indicador de riesgo elevado para MSC).' },
+      { id: 'c2_48', topic: 'Módulo I: Arritmias', cat: '9. Arritmias Ventriculares (P45–48)', left: '¿Cuál es el manejo agudo y crónico de las arritmias ventriculares y de la Torsades de pointes?', right: 'TV inestable con pulso: cardioversión eléctrica sincronizada. TV monomórfica estable: procainamida, amiodarona o lidocaína. Torsades de pointes: suspender fármacos que prolongan QT y corregir K/Mg; elección: magnesio IV; si inestable: desfibrilación NO sincronizada; si recurrente: isoproterenol o marcapasos. Prevención a largo plazo: desfibrilador automático implantable (DAI) en alto riesgo de MSC (FEVI < 35% o FV idiopática) como pilar + betabloqueadores adyuvantes o ablación con catéter.' },
+
+      // ==================== MÓDULO II: VALVULOPATÍAS (49–79) ====================
+      // 1. Generalidades Valvulares y Cuadro Rápido de Soplos por Foco (Preguntas 49–50)
+      { id: 'c2_49', topic: 'Módulo II: Valvulopatías', cat: '1. Generalidades Valvulares y Focos (P49–50)', left: '¿Cuál es la diferencia fisiopatológica general entre estenosis e insuficiencia valvular?', right: 'Estenosis: restricción al flujo → sobrecarga de PRESIÓN → HIPERTROFIA. Insuficiencia: reflujo / sobrecarga de VOLUMEN → DILATACIÓN.' },
+      { id: 'c2_50', topic: 'Módulo II: Valvulopatías', cat: '1. Generalidades Valvulares y Focos (P49–50)', left: '¿Qué soplos sistólicos y diastólicos corresponden a cada uno de los 4 focos de auscultación clásica?', right: 'Foco aórtico: Sístole = Estenosis aórtica | Diástole = Insuficiencia aórtica. Foco pulmonar: Sístole = Estenosis pulmonar | Diástole = Insuficiencia pulmonar. Foco tricuspídeo: Sístole = Insuficiencia tricuspídea | Diástole = Estenosis tricuspídea + insuficiencia tricuspídea. Foco mitral: Sístole = Insuficiencia mitral | Diástole = Estenosis mitral.' },
+
+      // 2. Estenosis Aórtica (EA) (Preguntas 51–62)
+      { id: 'c2_51', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuál es el área valvular aórtica normal y qué importancia epidemiológica tiene la estenosis aórtica (EA)?', right: 'El área normal es de 3 a 4 cm². Es la valvulopatía primaria que con mayor frecuencia requiere tratamiento quirúrgico o percutáneo en Europa y Norteamérica, y en México representa la primera causa de obstrucción al flujo de salida del ventrículo izquierdo (VI), con patrón progresivo y evolución silente durante largos periodos.' },
+      { id: 'c2_52', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuál es la tasa de progresión natural anual y los 6 predictores de progresión rápida de la EA?', right: 'Progresión anual: reducción del área valvular de 0.1 a 0.3 cm²/año e incremento del gradiente medio transvalvular de 5 a 11 mmHg/año. 6 factores predictores de progresión rápida: edad avanzada, enfermedad renal crónica, enfermedad coronaria, disfunción sistólica, válvula bicúspide y calcificación valvular severa.' },
+      { id: 'c2_53', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuáles son las etiologías de la EA valvular según el grupo de edad?', right: '0–30 años (recién nacido): válvula unicúspide. 30–70 años (adulto joven): válvula bicúspide (hasta el 50% de los adultos con EA crítica) o tricúspide malformada. Adulto joven: EA reumática (por estreptococo betahemolítico del grupo A, fusión comisural y suele acompañarse de lesión mitral). > 70 años (adultos mayores): EA degenerativa calcificada (la más frecuente en adultos mayores, asociada a HTA, dislipidemia, DM y enfermedad coronaria).' },
+      { id: 'c2_54', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Qué caracteriza a las formas subvalvular y supravalvular de la EA?', right: 'Subvalvular: causada por membranas o rodete fibroso, o por miocardiopatía hipertrófica obstructiva. Supravalvular (poco común): asociada al síndrome de Williams-Beuren (hipercalcemia, facies característica y discapacidad intelectual; perla: Williams = SUPRAvalvular).' },
+      { id: 'c2_55', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuál es la secuencia fisiopatológica de la EA y qué pasa si progresa sin tratamiento?', right: 'Disminución del área valvular → obstrucción fija al vaciamiento/salida del VI → aumento de presión intraventricular izquierda → sobrecarga de presión crónica e hipertrofia concéntrica del VI → disfunción diastólica y, en fases avanzadas, disfunción sistólica. Sin tratamiento lleva a compromiso multiorgánico (pulmonar, hepático y renal) y muerte prematura.' },
+      { id: 'c2_56', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuál es la tríada clínica clásica (SAD) de la EA avanzada y qué pronóstico tiene sin recambio valvular?', right: 'Tríada clásica (SAD — indicación formal de intervención): Síncope, Angina y Disnea. Pronóstico sin recambio: Angina = supervivencia media ~5 años; Síncope = ~3 años; Disnea = ~2 años; Muerte súbita = 3–3.4% (en series globales varía entre 5 y 34%, más común en sintomáticos).' },
+      { id: 'c2_57', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuáles son los hallazgos físicos, razones de verosimilitud (LR) y el fenómeno de Gallavardin en la EA?', right: 'Soplo mesosistólico in crescendo-decrescendo en 2.º EIC derecho con irradiación a cuello y carótidas (+LR: 8.1; ausencia -LR: 0.1); frémito palpable; Fenómeno de Gallavardin (irradiación hacia el ápex); Pulso parvus et tardus (tardus +LR: 6.8, parvus +LR: 2); S2 disminuido (+LR: 7.5); combinación de ≥ 3 hallazgos (+LR: 40).' },
+      { id: 'c2_58', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuál es el estudio diagnóstico clave, la Regla ENARM y los criterios ecocardiográficos de severidad (leve, moderada y severa) de la EA?', right: 'Estudio clave: ETT. Regla ENARM (4–40–1): Vmax ≥ 4.0 m/s, gradiente medio ≥ 40 mmHg y área valvular ≤ 1.0 cm² (o ≤ 0.6 cm²/m² SC). Leve: área > 1.5 cm², Vmax < 3 m/s, gradiente < 20 mmHg. Moderada: área 1.0–1.5 cm², Vmax 3–4 m/s, gradiente 20–40 mmHg. Severa: área ≤ 1.0 cm², Vmax > 4 m/s, gradiente > 40 mmHg.' },
+      { id: 'c2_59', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuáles son las 4 categorías hemodinámicas de la EA y qué estudios complementarios requieren?', right: '1) EA gradiente alto (gradiente ≥ 40 mmHg, Vmax ≥ 4.0 m/s, área ≤ 1.0 cm²). 2) Flujo y gradiente bajos con FEVI reducida (< 50%, IVL ≤ 35 ml/m²) → requiere eco con dobutamina para distinguir EA verdadera de pseudograve. 3) Flujo y gradiente bajos con FEVI conservada (≥ 50%, IVL ≤ 35 ml/m², ancianos hipertensos) → cuantificación de calcio por TC (hombres > 2,000, mujeres > 1,200 Agatston). 4) Flujo normal, gradiente bajo y FEVI conservada (habitualmente moderada).' },
+      { id: 'c2_60', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuál es el algoritmo diagnóstico y las indicaciones de intervención en pacientes sintomáticos y asintomáticos con EA?', right: 'Sintomáticos con EA grave: todos deben considerarse para intervención (salvo fragilidad marcada o expectativa limitada). Asintomáticos con EA grave: intervención si FEVI < 50%; si FEVI ≥ 50% y activo, realizar prueba de esfuerzo: aparición de síntomas o caída sostenida de PA durante esfuerzo indica intervención (si no, seguimiento cada 6–12 meses).' },
+      { id: 'c2_61', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cómo decide el Heart Team entre reemplazo quirúrgico (RQVA) e implante percutáneo (TAVI)?', right: 'RQVA: < 75 años, riesgo quirúrgico bajo (STS Score o EuroSCORE II < 4%) y sin contraindicación quirúrgica. TAVI transfemoral: > 75 años, alto riesgo quirúrgico (STS o EuroSCORE II > 8%) o no candidatos a cirugía. Decisión individualizada (Heart Team) en rango intermedio.' },
+      { id: 'c2_62', topic: 'Módulo II: Valvulopatías', cat: '2. Estenosis Aórtica (P51–62)', left: '¿Cuál es el seguimiento, manejo médico, complicación post-TAVI, prevención y profilaxis de endocarditis (Cuadro 23) en la EA?', right: 'Seguimiento: grave asintomática c/6 meses, moderada anual, leve c/2–3 años. Médico: ningún fármaco frena progresión; en HTA usar IECA, ARA-II o betabloqueadores con vigilancia; post-TAVI vigilar bloqueo AV; evitar subvaloración en mujeres. Profilaxis endocarditis (Cuadro 23): dentales → Amoxicilina 3 g 1 h antes y 1.5 g 6 h después (alergia: Eritromicina 1 g / 0.5 g); dentales alto riesgo → Ampicilina 2 g + gentamicina 1.5 mg/kg IV/IM 30 min antes (alergia: Vancomicina 1 g IV); cirugía GI/GU → Gentamicina 1.5 mg/kg.' },
+
+      // 3. Insuficiencia Aórtica (IA) (Preguntas 63–68)
+      { id: 'c2_63', topic: 'Módulo II: Valvulopatías', cat: '3. Insuficiencia Aórtica (P63–68)', left: '¿Qué es la insuficiencia aórtica (IA), cuál es su epidemiología y sus etiologías (con porcentajes)?', right: 'Cierre inadecuado de valvas aórticas en diástole con flujo retrógrado al VI (sobrecarga de volumen y dilatación). Epidemiología (Framingham): ≥ 13% hombres y 8.5% mujeres (> 50 años). Etiologías: degenerativa/bicúspide 50–60%, endocarditis infecciosa 10–15% (causa principal de IA aguda grave, seguida de disección aórtica), fiebre reumática (países en desarrollo) y Marfan.' },
+      { id: 'c2_64', topic: 'Módulo II: Valvulopatías', cat: '3. Insuficiencia Aórtica (P63–68)', left: '¿Cuáles son los 3 tipos fisiopatológicos de regurgitación aórtica?', right: 'Tipo 1: cúspides normales con coaptación insuficiente por dilatación de la raíz aórtica → chorro central. Tipo 2: prolapso de cúspides → chorro excéntrico. Tipo 3: retracción valvular → chorro variable/excéntrico.' },
+      { id: 'c2_65', topic: 'Módulo II: Valvulopatías', cat: '3. Insuficiencia Aórtica (P63–68)', left: '¿Cuál es el cuadro clínico y los signos físicos característicos (con LR) de la insuficiencia aórtica?', right: 'Clínica: disnea de esfuerzo, ortopnea, edema pulmonar, palpitaciones, angina nocturna y latidos fuertes en supino. Física: soplo diastólico temprano decreciente en foco aórtico/borde esternal izquierdo (+LR: 9.9, ausencia -LR: 0.1), PAD < 50 mmHg (+LR: 19.3), gradiente poplíteo-braquial > 20 mmHg (+LR: 8.2), S3 (+LR: 5.9; FEVI < 50% +LR: 8.3), pulso de Corrigan, signo de Musset, signo de Quincke y soplo de Austin Flint (ápex).' },
+      { id: 'c2_66', topic: 'Módulo II: Valvulopatías', cat: '3. Insuficiencia Aórtica (P63–68)', left: '¿Qué hallazgos ofrecen el ECG, ETT (5 criterios de gravedad), RMC y TC de alta resolución en la IA?', right: 'ECG: hipertrofia VI. 5 criterios ETT de IA grave: 1) Vena contracta > 6 mm, 2) AORE ≥ 30 mm², 3) Volumen regurgitante ≥ 60 mL/latido, 4) Flujo holodiastólico invertido en aorta descendente y 5) Tiempo de hemipresión < 200 ms. RMC: en discordancia clínica-eco. TC alta resolución: mide diámetro aórtico en 4 niveles (anillo, senos de Valsalva, unión sinotubular y aorta ascendente tubular).' },
+      { id: 'c2_67', topic: 'Módulo II: Valvulopatías', cat: '3. Insuficiencia Aórtica (P63–68)', left: '¿Cómo se realiza la vigilancia ecocardiográfica y cuáles son las indicaciones de cirugía en la IA?', right: 'Vigilancia en asintomáticos con IA grave, FEVI > 50% y DTSVI < 50 mm: ETT anual (o cada 6 meses si se aproxima al umbral). 3 pilares quirúrgicos: 1) Dilatación significativa de aorta ascendente (incluso sin IA grave), 2) Todo sintomático con IA grave y 3) Asintomáticos con IA grave si FEVI ≤ 50%, DTSVI > 50 mm (> 25 mm/m² SC) o dilatación progresiva.' },
+      { id: 'c2_68', topic: 'Módulo II: Valvulopatías', cat: '3. Insuficiencia Aórtica (P63–68)', left: '¿Cuál es el tratamiento médico y las medidas preventivas en la insuficiencia aórtica?', right: 'Tratamiento médico: IECA o ARA-II (reducen poscarga), betabloqueadores (de elección en síndrome de Marfan para enlentecer dilatación aórtica) y diuréticos. Prevención: cribado de familiares de primer grado cuando hay válvula bicúspide o enfermedades del tejido conectivo, y seguimiento ecocardiográfico periódico.' },
+
+      // 4. Estenosis Mitral (EM) (Preguntas 69–74)
+      { id: 'c2_69', topic: 'Módulo II: Valvulopatías', cat: '4. Estenosis Mitral (P69–74)', left: '¿Qué es la estenosis mitral (EM), qué cavidades afecta y cuáles son sus perlas fisiopatológicas?', right: 'Obstruye el flujo de AI a VI, elevando presión en AI, vasculatura pulmonar y lado derecho, mientras que el VI permanece sin afección aislada ("AI se atora, pulmón se congestiona" y "AI grande = FA"). Secuencia: ↑ Presión AI → hipertensión venocapilar pulmonar → hipertensión arterial pulmonar → falla del VD + dilatación AI.' },
+      { id: 'c2_70', topic: 'Módulo II: Valvulopatías', cat: '4. Estenosis Mitral (P69–74)', left: '¿Cuáles son las etiologías reumática y no reumática de la EM y qué utilidad tienen los criterios de Jones?', right: 'Reumática (principal): secuela de fiebre reumática por Streptococcus pyogenes; produce fusión comisural, engrosamiento/calcificación de valvas y cuerdas tendinosas y "válvula en boca de pescado". No reumática: calcificación degenerativa del anillo/valva en adultos mayores. Criterios de Jones: útiles para fiebre reumática, NO para diagnosticar estenosis mitral.' },
+      { id: 'c2_71', topic: 'Módulo II: Valvulopatías', cat: '4. Estenosis Mitral (P69–74)', left: '¿Cuáles son los síntomas, complicaciones y el Síndrome de Ortner en la estenosis mitral?', right: 'Síntomas: disnea de esfuerzo (70%), ortopnea, DPN, edema pulmonar, fatiga, palpitaciones, hemoptisis y disfonía. Complicaciones: FA (30–40% general y hasta 70% hospitalizados), tromboembolismo sistémico, hipertensión pulmonar y falla de VD. Síndrome de Ortner: disfonía por compresión del nervio laríngeo recurrente izquierdo por AI dilatada e hipertensión pulmonar.' },
+      { id: 'c2_72', topic: 'Módulo II: Valvulopatías', cat: '4. Estenosis Mitral (P69–74)', left: '¿Qué hallazgos se observan en la exploración física general, pulso arterial/venoso y auscultación (Ritmo de Duroziez) de la EM?', right: 'Facies mitral (manchas rosadas/violáceas en mejillas); pulso venoso con onda "a" prominente en ritmo sinusal (desaparece en FA predominando "v"). Ritmo de Duroziez (ápex, decúbito lateral izquierdo): 1) S1 acentuado, 2) Sístole limpia, 3) Chasquido de apertura mitral (A2-SO más corto a mayor presión AI) y 4) Retumbo diastólico de tono bajo con refuerzo presistólico (se pierde en FA). Puede haber soplo de Graham Steell.' },
+      { id: 'c2_73', topic: 'Módulo II: Valvulopatías', cat: '4. Estenosis Mitral (P69–74)', left: '¿Qué hallazgos ofrecen la Rx de tórax, ECG, prueba de esfuerzo, ETT/ETE e índice de Wilkins en la EM?', right: 'Rx tórax: crecimiento AI con imagen en "4 arcos". ECG: onda P > 120 ms mellada y FA. ETT/ETE: apertura en domo; severidad: AVM ≤ 1.5 cm² (muy grave ≤ 1.0 cm²), PHT ≥ 150 ms (muy severa ≥ 220 ms), gradiente medio ≥ 10 mmHg. Índice de Wilkins (movilidad, engrosamiento, calcificación, aparato subvalvular; 1–4 pts c/u): puntaje ≤ 8 = morfología favorable para valvuloplastía con balón.' },
+      { id: 'c2_74', topic: 'Módulo II: Valvulopatías', cat: '4. Estenosis Mitral (P69–74)', left: '¿Cuál es el tratamiento médico, indicaciones de intervención, algoritmo de conducta, seguimiento y profilaxis de la EM?', right: 'Médico: betabloqueadores o digoxina; anticoagulación en FA/trombo/embolia previa con antagonistas de vitamina K (warfarina/acenocumarina, INR 2.0–3.5); diuréticos; penicilina benzatínica IM c/3–4 semanas en fiebre reumática. 5 indicaciones de intervención: 1) Síntomas NYHA II–IV, 2) Área ≤ 1.5 cm², 3) PSAP ≥ 50 mmHg, 4) Embolia sistémica, 5) Gradiente ≥ 10 mmHg. Wilkins ≤ 8 (sin trombo ni IM mod-severa) → valvuloplastía percutánea con balón; desfavorable → cirugía mitral.' },
+
+      // 5. Insuficiencia Mitral (IM) (Preguntas 75–79)
+      { id: 'c2_75', topic: 'Módulo II: Valvulopatías', cat: '5. Insuficiencia Mitral (P75–79)', left: '¿Qué es la insuficiencia mitral (IM), cómo se divide (primaria vs. secundaria) y cuáles son sus etiologías (con porcentajes)?', right: 'Falta de coaptación mitral en sístole con reflujo del VI a la AI (sobrecarga de volumen y dilatación, más en mujeres). Primaria: daño estructural valvular; Secundaria: disfunción miocárdica (isquémica). Etiologías: degeneración/prolapso mitral 50–70%, isquemia/IAM 20–30% (ruptura músculo papilar causa IM aguda grave), reumática 15–20%, endocarditis infecciosa y enfermedades del tejido conectivo.' },
+      { id: 'c2_76', topic: 'Módulo II: Valvulopatías', cat: '5. Insuficiencia Mitral (P75–79)', left: '¿En qué se diferencia la fisiopatología y el cuadro clínico de la IM crónica frente a la IM aguda?', right: 'IM crónica: sobrecarga mantenida de volumen → dilatación progresiva de AI y VI → disnea progresiva, ortopnea y fatiga tras años asintomática. IM aguda: aumento súbito de presión en AI y venas pulmonares sin tiempo de adaptación → edema pulmonar severo, disnea súbita, hipoxia, hipotensión y choque cardiogénico.' },
+      { id: 'c2_77', topic: 'Módulo II: Valvulopatías', cat: '5. Insuficiencia Mitral (P75–79)', left: '¿Cuál es el hallazgo auscultatorio clásico de la IM y qué sensibilidad y razones de verosimilitud (LR) tiene el examen físico?', right: 'Soplo holosistólico de alta frecuencia en "chorro de vapor" en ápex irradiado a axila (+LR: 6.8 si alcanza línea axilar anterior); intensidad grado 4–5/6 (+LR: 14), grado 1–2/6 (-LR: 0.19); ausencia de soplo NO la excluye (-LR: 0.66, frecuente en IM aguda). S2 acentuado (+LR: 4.7), S3 y ápex desplazado/hipercinético (+LR: 11.2); sensibilidad global ~88%.' },
+      { id: 'c2_78', topic: 'Módulo II: Valvulopatías', cat: '5. Insuficiencia Mitral (P75–79)', left: '¿Cuál es el estudio diagnóstico clave, los 6 parámetros ecocardiográficos de gravedad y cuándo usar ETE, esfuerzo o cateterismo en la IM?', right: 'Estudio clave: ETT. 6 parámetros de gravedad: 1) EROA ≥ 0.40 cm², 2) Volumen regurgitante ≥ 60 mL/latido, 3) Fracción regurgitante > 50%, 4) FEVI anormal < 60%, 5) DSFVI patológico ≥ 45 mm y 6) PSAP > 50 mmHg en reposo o > 60 mmHg con esfuerzo. ETE: mala ventana, inestabilidad, endocarditis o prequirúrgico; prueba de esfuerzo con protocolo de Naughton: capacidad funcional y momento quirúrgico. ETT anual (o c/6 m si progresa).' },
+      { id: 'c2_79', topic: 'Módulo II: Valvulopatías', cat: '5. Insuficiencia Mitral (P75–79)', left: '¿Cuál es el tratamiento médico de la IM aguda y crónica, las indicaciones quirúrgicas, pronóstico, referencia y prevención?', right: 'IM aguda: nitroprusiato o nicardipina (↓ poscarga), balón de contrapulsación si inestable, antibióticos + cirugía temprana en endocarditis. IM crónica: en primaria con FEVI < 60% → betabloqueadores, IECA/ARA-II, antialdosterónicos, diuréticos y anticoagulación si FA (NO fármacos si asintomático con FEVI normal). Cirugía (elección: reparación valvular sobre reemplazo): sintomáticos con IM grave, o asintomáticos con FEVI ≤ 60%, DSFVI ≥ 45 mm, FA o PSAP > 50 mmHg.' }
+    ];
+
+    const game = {
+      xp: 0,
+      mastered: [],
+      mistakes: [],
+      selectedTopic: 'ALL',
+      currentCat: null,
+
+      ankiDeck: [],
+      ankiIndex: 0,
+      ankiFlipped: false,
+
+      matchPairs: [],
+      matchLeftOrder: [],
+      matchRightOrder: [],
+      matchSelLeft: null,
+      matchMatchedIds: [],
+      matchCombo: 0,
+      matchErrorFlash: false,
+
+      memoCards: [],
+      memoFlipped: [],
+      memoMatched: [],
+      memoMoves: 0,
+      memoLocked: false,
+
+      canvas: null,
+      ctx: null,
+      rafId: null,
+      shooterActive: false,
+      shooterSpeed: 'comfortable',
+      shooterQueue: [],
+      shooterIndex: 0,
+      shield: 100,
+      enemy: null,
+      turrets: [],
+      lasers: [],
+      particles: [],
+      stars: [],
+      feedbackMsg: '',
+      feedbackColor: '#a855f7',
+      feedbackTimer: 0,
+
+      bossName: '',
+      bossHp: 100,
+      bossMaxHp: 100,
+      playerHp: 100,
+      bossQueue: [],
+      bossIdx: 0,
+      bossOptions: [],
+      bossAnswered: false,
+      bossLog: '',
+      bossTimer: 25,
+      bossTimerId: null,
+
+      init() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('cardiodefensa_c2_only_v1') || '{}');
+          if (typeof saved.xp === 'number') this.xp = saved.xp;
+          if (Array.isArray(saved.mastered)) this.mastered = saved.mastered;
+          if (Array.isArray(saved.mistakes)) this.mistakes = saved.mistakes;
+        } catch (e) {}
+        this.updateHUD();
+        this.showMenu();
+      },
+
+      saveProgress() {
+        try {
+          localStorage.setItem('cardiodefensa_c2_only_v1', JSON.stringify({
+            xp: this.xp,
+            mastered: this.mastered,
+            mistakes: this.mistakes
+          }));
+        } catch (e) {}
+        this.updateHUD();
+      },
+
+      updateHUD() {
+        const xpEl = document.getElementById('hud-xp');
+        const mEl = document.getElementById('hud-mastered');
+        const eEl = document.getElementById('hud-mistakes');
+        if (xpEl) xpEl.textContent = this.xp;
+        if (mEl) mEl.textContent = `${this.mastered.length}/${CARDIO2_PAIRS.length}`;
+        if (eEl) eEl.textContent = this.mistakes.length;
+      },
+
+      markMastered(id, bonus = 15) {
+        if (!this.mastered.includes(id)) this.mastered.push(id);
+        this.mistakes = this.mistakes.filter(m => m !== id);
+        this.xp += bonus;
+        this.saveProgress();
+      },
+
+      markMistake(id) {
+        if (!this.mistakes.includes(id)) this.mistakes.push(id);
+        this.saveProgress();
+      },
+
+      stopTimers() {
+        this.shooterActive = false;
+        if (this.rafId) {
+          cancelAnimationFrame(this.rafId);
+          this.rafId = null;
+        }
+        if (this.bossTimerId) {
+          clearInterval(this.bossTimerId);
+          this.bossTimerId = null;
+        }
+      },
+
+      shuffle(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      },
+
+      escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      },
+
+      getPairsByCat(cat) {
+        if (cat === 'ALL_MISTAKES') return CARDIO2_PAIRS.filter(p => this.mistakes.includes(p.id));
+        if (cat === 'ALL_CARDS') return [...CARDIO2_PAIRS];
+        return CARDIO2_PAIRS.filter(p => p.cat === cat);
+      },
+
+      getDistractors(pair, count = 3) {
+        let pool = CARDIO2_PAIRS.filter(p => p.id !== pair.id && p.topic === pair.topic);
+        if (pool.length < count) pool = CARDIO2_PAIRS.filter(p => p.id !== pair.id);
+        return this.shuffle(pool).slice(0, count);
+      },
+
+      selectTopic(topic) {
+        sfx.click();
+        this.selectedTopic = topic;
+        this.showMenu();
+      },
+
+      showMenu() {
+        this.stopTimers();
+        const root = document.getElementById('game-root');
+
+        const topics = ['ALL', 'Módulo I: Arritmias', 'Módulo II: Valvulopatías'];
+        const topicLabels = {};
+        topics.forEach(t => {
+          topicLabels[t] = t === 'ALL'
+            ? `Todos (${CARDIO2_PAIRS.length})`
+            : `${t} (${CARDIO2_PAIRS.filter(p => p.topic === t).length})`;
+        });
+
+        const visiblePairs = this.selectedTopic === 'ALL'
+          ? CARDIO2_PAIRS
+          : CARDIO2_PAIRS.filter(p => p.topic === this.selectedTopic);
+
+        const cats = [...new Set(visiblePairs.map(p => p.cat))];
+        const doneTotal = this.mastered.length;
+        const pctTotal = Math.round((doneTotal / CARDIO2_PAIRS.length) * 100);
+
+        const tabsHtml = topics.map(t => {
+          const active = this.selectedTopic === t;
+          return `<button onclick="game.selectTopic('${t}')" class="btn-arcade px-3 py-2 rounded-xl text-xs font-arcade font-bold uppercase tracking-wide border ${
+            active
+              ? 'bg-purple-500 text-white border-purple-300'
+              : 'bg-slate-900/90 text-slate-300 border-slate-700 hover:border-purple-500/50'
+          }">${topicLabels[t]}</button>`;
+        }).join('');
+
+        const cardsHtml = cats.map((cat) => {
+          const items = CARDIO2_PAIRS.filter(p => p.cat === cat);
+          const done = items.filter(p => this.mastered.includes(p.id)).length;
+          const pct = Math.round((done / items.length) * 100);
+          const safeCat = cat.replace(/'/g, "\\'");
+          return `
+            <div class="arcade-panel rounded-2xl p-4 flex flex-col justify-between gap-3 pop-in">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <span class="font-mono-code text-[11px] text-purple-300 uppercase">${items[0].topic}</span>
+                  <span class="font-mono-code text-xs font-bold ${pct === 100 ? 'text-emerald-400' : 'text-slate-300'}">${done}/${items.length} (${pct}%)</span>
+                </div>
+                <h3 class="font-arcade text-base font-bold text-white leading-snug">${this.escapeHtml(cat)}</h3>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-2">
+                  <div class="h-full bg-gradient-to-r from-purple-400 to-cyan-400 transition-all duration-300" style="width:${pct}%"></div>
+                </div>
+              </div>
+              <div class="grid grid-cols-5 gap-1.5 pt-1">
+                <button onclick="game.startAnki('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/40 text-indigo-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>🃏</span><span>Anki</span>
+                </button>
+                <button onclick="game.startMatch('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/40 text-amber-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>⚡</span><span>Pares</span>
+                </button>
+                <button onclick="game.startMemo('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/40 text-emerald-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>🧠</span><span>Memo</span>
+                </button>
+                <button onclick="game.startShooter('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/40 text-cyan-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>🚀</span><span>Nave</span>
+                </button>
+                <button onclick="game.startBoss('${safeCat}')" class="btn-arcade py-2 px-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/40 text-rose-200 text-[11px] font-bold flex flex-col items-center gap-0.5">
+                  <span>👾</span><span>Jefe</span>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        const mistakesBanner = this.mistakes.length > 0 ? `
+          <div class="arcade-panel rounded-2xl p-4 border-rose-500/40 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p class="font-arcade text-sm font-bold text-rose-300 uppercase">Repaso de Fallos Pendientes (${this.mistakes.length})</p>
+              <p class="text-xs text-slate-400">Refuerza únicamente las tarjetas que has fallado para dejarlas en verde.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="game.startAnki('ALL_MISTAKES')" class="btn-arcade px-3 py-2 rounded-xl bg-rose-500/25 border border-rose-400/50 text-rose-200 text-xs font-bold">🃏 Repasar en Anki</button>
+              <button onclick="game.startBoss('ALL_MISTAKES')" class="btn-arcade px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">👾 Jefe de Fallos</button>
+            </div>
+          </div>
+        ` : '';
+
+        root.innerHTML = `
+          <div class="space-y-5">
+            <div class="arcade-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="space-y-1">
+                <h2 class="font-arcade text-xl sm:text-2xl font-bold text-white uppercase">Cardiología 2 • Día 2 ENARM</h2>
+                <p class="text-xs sm:text-sm text-slate-300">Domina las <strong>${CARDIO2_PAIRS.length} tarjetas completas</strong>: Módulo I Arritmias (48) y Módulo II Valvulopatías (31) en 5 modos.</p>
+              </div>
+              <div class="sm:w-56 shrink-0">
+                <div class="flex justify-between font-mono-code text-xs mb-1">
+                  <span class="text-slate-400">Progreso Módulo 2</span>
+                  <span class="text-emerald-400 font-bold">${doneTotal}/${CARDIO2_PAIRS.length} (${pctTotal}%)</span>
+                </div>
+                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700">
+                  <div class="h-full bg-gradient-to-r from-purple-400 to-cyan-400" style="width:${pctTotal}%"></div>
+                </div>
+              </div>
+            </div>
+
+            ${mistakesBanner}
+
+            <div class="flex flex-wrap gap-2">
+              ${tabsHtml}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${cardsHtml}
+            </div>
+          </div>
+        `;
+      },
+
+      startAnki(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        this.ankiDeck = this.shuffle(this.getPairsByCat(cat)); this.ankiIndex = 0; this.ankiFlipped = false;
+        this.renderAnki();
+      },
+
+      renderAnki() {
+        const root = document.getElementById('game-root');
+        if (!this.ankiDeck.length) { this.showMenu(); return; }
+        if (this.ankiIndex >= this.ankiDeck.length) {
+          root.innerHTML = `
+            <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+              <div class="text-5xl">🏆</div>
+              <h2 class="font-arcade text-2xl font-bold text-emerald-400 uppercase">¡Ronda Anki Completada!</h2>
+              <p class="text-sm text-slate-300">Has repasado todas las tarjetas de <strong>${this.escapeHtml(this.currentCat)}</strong>.</p>
+              <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="game.startAnki('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-indigo-500 text-white font-bold text-sm">Repetir Ronda</button>
+                <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        const card = this.ankiDeck[this.ankiIndex];
+        root.innerHTML = `
+          <div class="max-w-2xl mx-auto w-full space-y-4 pop-in">
+            <div class="flex items-center justify-between">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-mono-code text-xs text-purple-300">${this.escapeHtml(card.cat)}</span>
+              <span class="font-mono-code text-xs text-slate-400">Tarjeta ${this.ankiIndex + 1} / ${this.ankiDeck.length}</span>
+            </div>
+            <div onclick="game.flipAnki()" class="arcade-panel rounded-2xl p-6 sm:p-8 min-h-[280px] flex flex-col justify-between cursor-pointer border-purple-500/40 hover:border-cyan-400/60 transition">
+              <div class="flex justify-between items-center text-[11px] font-mono-code text-slate-400">
+                <span>${this.ankiFlipped ? 'RESPUESTA CLÍNICA' : 'PREGUNTA'}</span>
+                <span class="text-purple-300">Toca para voltear</span>
+              </div>
+              <div class="my-6 space-y-4">
+                <p class="text-lg sm:text-xl font-bold text-white leading-relaxed">${this.escapeHtml(card.left)}</p>
+                ${this.ankiFlipped ? `<div class="pt-4 border-t border-slate-700/80"><p class="text-base sm:text-lg text-emerald-300 leading-relaxed font-medium">${this.escapeHtml(card.right)}</p></div>` : `<p class="text-xs text-slate-400 italic pt-2">Piensa tu respuesta y haz clic en la tarjeta para verificar...</p>`}
+              </div>
+              <div class="text-right font-mono-code text-[11px] text-slate-500">ID: ${card.id}</div>
+            </div>
+            ${this.ankiFlipped ? `
+              <div class="grid grid-cols-2 gap-3">
+                <button onclick="game.answerAnki(false)" class="btn-arcade py-3.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-500/60 text-rose-200 font-arcade font-bold text-sm">🔁 Otra vez (Repasar)</button>
+                <button onclick="game.answerAnki(true)" class="btn-arcade py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-arcade font-bold text-sm">✅ ¡Me la sé! (+15 XP)</button>
+              </div>
+            ` : `<button onclick="game.flipAnki()" class="btn-arcade w-full py-3.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-arcade font-bold text-sm">Mostrar Respuesta</button>`}
+          </div>
+        `;
+      },
+
+      flipAnki() { sfx.click(); this.ankiFlipped = !this.ankiFlipped; this.renderAnki(); },
+      answerAnki(known) {
+        const card = this.ankiDeck[this.ankiIndex];
+        if (known) { sfx.hit(); this.markMastered(card.id, 15); }
+        else { sfx.boom(); this.markMistake(card.id); this.ankiDeck.push(card); }
+        this.ankiIndex++; this.ankiFlipped = false; this.renderAnki();
+      },
+
+      startMatch(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        const pool = this.shuffle(this.getPairsByCat(cat)).slice(0, 5);
+        this.matchPairs = pool; this.matchLeftOrder = this.shuffle(pool); this.matchRightOrder = this.shuffle(pool);
+        this.matchSelLeft = null; this.matchMatchedIds = []; this.matchCombo = 0;
+        this.renderMatch();
+      },
+
+      renderMatch() {
+        const root = document.getElementById('game-root');
+        if (this.matchMatchedIds.length === this.matchPairs.length) {
+          root.innerHTML = `
+            <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+              <div class="text-5xl">⚡</div>
+              <h2 class="font-arcade text-2xl font-bold text-amber-400 uppercase">¡Tablero Conectado!</h2>
+              <p class="text-sm text-slate-300">Combo final: <strong>x${this.matchCombo}</strong> en <strong>${this.escapeHtml(this.currentCat)}</strong>.</p>
+              <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="game.startMatch('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm">Siguiente Tablero</button>
+                <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        const leftHtml = this.matchLeftOrder.map(p => {
+          const done = this.matchMatchedIds.includes(p.id); const sel = this.matchSelLeft === p.id;
+          return `<button ${done ? 'disabled' : ''} onclick="game.selectMatchLeft('${p.id}')" class="w-full text-left p-3 rounded-xl border text-xs sm:text-sm leading-snug transition ${done ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400/50 line-through opacity-50' : sel ? 'bg-purple-500/25 border-purple-400 text-white shadow-lg shadow-purple-500/20' : 'bg-slate-900/90 border-slate-700 text-slate-200 hover:border-purple-500/60'}">${this.escapeHtml(p.left)}</button>`;
+        }).join('');
+        const rightHtml = this.matchRightOrder.map(p => {
+          const done = this.matchMatchedIds.includes(p.id);
+          return `<button ${done ? 'disabled' : ''} onclick="game.selectMatchRight('${p.id}')" class="w-full text-left p-3 rounded-xl border text-xs sm:text-sm leading-snug transition ${done ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400/50 line-through opacity-50' : 'bg-slate-900/90 border-slate-700 text-emerald-200 hover:border-amber-400/70'}">${this.escapeHtml(p.right)}</button>`;
+        }).join('');
+        root.innerHTML = `
+          <div class="space-y-4 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-arcade text-sm text-amber-400 uppercase">⚡ Conecta-Pares • ${this.escapeHtml(this.currentCat)}</span>
+              <span class="font-mono-code text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">Combo x${this.matchCombo}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 ${this.matchErrorFlash ? 'animate-shake' : ''}">
+              <div class="space-y-2.5"><div class="font-mono-code text-[11px] text-purple-300 uppercase">Preguntas</div>${leftHtml}</div>
+              <div class="space-y-2.5"><div class="font-mono-code text-[11px] text-emerald-400 uppercase">Respuestas</div>${rightHtml}</div>
+            </div>
+          </div>
+        `;
+        this.matchErrorFlash = false;
+      },
+
+      selectMatchLeft(id) { sfx.click(); this.matchSelLeft = id; this.renderMatch(); },
+      selectMatchRight(id) {
+        if (!this.matchSelLeft) return;
+        if (this.matchSelLeft === id) { sfx.hit(); this.matchMatchedIds.push(id); this.matchCombo++; this.markMastered(id, 10 + this.matchCombo * 2); this.matchSelLeft = null; }
+        else { sfx.boom(); this.matchCombo = 0; this.matchErrorFlash = true; this.markMistake(this.matchSelLeft); this.matchSelLeft = null; }
+        this.renderMatch();
+      },
+
+      startMemo(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        const chosen = this.shuffle(this.getPairsByCat(cat)).slice(0, 6);
+        const deck = [];
+        chosen.forEach(p => { deck.push({ uid: p.id + '_L', pairId: p.id, side: 'P', text: p.left }); deck.push({ uid: p.id + '_R', pairId: p.id, side: 'R', text: p.right }); });
+        this.memoCards = this.shuffle(deck); this.memoFlipped = []; this.memoMatched = []; this.memoMoves = 0; this.memoLocked = false;
+        this.renderMemo();
+      },
+
+      renderMemo() {
+        const root = document.getElementById('game-root');
+        const totalPairs = this.memoCards.length / 2;
+        if (this.memoMatched.length === totalPairs && totalPairs > 0) {
+          root.innerHTML = `
+            <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+              <div class="text-5xl">🧠</div>
+              <h2 class="font-arcade text-2xl font-bold text-emerald-400 uppercase">¡Memorama Completado!</h2>
+              <p class="text-sm text-slate-300">Encontraste las ${totalPairs} parejas en <strong>${this.memoMoves} intentos</strong>.</p>
+              <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="game.startMemo('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-sm">Jugar Otro Memorama</button>
+                <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        const gridHtml = this.memoCards.map((c, idx) => {
+          const isMatched = this.memoMatched.includes(c.pairId);
+          const isOpen = isMatched || this.memoFlipped.includes(idx);
+          return `<button onclick="game.flipMemo(${idx})" class="min-h-[120px] p-3 rounded-xl border text-left transition flex flex-col justify-between ${isMatched ? 'bg-emerald-950/60 border-emerald-400/60 text-emerald-200' : isOpen ? (c.side === 'P' ? 'bg-purple-950/80 border-purple-400 text-white' : 'bg-amber-950/70 border-amber-400 text-amber-100') : 'bg-slate-900 border-slate-700 hover:border-purple-500/60 items-center justify-center'}">${isOpen ? `<span class="font-mono-code text-[10px] uppercase ${c.side === 'P' ? 'text-purple-300' : 'text-amber-300'}">${c.side === 'P' ? 'Pregunta' : 'Respuesta'}</span><span class="text-[11px] sm:text-xs leading-snug mt-1">${this.escapeHtml(c.text)}</span>` : `<span class="text-2xl opacity-70">🫀</span><span class="font-mono-code text-[10px] text-slate-500 mt-1">Voltear</span>`}</button>`;
+        }).join('');
+        root.innerHTML = `
+          <div class="space-y-4 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-arcade text-sm text-emerald-400 uppercase">🧠 Memorama • ${this.escapeHtml(this.currentCat)}</span>
+              <span class="font-mono-code text-xs text-slate-300">Parejas: ${this.memoMatched.length}/${totalPairs} • Intentos: ${this.memoMoves}</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">${gridHtml}</div>
+          </div>
+        `;
+      },
+
+      flipMemo(idx) {
+        if (this.memoLocked) return;
+        const card = this.memoCards[idx];
+        if (this.memoMatched.includes(card.pairId) || this.memoFlipped.includes(idx)) return;
+        sfx.click(); this.memoFlipped.push(idx); this.renderMemo();
+        if (this.memoFlipped.length === 2) {
+          this.memoMoves++; this.memoLocked = true;
+          const [i1, i2] = this.memoFlipped; const c1 = this.memoCards[i1]; const c2 = this.memoCards[i2];
+          if (c1.pairId === c2.pairId && c1.side !== c2.side) { sfx.hit(); this.memoMatched.push(c1.pairId); this.markMastered(c1.pairId, 20); this.memoFlipped = []; this.memoLocked = false; this.renderMemo(); }
+          else { setTimeout(() => { this.memoFlipped = []; this.memoLocked = false; this.renderMemo(); }, 1300); }
+        }
+      },
+
+      startShooter(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        this.shooterQueue = this.shuffle(this.getPairsByCat(cat)); this.shooterIndex = 0; this.shield = 100;
+        this.lasers = []; this.particles = []; this.feedbackMsg = ''; this.feedbackTimer = 0; this.shooterActive = true;
+        const root = document.getElementById('game-root');
+        root.innerHTML = `
+          <div class="space-y-3 pop-in">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-arcade text-sm text-purple-300 uppercase">🚀 Defensa Láser • ${this.escapeHtml(cat)}</span>
+              <div class="flex items-center gap-2">
+                <button onclick="game.setShooterSpeed('slow')" id="btn-spd-slow" class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ${this.shooterSpeed === 'slow' ? 'bg-emerald-500 text-slate-950 border-emerald-300' : 'bg-slate-900 text-slate-300 border-slate-700'}">🐢 LENTO</button>
+                <button onclick="game.setShooterSpeed('comfortable')" id="btn-spd-comf" class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ${this.shooterSpeed === 'comfortable' ? 'bg-purple-500 text-white border-purple-300' : 'bg-slate-900 text-slate-300 border-slate-700'}">🚀 CÓMODO</button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between font-mono-code text-xs px-1">
+              <span id="shooter-progress" class="text-slate-300">Nave 1 / ${this.shooterQueue.length}</span>
+              <span id="shooter-shield" class="text-emerald-400 font-bold">Escudo: 100%</span>
+            </div>
+            <div class="arcade-panel rounded-2xl p-2"><canvas id="shooter-canvas"></canvas></div>
+            <div id="shooter-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+          </div>
+        `;
+        this.canvas = document.getElementById('shooter-canvas'); this.ctx = this.canvas.getContext('2d'); this.resizeCanvas();
+        this.stars = Array.from({ length: 45 }, () => ({ x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height, r: Math.random() * 1.6 + 0.5, vy: Math.random() * 0.4 + 0.15 }));
+        this.spawnEnemy(); this.shooterLoop();
+      },
+
+      setShooterSpeed(spd) {
+        sfx.click(); this.shooterSpeed = spd;
+        if (this.enemy) this.enemy.vy = spd === 'slow' ? 0.18 : 0.34;
+        const bSlow = document.getElementById('btn-spd-slow'); const bComf = document.getElementById('btn-spd-comf');
+        if (bSlow && bComf) {
+          bSlow.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border ${spd === 'slow' ? 'bg-emerald-500 text-slate-950 border-emerald-300' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
+          bComf.className = `px-2.5 py-1 rounded-lg text-[11px] font-bold border ${spd === 'comfortable' ? 'bg-purple-500 text-white border-purple-300' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
+        }
+      },
+
+      resizeCanvas() {
+        if (!this.canvas || !this.canvas.parentElement) return;
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        this.canvas.width = Math.max(300, Math.floor(rect.width - 16)); this.canvas.height = 360;
+        if (this.enemy) this.enemy.x = this.canvas.width / 2;
+        if (this.turrets && this.turrets.length === 4) this.turrets.forEach((t, idx) => { t.x = (this.canvas.width / 4) * idx + (this.canvas.width / 8); });
+      },
+
+      spawnEnemy() {
+        if (this.shooterIndex >= this.shooterQueue.length || this.shield <= 0) { this.finishShooter(); return; }
+        const pair = this.shooterQueue[this.shooterIndex]; const w = this.canvas ? this.canvas.width : 640;
+        this.enemy = { pair, x: w / 2, y: 58, vy: this.shooterSpeed === 'slow' ? 0.18 : 0.34, pulse: 0 };
+        const distractors = this.getDistractors(pair, 3);
+        const options = this.shuffle([{ text: pair.right, correct: true }, ...distractors.map(d => ({ text: d.right, correct: false }))]);
+        this.turrets = options.map((opt, idx) => ({ idx, text: opt.text, correct: opt.correct, x: (w / 4) * idx + (w / 8), y: 318 }));
+        const progEl = document.getElementById('shooter-progress'); const shEl = document.getElementById('shooter-shield');
+        if (progEl) progEl.textContent = `Nave ${this.shooterIndex + 1} / ${this.shooterQueue.length}`;
+        if (shEl) { shEl.textContent = `Escudo: ${this.shield}%`; shEl.className = `font-bold ${this.shield > 50 ? 'text-emerald-400' : this.shield > 25 ? 'text-amber-400' : 'text-rose-400'}`; }
+        const btnBox = document.getElementById('shooter-buttons');
+        if (btnBox) {
+          const labels = ['A', 'B', 'C', 'D'];
+          btnBox.innerHTML = this.turrets.map((t, idx) => `<button onclick="game.fireTurret(${idx})" class="btn-arcade text-left p-3 rounded-xl bg-slate-900/95 hover:bg-slate-800 border border-purple-500/35 hover:border-purple-400 text-xs sm:text-sm text-slate-100 flex items-start gap-2.5 leading-snug"><span class="shrink-0 w-6 h-6 rounded-lg bg-purple-500/20 border border-purple-400/50 text-purple-300 font-arcade font-bold flex items-center justify-center text-xs">${labels[idx]}</span><span>${this.escapeHtml(t.text)}</span></button>`).join('');
+        }
+      },
+
+      fireTurret(idx) {
+        if (!this.shooterActive || !this.enemy || !this.turrets[idx]) return;
+        const turret = this.turrets[idx]; sfx.laser();
+        this.lasers.push({ x: turret.x, y: turret.y - 12, tx: this.enemy.x, ty: this.enemy.y, progress: 0, color: turret.correct ? '#34d399' : '#f43f5e' });
+        if (turret.correct) {
+          sfx.hit(); this.spawnExplosion(this.enemy.x, this.enemy.y, '#34d399'); this.markMastered(this.enemy.pair.id, 20);
+          this.feedbackMsg = '¡IMPACTO DIRECTO! +20 XP'; this.feedbackColor = '#34d399'; this.feedbackTimer = 60;
+          this.shooterIndex++; this.enemy = null;
+          setTimeout(() => { if (this.shooterActive) this.spawnEnemy(); }, 320);
+        } else {
+          sfx.boom(); this.shield = Math.max(0, this.shield - 20); this.markMistake(this.enemy.pair.id);
+          this.spawnExplosion(turret.x, turret.y - 20, '#f43f5e');
+          this.feedbackMsg = '¡FALLO! -20% ESCUDO'; this.feedbackColor = '#f43f5e'; this.feedbackTimer = 60;
+          const shEl = document.getElementById('shooter-shield'); if (shEl) shEl.textContent = `Escudo: ${this.shield}%`;
+          if (this.shield <= 0) this.finishShooter();
+        }
+      },
+
+      spawnExplosion(x, y, color) {
+        for (let i = 0; i < 18; i++) {
+          const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 3.5 + 1;
+          this.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 28, color });
+        }
+      },
+
+      wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' '); let line = ''; const lines = [];
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          if (ctx.measureText(testLine).width > maxWidth && n > 0) { lines.push(line.trim()); line = words[n] + ' '; }
+          else { line = testLine; }
+        }
+        lines.push(line.trim());
+        const startY = y - ((lines.length - 1) * lineHeight) / 2;
+        lines.forEach((l, i) => ctx.fillText(l, x, startY + i * lineHeight));
+        return lines.length;
+      },
+
+      shooterLoop() {
+        if (!this.shooterActive || !this.ctx || !this.canvas) return;
+        const ctx = this.ctx; const w = this.canvas.width; const h = this.canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.55)';
+        this.stars.forEach(s => { s.y += s.vy; if (s.y > h) { s.y = 0; s.x = Math.random() * w; } ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill(); });
+        ctx.strokeStyle = this.shield > 40 ? 'rgba(52, 211, 153, 0.5)' : 'rgba(244, 63, 94, 0.7)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(16, h - 42); ctx.lineTo(w - 16, h - 42); ctx.stroke();
+        const tLabels = ['A', 'B', 'C', 'D'];
+        this.turrets.forEach((t, i) => {
+          ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(t.x, h - 22, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#e9d5ff'; ctx.font = 'bold 12px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(tLabels[i], t.x, h - 22);
+        });
+        if (this.enemy) {
+          this.enemy.y += this.enemy.vy;
+          const boxW = Math.min(w - 24, 560); ctx.font = 'bold 13px "Inter", sans-serif';
+          const words = this.enemy.pair.left.split(' '); let tmpLine = ''; let lineCount = 1;
+          for (let n = 0; n < words.length; n++) {
+            const test = tmpLine + words[n] + ' ';
+            if (ctx.measureText(test).width > boxW - 28 && n > 0) { lineCount++; tmpLine = words[n] + ' '; }
+            else { tmpLine = test; }
+          }
+          const boxH = Math.max(68, lineCount * 17 + 34); const bx = this.enemy.x - boxW / 2; const by = this.enemy.y - boxH / 2;
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.96)'; ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 2.5;
+          ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(bx, by, boxW, boxH, 12); else ctx.rect(bx, by, boxW, boxH); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#d8b4fe'; ctx.font = 'bold 10px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(this.enemy.pair.cat.toUpperCase(), this.enemy.x, by + 15);
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 13px "Inter", sans-serif';
+          this.wrapCanvasText(ctx, this.enemy.pair.left, this.enemy.x, by + 24 + (boxH - 26) / 2, boxW - 28, 17);
+          if (this.enemy.y + boxH / 2 >= h - 42) {
+            sfx.boom(); this.shield = Math.max(0, this.shield - 25); this.markMistake(this.enemy.pair.id);
+            this.spawnExplosion(this.enemy.x, h - 46, '#f43f5e'); this.feedbackMsg = '¡IMPACTO EN ESCUDO! -25%'; this.feedbackColor = '#f43f5e'; this.feedbackTimer = 60;
+            this.shooterIndex++; this.enemy = null;
+            if (this.shield <= 0) { this.finishShooter(); return; }
+            setTimeout(() => { if (this.shooterActive) this.spawnEnemy(); }, 350);
+          }
+        }
+        this.lasers = this.lasers.filter(l => {
+          l.progress += 0.22; const cx = l.x + (l.tx - l.x) * l.progress; const cy = l.y + (l.ty - l.y) * l.progress;
+          ctx.strokeStyle = l.color; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.lineTo(cx, cy); ctx.stroke();
+          return l.progress < 1;
+        });
+        this.particles = this.particles.filter(p => {
+          p.x += p.vx; p.y += p.vy; p.life--; ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life / 28);
+          ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+          return p.life > 0;
+        });
+        if (this.feedbackTimer > 0) {
+          this.feedbackTimer--; ctx.fillStyle = this.feedbackColor; ctx.font = 'bold 14px "Chakra Petch", sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText(this.feedbackMsg, w / 2, 24);
+        }
+        this.rafId = requestAnimationFrame(() => this.shooterLoop());
+      },
+
+      finishShooter() {
+        this.stopTimers(); const won = this.shield > 0; const root = document.getElementById('game-root');
+        root.innerHTML = `
+          <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+            <div class="text-5xl">${won ? '🚀' : '💥'}</div>
+            <h2 class="font-arcade text-2xl font-bold ${won ? 'text-emerald-400' : 'text-rose-400'} uppercase">${won ? '¡Sector Defendido!' : 'Escudo Caído'}</h2>
+            <p class="text-sm text-slate-300">Escudo restante: <strong>${this.shield}%</strong> en <strong>${this.escapeHtml(this.currentCat)}</strong>.</p>
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+              <button onclick="game.startShooter('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-purple-500 text-white font-bold text-sm">Volver a Jugar</button>
+              <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+            </div>
+          </div>
+        `;
+      },
+
+      startBoss(cat) {
+        sfx.click(); this.stopTimers(); this.currentCat = cat;
+        this.bossQueue = this.shuffle(this.getPairsByCat(cat)); this.bossIdx = 0;
+        this.bossMaxHp = this.bossQueue.length * 100; this.bossHp = this.bossMaxHp; this.playerHp = 100;
+        this.bossLog = '¡El Jefe de Cardiología 2 ha aparecido! Responde en menos de 15s para golpe crítico.';
+        this.bossName = cat === 'ALL_MISTAKES' ? 'Tormenta de Fallos' : `Jefe: ${cat}`;
+        this.prepareBossTurn();
+      },
+
+      prepareBossTurn() {
+        if (this.bossTimerId) clearInterval(this.bossTimerId);
+        if (this.bossHp <= 0 || this.playerHp <= 0 || this.bossIdx >= this.bossQueue.length) { this.renderBossResult(); return; }
+        const pair = this.bossQueue[this.bossIdx]; const distractors = this.getDistractors(pair, 3);
+        this.bossOptions = this.shuffle([{ text: pair.right, correct: true }, ...distractors.map(d => ({ text: d.right, correct: false }))]);
+        this.bossAnswered = false; this.bossTimer = 25; this.renderBoss();
+        this.bossTimerId = setInterval(() => {
+          if (this.bossAnswered) return;
+          this.bossTimer--; const tEl = document.getElementById('boss-timer'); if (tEl) tEl.textContent = `${this.bossTimer}s`;
+          if (this.bossTimer <= 0) { clearInterval(this.bossTimerId); this.answerBoss(-1); }
+        }, 1000);
+      },
+
+      renderBoss() {
+        const root = document.getElementById('game-root'); const pair = this.bossQueue[this.bossIdx];
+        const bossPct = Math.max(0, Math.round((this.bossHp / this.bossMaxHp) * 100)); const labels = ['A', 'B', 'C', 'D'];
+        const optsHtml = this.bossOptions.map((opt, idx) => `<button ${this.bossAnswered ? 'disabled' : ''} onclick="game.answerBoss(${idx})" class="btn-arcade w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm leading-snug flex items-start gap-2.5 ${this.bossAnswered ? (opt.correct ? 'bg-emerald-500/25 border-emerald-400 text-emerald-100' : 'bg-slate-900/60 border-slate-800 text-slate-500') : 'bg-slate-900/95 hover:bg-slate-800 border-rose-500/35 hover:border-purple-400 text-slate-100'}"><span class="shrink-0 w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-400/50 text-rose-300 font-arcade font-bold flex items-center justify-center text-xs">${labels[idx]}</span><span>${this.escapeHtml(opt.text)}</span></button>`).join('');
+        root.innerHTML = `
+          <div class="max-w-3xl mx-auto w-full space-y-4 pop-in">
+            <div class="flex items-center justify-between">
+              <button onclick="game.showMenu()" class="btn-arcade px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">← Menú</button>
+              <span class="font-mono-code text-xs text-slate-400">Turno ${this.bossIdx + 1} / ${this.bossQueue.length}</span>
+              <span id="boss-timer" class="font-mono-code text-sm font-bold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">${this.bossTimer}s</span>
+            </div>
+            <div class="arcade-panel rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 border-rose-500/40">
+              <div>
+                <div class="flex justify-between text-xs font-arcade font-bold mb-1"><span class="text-rose-400 uppercase">👾 ${this.escapeHtml(this.bossName)}</span><span class="text-rose-300">${this.bossHp} / ${this.bossMaxHp} HP</span></div>
+                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-rose-900"><div class="h-full bg-gradient-to-r from-rose-600 to-amber-500 transition-all duration-300" style="width:${bossPct}%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-arcade font-bold mb-1"><span class="text-emerald-400 uppercase">🛡️ Tu Escudo Cardíaco</span><span class="text-emerald-300">${this.playerHp} / 100 HP</span></div>
+                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-emerald-900"><div class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-300" style="width:${this.playerHp}%"></div></div>
+              </div>
+            </div>
+            <div class="text-center font-mono-code text-xs text-purple-300">${this.escapeHtml(this.bossLog)}</div>
+            <div class="arcade-panel rounded-2xl p-5"><p class="text-base sm:text-lg font-bold text-white leading-relaxed">${this.escapeHtml(pair.left)}</p></div>
+            <div class="space-y-2.5">${optsHtml}</div>
+            ${this.bossAnswered ? `<button onclick="game.nextBossTurn()" class="btn-arcade w-full py-3 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-arcade font-bold text-sm">Siguiente Turno →</button>` : ''}
+          </div>
+        `;
+      },
+
+      answerBoss(idx) {
+        if (this.bossAnswered) return;
+        this.bossAnswered = true; if (this.bossTimerId) clearInterval(this.bossTimerId);
+        const pair = this.bossQueue[this.bossIdx];
+        const isCorrect = idx >= 0 && this.bossOptions[idx] && this.bossOptions[idx].correct;
+        if (isCorrect) {
+          sfx.hit(); const crit = this.bossTimer >= 10; const dmg = crit ? 130 : 100;
+          this.bossHp = Math.max(0, this.bossHp - dmg); this.markMastered(pair.id, crit ? 25 : 15);
+          this.bossLog = crit ? `¡ATAQUE CRÍTICO (-${dmg} HP al Jefe)! +25 XP` : `¡Golpe certero (-${dmg} HP al Jefe)! +15 XP`;
+        } else {
+          sfx.boom(); this.playerHp = Math.max(0, this.playerHp - 25); this.markMistake(pair.id);
+          this.bossLog = idx === -1 ? '¡Se acabó el tiempo! El Jefe contraataca (-25 HP).' : '¡Respuesta incorrecta! El Jefe contraataca (-25 HP).';
+        }
+        this.renderBoss();
+      },
+
+      nextBossTurn() { sfx.click(); this.bossIdx++; this.prepareBossTurn(); },
+      renderBossResult() {
+        this.stopTimers(); const won = this.playerHp > 0; const root = document.getElementById('game-root');
+        root.innerHTML = `
+          <div class="arcade-panel rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto pop-in">
+            <div class="text-5xl">${won ? '👑' : '💀'}</div>
+            <h2 class="font-arcade text-2xl font-bold ${won ? 'text-emerald-400' : 'text-rose-400'} uppercase">${won ? '¡Jefe Derrotado!' : 'Derrota Clínica'}</h2>
+            <p class="text-sm text-slate-300">${won ? 'Dominaste la batalla contra' : 'El jefe te superó en'} <strong>${this.escapeHtml(this.bossName)}</strong>.</p>
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+              <button onclick="game.startBoss('${this.currentCat.replace(/'/g, "\\'")}')" class="btn-arcade px-4 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-sm">Revancha</button>
+              <button onclick="game.showMenu()" class="btn-arcade px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-sm">Volver al Menú</button>
+            </div>
+          </div>
+        `;
+      },
+
+      openAnkiModal() { sfx.click(); const m = document.getElementById('anki-modal'); if (m) m.classList.remove('hidden'); this.setAnkiExport(this.mistakes.length > 0 ? 'mistakes' : 'all'); },
+      closeAnkiModal() { sfx.click(); const m = document.getElementById('anki-modal'); if (m) m.classList.add('hidden'); const st = document.getElementById('anki-status'); if (st) st.classList.add('hidden'); },
+      setAnkiExport(mode) {
+        const list = mode === 'mistakes' ? CARDIO2_PAIRS.filter(p => this.mistakes.includes(p.id)) : CARDIO2_PAIRS;
+        const ta = document.getElementById('anki-textarea'); if (!ta) return;
+        ta.value = list.length ? list.map(p => `${p.left.replace(/;/g, ',')} ; ${p.right.replace(/;/g, ',')}`).join('\n') : 'No tienes fallos registrados todavía.';
+      },
+      copyAnkiText() {
+        const ta = document.getElementById('anki-textarea'); const st = document.getElementById('anki-status'); if (!ta) return;
+        ta.select(); ta.setSelectionRange(0, 99999);
+        try { document.execCommand('copy'); sfx.hit(); if (st) st.classList.remove('hidden'); } catch (e) {}
+      }
+    };
+
+    window.addEventListener('resize', () => game.resizeCanvas());
+    window.addEventListener('keydown', (e) => {
+      if (game.shooterActive && ['1', '2', '3', '4'].includes(e.key)) game.fireTurret(parseInt(e.key, 10) - 1);
+      else if (game.bossQueue.length > 0 && !game.bossAnswered && document.getElementById('boss-timer') && ['1', '2', '3', '4'].includes(e.key)) game.answerBoss(parseInt(e.key, 10) - 1);
+      else if (game.ankiDeck.length > 0 && game.ankiIndex < game.ankiDeck.length && e.code === 'Space' && !game.shooterActive && !document.getElementById('boss-timer')) { e.preventDefault(); game.flipAnki(); }
+    });
+    window.onload = () => game.init();
+  </script>
+</body>
+</html>
