@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CardioDefensa • Cardiología 3 (147 Tarjetas)</title>
+  <title>CardioDefensa • Cardiología 3 (283 Tarjetas)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
@@ -64,7 +64,7 @@
           <h1 class="font-arcade text-lg sm:text-xl font-bold tracking-wider uppercase text-white leading-none">
             CARDIO<span class="text-rose-400">DEFENSA</span>
           </h1>
-          <span class="font-mono-code text-[11px] text-rose-300">Cardiología 3 • IC (74), Cor Pulmonale (18), SCR (16) y Cardiomiopatías (39)</span>
+          <span class="font-mono-code text-[11px] text-rose-300">Cardiología 3 • Fiebre Reumática (35), Pericarditis (101), IC (74), CP (18), SCR (16) y Cardiomiopatías (39)</span>
         </div>
       </div>
 
@@ -79,7 +79,7 @@
         </div>
         <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-2 font-mono-code text-xs">
           <span class="text-rose-300">Dominados:</span>
-          <span id="hud-mastered" class="font-bold text-emerald-400">0/147</span>
+          <span id="hud-mastered" class="font-bold text-emerald-400">0/283</span>
         </div>
         <button onclick="game.openAnkiModal()" class="btn-arcade px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 font-arcade font-bold text-xs flex items-center gap-1.5">
           <span>Exportar Anki</span>
@@ -103,7 +103,7 @@
       </div>
       <div class="flex flex-wrap gap-2">
         <button onclick="game.setAnkiExport('mistakes')" class="px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/50 text-rose-300 text-xs font-bold">Solo Fallos</button>
-        <button onclick="game.setAnkiExport('all')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-bold">Todo Cardiología 3 (147)</button>
+        <button onclick="game.setAnkiExport('all')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-bold">Todo Cardiología 3 (283)</button>
         <button onclick="game.copyAnkiText()" class="ml-auto px-4 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold">Copiar Texto</button>
       </div>
       <textarea id="anki-textarea" readonly rows="9" class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono-code text-xs text-slate-200 focus:outline-none"></textarea>
@@ -113,7 +113,7 @@
 
   <!-- Pie -->
   <footer class="border-t border-slate-900 py-3 px-4 text-center text-[11px] font-mono-code text-slate-500">
-    CardioDefensa • Módulo 3: Cardiología 3 (147 tarjetas: IC, Cor Pulmonale, SCR, Cardiomiopatías y Miocarditis)
+    CardioDefensa • Módulo 3: Cardiología 3 (283 tarjetas: Fiebre Reumática, Pericarditis, IC, Cor Pulmonale, SCR y Cardiomiopatías)
   </footer>
 
   <script>
@@ -142,6 +142,966 @@
     };
 
     const cardiologiaDia3 = [
+      // =========================================================================
+      // TEMA 1: FIEBRE REUMÁTICA (35 PREGUNTAS)
+      // =========================================================================
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Etiología, Fisiopatología y Cuadro Clínico General",
+        numero: 1,
+        pregunta: "¿Qué es la fiebre reumática y cuál es su agente etiológico desencadenante?",
+        respuesta: "Es una enfermedad inflamatoria no-supurativa causada por una reacción inmunológica desencadenada por una infección faríngea por Streptococcus pyogenes."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Etiología, Fisiopatología y Cuadro Clínico General",
+        numero: 2,
+        pregunta: "¿Cuál es el periodo de latencia entre la faringitis estreptocócica y la aparición de la fiebre reumática?",
+        respuesta: "Aparece 2 a 3 semanas después del cuadro de faringitis."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Etiología, Fisiopatología y Cuadro Clínico General",
+        numero: 3,
+        pregunta: "¿Cuáles son los cinco órganos o tejidos principalmente afectados por la fiebre reumática?",
+        respuesta: "• Corazón\n• Articulaciones\n• Piel\n• Tejido celular subcutáneo\n• Sistema nervioso central (SNC)"
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Etiología, Fisiopatología y Cuadro Clínico General",
+        numero: 4,
+        pregunta: "¿Cuál es la complicación más seria de la fiebre reumática?",
+        respuesta: "La cardiopatía reumática."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Etiología, Fisiopatología y Cuadro Clínico General",
+        numero: 5,
+        pregunta: "¿Cuáles son los cinco signos inflamatorios clásicos mediante los cuales puede manifestarse la fiebre reumática?",
+        respuesta: "• Artritis\n• Carditis\n• Corea (debilidad muscular, labilidad emocional, movimientos involuntarios rápidos de casi todos los músculos)\n• Nódulos subcutáneos\n• Eritema marginado"
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Etiología, Fisiopatología y Cuadro Clínico General",
+        numero: 6,
+        pregunta: "¿Cuáles son las manifestaciones clínicas y auscultatorias de la carditis reumática?",
+        respuesta: "• Soplo cardiaco nuevo (regurgitación mitral, insuficiencia aórtica o soplo diastólico mitral).\n• Cardiomegalia.\n• Insuficiencia cardiaca congestiva.\n• Frote o derrame pericárdico."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Diagnósticos de Jones",
+        numero: 7,
+        pregunta: "¿Cómo se establece el diagnóstico de un PRIMER episodio de fiebre reumática según los criterios de Jones?",
+        respuesta: "Requiere evidencia de infección estreptocócica precedente más:\n• 2 criterios mayores, O\n• 1 criterio mayor + 2 criterios menores."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Diagnósticos de Jones",
+        numero: 8,
+        pregunta: "¿Cuáles son las dos excepciones en los criterios de Jones que permiten diagnosticar fiebre reumática por sí solas sin cumplir la regla estándar?",
+        respuesta: "• La corea (de Sydenham).\n• La carditis indolente."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Diagnósticos de Jones",
+        numero: 9,
+        pregunta: "¿Cómo se establece el diagnóstico de un EPISODIO RECURRENTE de fiebre reumática?",
+        respuesta: "Con la presencia de 3 criterios menores más la evidencia de un cuadro precedente de infección por Streptococcus pyogenes."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Mayores de Jones",
+        numero: 10,
+        pregunta: "¿Cuáles son los 5 criterios mayores de Jones?",
+        respuesta: "1. Poliartritis migratoria\n2. Carditis\n3. Nódulos subcutáneos\n4. Eritema marginado\n5. Corea de Sydenham (baile de San Vito)"
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Mayores de Jones",
+        numero: 11,
+        pregunta: "¿Cómo se caracteriza la poliartritis migratoria de la fiebre reumática?",
+        respuesta: "Es una inflamación temporal y migratoria de articulaciones grandes, que usualmente inicia en las piernas y migra en dirección cefálica."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Mayores de Jones",
+        numero: 12,
+        pregunta: "¿Cómo se manifiesta la carditis como criterio mayor de Jones?",
+        respuesta: "Como inflamación miocárdica evidenciada por insuficiencia cardiaca congestiva, pericarditis con frote o un soplo cardiaco nuevo."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Mayores de Jones",
+        numero: 13,
+        pregunta: "¿Qué son los nódulos subcutáneos, cuánto miden y cuáles son sus localizaciones anatómicas más frecuentes?",
+        respuesta: "Son colecciones firmes de fibras de colágeno sobre huesos o tendones con un diámetro de 0.5 a 2 cm, localizados comúnmente en:\n• Cara dorsal de la muñeca\n• Cara lateral del codo\n• Cara frontal de la rodilla"
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Mayores de Jones",
+        numero: 14,
+        pregunta: "¿Qué porcentaje de pacientes presenta eritema marginado y cuáles son sus características semiológicas?",
+        respuesta: "Se presenta en el 2 % de los casos y es altamente específico; consiste en máculas o pápulas de color rosa brillante, indoloras, que presentan diascopia (blanqueamiento a la vitropresión) y se extienden centrífugamente con un patrón circular o serpiginoso."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Mayores de Jones",
+        numero: 15,
+        pregunta: "¿Qué es la corea de Sydenham, cuándo suele aparecer y cuáles son sus tres signos clínicos característicos?",
+        respuesta: "También llamada baile de San Vito, es una serie característica de movimientos rápidos de cara y brazos sin propósito que aparece generalmente de forma tardía en la enfermedad. Sus signos clínicos son:\n• 'Prensión de la lechera'\n• 'El cuchareo'\n• Signo del pronador"
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Menores de Jones y Evidencia Estreptocócica",
+        numero: 16,
+        pregunta: "¿Cuáles son los criterios menores de Jones?",
+        respuesta: "• Fiebre\n• Artralgia (dolor articular sin edema)\n• Elevación de reactantes de fase aguda (VSG o PCR)\n• Leucocitosis\n• Prolongación del intervalo PR en el electrocardiograma (dependiente de la edad)\n• Episodio previo de fiebre reumática o enfermedad cardiaca inactiva"
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Menores de Jones y Evidencia Estreptocócica",
+        numero: 17,
+        pregunta: "¿Qué valores de VSG y PCR se consideran positivos como criterio menor de Jones?",
+        respuesta: "• Velocidad de eritrosedimentación (VSG): ≥ 30 mm/hora.\n• Proteína C reactiva (PCR): ≥ 30 μg/L."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Menores de Jones y Evidencia Estreptocócica",
+        numero: 18,
+        pregunta: "¿Cuáles son los puntos de corte por grupo de edad para considerar prolongado el intervalo PR en el ECG como criterio menor?",
+        respuesta: "• 3 a 12 años: intervalo PR > 0.16 segundos.\n• 12 a 16 años: intervalo PR > 0.18 segundos.\n• ≥ 17 años: intervalo PR > 0.20 segundos."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Criterios Menores de Jones y Evidencia Estreptocócica",
+        numero: 19,
+        pregunta: "¿Cómo se documenta la evidencia de infección estreptocócica precedente en los criterios de Jones?",
+        respuesta: "Mediante títulos de antiestreptolisinas O (ASLO) o anti-DNAsa B elevados o en ascenso (elevándose)."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Diagnóstico Microbiológico e Inmunológico",
+        numero: 20,
+        pregunta: "¿Cuál es el estándar de oro diagnóstico para la colonización faríngea por Streptococcus pyogenes y en qué medios debe transportarse la muestra?",
+        respuesta: "El estándar de oro es el cultivo en agar sangre de cordero al 5 %, y la muestra debe enviarse al laboratorio en los medios de transporte Cary-Blair o Amies."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Diagnóstico Microbiológico e Inmunológico",
+        numero: 21,
+        pregunta: "¿Cuáles son los puntos de corte por edad de los títulos de antiestreptolisinas O (ASLO) para evidenciar una infección previa por S. pyogenes?",
+        respuesta: "• 4 a 5 años: 120 unidades/mL.\n• 6 a 9 años: 480 unidades/mL.\n• 10 a 14 años: 320 unidades/mL."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Evaluación de Corea, Hospitalización y Tratamiento Específico",
+        numero: 22,
+        pregunta: "¿Por qué todos los pacientes con corea deben referirse al segundo nivel de atención para obtener ECG y ecocardiograma, y qué hallazgos pueden revelar?",
+        respuesta: "Porque la corea se asocia en un 71 % de los casos a la presencia de carditis:\n• Electrocardiograma: puede revelar prolongación del intervalo QT.\n• Ecocardiograma: puede revelar valvulitis, miocarditis o pericarditis."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Evaluación de Corea, Hospitalización y Tratamiento Específico",
+        numero: 23,
+        pregunta: "¿Cuál es la conducta intrahospitalaria inmediata ante la sospecha de un episodio inicial o recurrente de fiebre reumática?",
+        respuesta: "Todos los pacientes bajo sospecha de episodio inicial o recurrente deben hospitalizarse a la brevedad posible."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Evaluación de Corea, Hospitalización y Tratamiento Específico",
+        numero: 24,
+        pregunta: "¿Con qué fármaco se maneja el dolor ANTES de confirmar el diagnóstico de fiebre reumática?",
+        respuesta: "Con paracetamol."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Evaluación de Corea, Hospitalización y Tratamiento Específico",
+        numero: 25,
+        pregunta: "Una vez confirmado el diagnóstico de fiebre reumática, ¿cómo se manejan las artralgias graves?",
+        respuesta: "Con salicilatos (el naproxeno es una alternativa aceptable)."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Evaluación de Corea, Hospitalización y Tratamiento Específico",
+        numero: 26,
+        pregunta: "¿Cuál es el tratamiento inicial de la corea grave y qué opciones se emplean en formas refractarias?",
+        respuesta: "• Tratamiento inicial: carbamazepina.\n• Formas refractarias: ácido valproico o inmunoglobulina intravenosa."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Evaluación de Corea, Hospitalización y Tratamiento Específico",
+        numero: 27,
+        pregunta: "¿Con qué fármacos se trata la carditis reumática y sus formas graves?",
+        respuesta: "• Carditis: prednisona o prednisolona.\n• Formas graves: metilprednisolona."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Prevención Primaria y Erradicación de Streptococcus pyogenes",
+        numero: 28,
+        pregunta: "¿Cuáles son las medidas específicas de prevención primaria establecidas por la GPC para la fiebre reumática?",
+        respuesta: "Corresponden al saneamiento básico y vigilancia clínica escolar:\n• Construcción de viviendas con espacio, luz y ventilación adecuados.\n• Disponibilidad de agua potable.\n• Disposición adecuada de basura y excretas.\n• Manejo higiénico de los alimentos.\n• Auscultación cuidadosa en los pacientes escolares."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Prevención Primaria y Erradicación de Streptococcus pyogenes",
+        numero: 29,
+        pregunta: "¿Cuál es el esquema temporal de tratamiento antibiótico en pacientes con faringoamigdalitis bacteriana diagnosticada mediante criterios de Centor?",
+        respuesta: "Deben recibir un tratamiento antibiótico para abatir la infección aguda, seguido de un esquema de erradicación definitiva 9 días después de la conclusión del primer régimen."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Prevención Primaria y Erradicación de Streptococcus pyogenes",
+        numero: 30,
+        pregunta: "¿Cuál es el manejo antibiótico específico para S. pyogenes según las últimas actualizaciones de las guías mexicanas de infecciones de vías respiratorias altas?",
+        respuesta: "• Elección: Penicilina G benzatínica.\n• Alternativas: penicilina benzatínica + procaínica o penicilina oral (penicilina V potásica o amoxicilina).\n• En caso de alergia a la penicilina: macrólido, clindamicina o cefalosporinas de primera generación."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Profilaxis Antibiótica Secundaria y Contra Endocarditis Bacteriana",
+        numero: 31,
+        pregunta: "¿Cuál es la duración recomendada de la profilaxis antibiótica secundaria en pacientes con fiebre reumática según su presentación clínica?",
+        respuesta: "• Fiebre reumática con carditis y daño valvular persistente: durante 10 años o hasta que cumpla 40 años; puede ser vitalicia.\n• Fiebre reumática con carditis y sin daño valvular: durante 10 años o hasta que cumpla 21 años; puede tener una duración mayor.\n• Fiebre reumática sin carditis: durante 5 años o hasta que cumpla 21 años; puede tener una duración mayor."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Profilaxis Antibiótica Secundaria y Contra Endocarditis Bacteriana",
+        numero: 32,
+        pregunta: "¿En qué momento clínico resulta primordial el cuidado dental en pacientes con antecedente de fiebre o cardiopatía reumáticas?",
+        respuesta: "En el periodo previo a la realización de la cirugía valvular."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Profilaxis Antibiótica Secundaria y Contra Endocarditis Bacteriana",
+        numero: 33,
+        pregunta: "¿Cuáles son los agentes y dosis de elección para la profilaxis contra endocarditis bacteriana?",
+        respuesta: "• Amoxicilina: 2 g o 50 mg/kg, 30 a 60 minutos antes del procedimiento.\n• Ampicilina: 2 g o 50 mg/kg, 30 a 60 minutos antes del procedimiento."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Profilaxis Antibiótica Secundaria y Contra Endocarditis Bacteriana",
+        numero: 34,
+        pregunta: "¿Cuál es el esquema de profilaxis contra endocarditis bacteriana en pacientes alérgicos a la penicilina (sin anafilaxia/angioedema)?",
+        respuesta: "• Cefalexina: 2 g o 50 mg/kg, 30 a 60 minutos antes del procedimiento."
+      },
+      {
+        tema: "Tema 1: Fiebre Reumática",
+        subtema: "Profilaxis Antibiótica Secundaria y Contra Endocarditis Bacteriana",
+        numero: 35,
+        pregunta: "¿Cuáles son los esquemas de profilaxis contra endocarditis bacteriana en pacientes con historia de anafilaxia o angioedema?",
+        respuesta: "• Clindamicina: 600 mg o 15 a 20 mg/kg, 30 a 60 minutos antes del procedimiento.\n• Azitromicina: 500 mg o 15 mg/kg, 30 a 60 minutos antes del procedimiento."
+      },
+
+      // =========================================================================
+      // TEMA 2: PERICARDITIS Y TAPONAMIENTO CARDIACO (101 PREGUNTAS)
+      // =========================================================================
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Definición y Epidemiología",
+        numero: 1,
+        pregunta: "¿Qué es la pericarditis?",
+        respuesta: "Es un síndrome inflamatorio del pericardio que puede presentarse con o sin derrame pericárdico."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Definición y Epidemiología",
+        numero: 2,
+        pregunta: "¿Qué porcentaje de consultas en urgencias y hospitalizaciones representa la pericarditis?",
+        respuesta: "• Consultas en servicios de urgencias: hasta el 5 %.\n• Hospitalizaciones: 0.1 %."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Definición y Epidemiología",
+        numero: 3,
+        pregunta: "¿Cuál es el grupo etario predominante y la distribución por sexo en la pericarditis?",
+        respuesta: "Predomina entre los 41 y 60 años, con una proporción hombres a mujeres de 2:1, aunque las mujeres presentan mayor riesgo de complicaciones."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Definición y Epidemiología",
+        numero: 4,
+        pregunta: "¿Qué factores de riesgo clínicos o electrocardiográficos aumentan la probabilidad de compromiso miocárdico en la pericarditis?",
+        respuesta: "• Fiebre\n• Arritmia\n• Elevación del segmento ST"
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 5,
+        pregunta: "¿Cómo se clasifica etiológicamente la pericarditis?",
+        respuesta: "• Infecciosa: viral, bacteriana o fúngica.\n• No infecciosa: autoinmune, metabólica, traumática, neoplásica, inducida por radiación o fármacos."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 6,
+        pregunta: "¿Cuáles son las principales etiologías de pericarditis según la región geográfica (países desarrollados vs. regiones emergentes)?",
+        respuesta: "• Países desarrollados (ej. Europa occidental): mayoritariamente idiopática o viral (virus Coxsackie B y herpesvirus); la etiología idiopática representa aproximadamente el 55 % de los casos.\n• Regiones emergentes (ej. África): la tuberculosis es la causa principal, representando el 69.5 % de los casos (mientras que la idiopática disminuye al 13.7 %)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 7,
+        pregunta: "¿Cuáles son los porcentajes comparativos de las etiologías específicas entre Europa occidental y África?",
+        respuesta: "• Idiopática: 55 % en Europa occidental vs. 13.7 % en África.\n• Tuberculosis: causa principal en regiones emergentes (69.5 % en África).\n• Neoplasias: 8.9 % en Europa occidental vs. 9.4 % en África.\n• Causas autoinmunes: 2.6 % en Europa occidental vs. 5.2 % en África.\n• Pericarditis purulenta: 3.0 % en Europa occidental vs. 2.1 % en África."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 8,
+        pregunta: "¿Qué enfermedades autoinmunes y posisquémicas destacan entre las causas no infecciosas de pericarditis?",
+        respuesta: "• Lupus eritematoso sistémico (LES)\n• Artritis reumatoide\n• Síndrome de Dressler (asociado a infarto agudo de miocardio)"
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Fisiopatología y Complicaciones",
+        numero: 9,
+        pregunta: "¿Cuál es la fisiopatología de la inflamación pericárdica?",
+        respuesta: "La inflamación del pericardio genera aumento de la permeabilidad capilar, infiltración leucocitaria y acumulación de líquido inflamatorio, lo que puede derivar en derrame pericárdico, fibrosis o adherencias."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Fisiopatología y Complicaciones",
+        numero: 10,
+        pregunta: "¿Cuáles son las tres complicaciones más relevantes de la pericarditis, sus frecuencias y de qué depende su progresión?",
+        respuesta: "Su progresión depende de la severidad y cronicidad del proceso inflamatorio:\n• Derrame pericárdico severo: 15 a 60 % de los casos.\n• Taponamiento cardíaco: 5 a 15 % de los casos.\n• Pericarditis constrictiva: 1 a 2 % de los pacientes (más frecuente en contextos tuberculosos o purulentos)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 11,
+        pregunta: "Además de Coxsackie B (el más frecuente) y herpesvirus, ¿qué otros virus causan pericarditis aguda viral o idiopática?",
+        respuesta: "• Echo\n• Influenza\n• Adenovirus\n• Mononucleosis"
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 12,
+        pregunta: "¿Cuál es el perfil demográfico, antecedente clínico y tasa de recidiva de la pericarditis aguda viral o idiopática?",
+        respuesta: "• Perfil: aparece preferentemente en sujetos jóvenes del sexo masculino.\n• Antecedente: infección vírica de vías respiratorias altas manifestada como un síndrome pseudogripal (malestar general, fiebre y mialgias) en las semanas previas, al que se suman los síntomas de inflamación pericárdica.\n• Recidiva: presenta una gran tendencia a la recidiva en el 25 % de los casos."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 13,
+        pregunta: "¿Cuál es la base fisiopatológica, el periodo de aparición y el cuadro clínico del síndrome de pospericardiotomía (postinjuria)?",
+        respuesta: "• Base: probablemente inmunológica.\n• Contexto y tiempo de aparición: pacientes sometidos a cirugía cardiaca, apareciendo en un periodo variable de 10 días a varias semanas.\n• Cuadro clínico: fiebre, dolor precordial de tipo pericárdico, artralgias y roce pericárdico; se asocia a pleuritis y neumonitis.\n• Evolución: favorable en la mayoría de los casos, aunque suele recidivar."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 14,
+        pregunta: "¿Cuáles son los principales factores predisponentes de la pericarditis bacteriana (purulenta)?",
+        respuesta: "• Derrame pericárdico en pericarditis urémica.\n• Inmunosupresión condicionada por quemaduras extensas, inmunoterapia, linfoma, leucemia o SIDA."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 15,
+        pregunta: "¿Cuál es la mortalidad, evolución, presentación clínica y signos diagnósticos útiles de la pericarditis bacteriana (purulenta)?",
+        respuesta: "• Mortalidad y evolución: mortalidad muy alta (70 %), con evolución fulminante en pocos días.\n• Clínica: el dolor pericárdico está ausente en la mayoría de los casos; el cuadro lo dominan la sepsis y el taponamiento cardiaco.\n• Signos diagnósticos útiles: importante leucocitosis con neutrofilia, cardiomegalia radiológica y ensanchamiento mediastínico."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 16,
+        pregunta: "¿Qué conectivopatías causan pericarditis y en qué porcentajes se presenta en LES y artritis reumatoide?",
+        respuesta: "• Lupus eritematoso sistémico (LES): 20 a 40 % de los casos.\n• Artritis reumatoide: menos del 10 % de los casos.\n• Otras: esclerodermia, panarteritis nudosa (PAN) y otras vasculitis, y dermatomiositis."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 17,
+        pregunta: "¿En qué porcentaje de pacientes renales aparece la pericarditis urémica y qué implicación terapéutica tiene?",
+        respuesta: "• Aparece en el 32 a 42 % de los pacientes urémicos crónicos.\n• Aparece en el 15 % de los pacientes sometidos a hemodiálisis crónica.\n• Implicación: constituye un criterio de tratamiento renal sustitutivo."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 18,
+        pregunta: "¿Con qué frecuencia y ante qué tumores se observa la pericarditis neoplásica, y cómo se manifiesta clínicamente?",
+        respuesta: "• Frecuencia: en el 5 a 15 % de los pacientes con neoplasias malignas.\n• Neoplasias asociadas: cáncer broncogénico, cáncer de mama, leucemia, linfoma de Hodgkin y otros linfomas.\n• Manifestación clínica: derrame pericárdico hemorrágico y taponamiento cardiaco."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación",
+        numero: 19,
+        pregunta: "¿En qué tratamientos oncológicos es frecuente la pericarditis posradiación y en qué plazo temporal se presenta?",
+        respuesta: "• Es frecuente tras radioterapia por linfoma de Hodgkin y cáncer de mama.\n• Se presenta como una pericarditis aguda en el curso de los 12 meses siguientes a la radioterapia."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Cuadro Clínico",
+        numero: 20,
+        pregunta: "¿Cuál es el síntoma predominante de la pericarditis aguda, su frecuencia y sus características semiológicas?",
+        respuesta: "El dolor precordial, presente en más del 95 % de los casos:\n• Calidad y localización: agudo, punzante o urente en la región anterior del tórax, con irradiación hacia el cuello, los hombros o la región epigástrica.\n• Agravantes: respiración profunda, tos o decúbito supino.\n• Atenuantes: inclinación hacia adelante."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Cuadro Clínico",
+        numero: 21,
+        pregunta: "¿Qué otros síntomas acompañan al dolor precordial en la pericarditis?",
+        respuesta: "• Fiebre\n• Disnea leve a moderada\n• Taquicardia\n• Ortopnea (en casos severos)"
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Cuadro Clínico",
+        numero: 22,
+        pregunta: "¿Cómo se describe y cuándo es más evidente el frote pericárdico?",
+        respuesta: "Es un ruido de fricción superficial que resulta más evidente en la fase inspiratoria con el paciente inclinado hacia adelante."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico",
+        numero: 23,
+        pregunta: "¿Cómo se establece el diagnóstico clínico de pericarditis aguda?",
+        respuesta: "Con la presencia de al menos 2 de las siguientes 4 características:\n1. Dolor torácico característico.\n2. Frote pericárdico.\n3. Cambios electrocardiográficos sugestivos.\n4. Evidencia de derrame pericárdico en ecocardiografía."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico",
+        numero: 24,
+        pregunta: "¿En qué porcentaje de casos ocurren cambios electrocardiográficos típicos y cuáles son sus 4 etapas evolutivas?",
+        respuesta: "Ocurren en el 60 al 80 % de los casos:\n• Etapa 1 (primeras 2 semanas): elevación difusa del segmento ST con depresión del segmento PR.\n• Etapa 2: resolución de las anomalías de los segmentos PR y ST, con aplanamiento de las ondas T.\n• Etapa 3: inversión de las ondas T asimétricas.\n• Etapa 4 (hasta 3 meses): normalización del electrocardiograma."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico",
+        numero: 25,
+        pregunta: "¿Qué utilidad diagnóstica tienen los marcadores inflamatorios y los biomarcadores de necrosis miocárdica?",
+        respuesta: "• PCR y VSG: indicadores comunes de actividad inflamatoria.\n• Troponinas: detectan necrosis miocárdica para diagnosticar miopericarditis."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico",
+        numero: 26,
+        pregunta: "¿Qué papel desempeñan la ecocardiografía, la tomografía computarizada y la resonancia magnética en la pericarditis?",
+        respuesta: "• Ecocardiografía: identifica derrame pericárdico y signos de taponamiento (como colapso auricular o ventricular).\n• Tomografía computarizada (TC): identifica calcificaciones o engrosamientos pericárdicos.\n• Resonancia magnética (RM): confirma inflamación, fibrosis o adherencias mediante realce tardío con gadolinio."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico",
+        numero: 27,
+        pregunta: "¿Cuándo está indicada la pericardiocentesis diagnóstica, qué estudios se realizan al líquido y qué valor de ADA sugiere tuberculosis?",
+        respuesta: "Está indicada en derrame severo o sospecha infecciosa:\n• Estudios del líquido: análisis citológico, cultivos aerobios y anaerobios, tinciones especiales (Gram y Ziehl-Neelsen), PCR para Mycobacterium tuberculosis y actividad de adenosina desaminasa (ADA).\n• Punto de corte diagnóstico: una actividad de ADA > 40 U/L sugiere etiología tuberculosa."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento Farmacológico y No Farmacológico",
+        numero: 28,
+        pregunta: "¿Cuál es el esquema de primera línea con AINE (ibuprofeno o aspirina) en la pericarditis aguda?",
+        respuesta: "• Ibuprofeno: 600 a 800 mg cada 8 horas durante 1 a 2 semanas, seguido de reducción gradual hasta completar 4 a 6 semanas.\n• Aspirina (alternativa): 750 a 1000 mg cada 8 horas, con un esquema similar de reducción gradual."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento Farmacológico y No Farmacológico",
+        numero: 29,
+        pregunta: "¿Cuál es la dosis y duración recomendada de la colchicina para reducir la recurrencia de pericarditis?",
+        respuesta: "• Peso < 70 kg: 0.5 mg al día.\n• Peso ≥ 70 kg: 0.5 mg cada 12 horas.\n• Duración: 3 meses en pericarditis aguda y hasta 6 meses en pericarditis recurrente."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento Farmacológico y No Farmacológico",
+        numero: 30,
+        pregunta: "¿Cuándo están indicados los corticoides, qué fármaco y dosis se utilizan y cómo se suspenden?",
+        respuesta: "• Indicaciones: casos refractarios, contraindicación para AINE, pericarditis autoinmune, pericarditis recurrente severa o pericarditis urémica.\n• Esquema: prednisona a dosis bajas de 0.2 a 0.5 mg/kg/día, con reducción progresiva."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento Farmacológico y No Farmacológico",
+        numero: 31,
+        pregunta: "¿Cuánto tiempo debe mantenerse la restricción de actividad física según el cuadro clínico?",
+        respuesta: "• Pericarditis aguda no complicada: al menos durante 4 semanas.\n• Miopericarditis o pericarditis recurrente: extenderse a 3 meses (el ejercicio intenso aumenta el riesgo de recurrencia y complicaciones)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento Farmacológico y No Farmacológico",
+        numero: 32,
+        pregunta: "¿Cuáles son el manejo no farmacológico de seguimiento y las intervenciones definitivas ante complicaciones graves?",
+        respuesta: "• Seguimiento no farmacológico: restricción de actividad física en fase aguda y monitorización con ecocardiografía y marcadores inflamatorios.\n• Taponamiento cardiaco: pericardiocentesis guiada por ecocardiografía.\n• Pericarditis constrictiva: pericardiectomía (tratamiento definitivo)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Criterios de Hospitalización y Pronóstico",
+        numero: 33,
+        pregunta: "¿Cuáles son los 7 criterios de hospitalización (alto riesgo) en pacientes con pericarditis?",
+        respuesta: "1. Fiebre > 38 °C\n2. Inmunosupresión\n3. Derrame pericárdico severo\n4. Taponamiento cardiaco\n5. Traumatismo reciente\n6. Ausencia de respuesta a AINE tras 1 semana de tratamiento\n7. Miopericarditis"
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Criterios de Hospitalización y Pronóstico",
+        numero: 34,
+        pregunta: "¿Cuál es el porcentaje global de recurrencia, cuáles son los factores de mal pronóstico y qué mortalidad alcanza la pericarditis bacteriana no tratada?",
+        respuesta: "• Recurrencia: hasta el 30 % de los pacientes (prevenible con colchicina y restricción física).\n• Factores de mal pronóstico: fiebre > 38 °C, derrame severo, taponamiento cardiaco y falta de respuesta a AINE tras una semana.\n• Mortalidad en pericarditis bacteriana no tratada: alcanza el 40 % (en la forma purulenta fulminante alcanza hasta el 70 %).\n• Referencia: enviar a segundo o tercer nivel a pacientes con criterios de alto riesgo o complicaciones."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Cuadro Clínico (Integración de Datos Nuevos)",
+        numero: 35,
+        pregunta: "¿De qué estructura anatómica procede el dolor pericárdico, cuánto puede durar, qué otras irradiaciones clásicas tiene y qué movimientos lo exacerban?",
+        respuesta: "• Origen: procede del pericardio parietal.\n• Duración: continuo, con duración de hasta varios días.\n• Irradiación: hacia las regiones supraclaviculares (sobre todo hacia la izquierda) y hacia el trapecio.\n• Agravantes adicionales: movimientos laterales del tórax (además de la inspiración profunda y el decúbito dorsal)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Cuadro Clínico (Integración de Datos Nuevos)",
+        numero: 36,
+        pregunta: "¿Cuál es el valor semiológico del roce (frote) pericárdico, en qué punto anatómico y fase respiratoria se ausculta mejor según este texto?",
+        respuesta: "• Es un signo patognomónico de pericarditis (aunque no se escucha en todos los pacientes o puede oírse solo en alguna etapa).\n• Foco y maniobra de auscultación: se ausculta mejor cerca del borde paraesternal izquierdo, con el paciente inclinado hacia adelante y en espiración."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Cuadro Clínico (Integración de Datos Nuevos)",
+        numero: 37,
+        pregunta: "¿De qué dos factores depende la sintomatología del derrame pericárdico?",
+        respuesta: "De la cantidad y de la velocidad con que se acumule el líquido en el saco pericárdico."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico (Integración de Datos Nuevos)",
+        numero: 38,
+        pregunta: "¿Qué morfología tiene la elevación del ST en la pericarditis, cuál es el signo electrocardiográfico más específico y qué alteración del voltaje puede observarse?",
+        respuesta: "• Morfología del ST: elevación del segmento ST 'en colgadura' (cóncavo hacia arriba) en todas las derivaciones.\n• Signo más específico: descenso del segmento PR.\n• Alteración del voltaje: disminución del voltaje del QRS (asociada a derrame pericárdico)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico (Integración de Datos Nuevos)",
+        numero: 39,
+        pregunta: "¿Qué hallazgos radiológicos presenta la radiografía de tórax en la pericarditis con derrame importante?",
+        respuesta: "• Cardiomegalia global con pérdida de los bordes normales del corazón.\n• Si el derrame es muy importante, produce la típica 'imagen en cantimplora o en tienda de campaña'."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico (Integración de Datos Nuevos)",
+        numero: 40,
+        pregunta: "¿Cuál es la utilidad diferencial del ecocardiograma frente a una cardiomegalia radiológica?",
+        respuesta: "Permite dilucidar con toda certeza si la cardiomegalia radiológica se debe a dilatación de las cavidades o a la presencia de derrame pericárdico y estimar su cantidad aproximada."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico (Integración de Datos Nuevos)",
+        numero: 41,
+        pregunta: "¿Qué biomarcadores se elevan en la perimiocarditis/miopericarditis aguda y cuál es la correlación específica de la troponina I?",
+        respuesta: "• Se elevan la CPK y las troponinas por afectación del miocardio subyacente.\n• Perla ENARM: los niveles elevados de troponina I tienen una alta correlación con el grado de inflamación y necrosis de células miocárdicas en casos de miopericarditis aguda."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento y Contraindicaciones",
+        numero: 42,
+        pregunta: "¿En qué proporción reduce la colchicina el riesgo de recurrencias de la pericarditis aguda?",
+        respuesta: "Reduce a la mitad el riesgo de recurrencias (que es del 15 al 30 % sin colchicina)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento y Contraindicaciones",
+        numero: 43,
+        pregunta: "¿Qué pacientes con pericarditis aguda pueden recibir tratamiento ambulatorio?",
+        respuesta: "Pacientes sin derrame pericárdico significativo y sin características clínicas de riesgo."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento y Contraindicaciones",
+        numero: 44,
+        pregunta: "¿Por qué se intenta evitar al máximo el uso de corticoides en la pericarditis aguda?",
+        respuesta: "Porque aumentan el riesgo de recurrencias (se reservan solo para casos rebeldes)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento y Contraindicaciones",
+        numero: 45,
+        pregunta: "¿Qué fármacos deben evitarse en la pericarditis postinfarto y por qué razón fisiopatológica?",
+        respuesta: "Deben evitarse los AINE y los corticoides, por el teórico riesgo de retrasar la cicatrización miocárdica."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Tratamiento y Contraindicaciones",
+        numero: 46,
+        pregunta: "¿Por qué está contraindicado el uso de anticoagulantes en la pericarditis?",
+        respuesta: "Porque incrementan el riesgo de transformación hemorrágica en caso de que exista derrame pericárdico."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 47,
+        pregunta: "¿Qué es la pericarditis crónica constrictiva?",
+        respuesta: "Es una enfermedad de evolución crónica producida como complicación de procesos inflamatorios (virales, bacterianos, radiaciones, etc.) que provocan engrosamiento, fibrosis y calcificación del pericardio, tornándolo rígido e interfiriendo con el llenado del corazón."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 48,
+        pregunta: "¿Cuál es la causa global más frecuente de pericarditis constrictiva y cuál es la etiología que con mayor frecuencia evoluciona hacia ella?",
+        respuesta: "• Causa global más frecuente: desconocida (pericarditis constrictiva idiopática).\n• Etiología específica que más frecuentemente evoluciona hacia constricción: la tuberculosa."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 49,
+        pregunta: "¿Cuáles son las consecuencias hemodinámicas del impedimento al llenado diastólico del ventrículo derecho en la pericarditis constrictiva?",
+        respuesta: "El pericardio fibrosado actúa como una 'coraza' que impide la distensión diastólica ventricular derecha, generando dos consecuencias:\n• Constituye un obstáculo para el retorno venoso y condiciona una elevación de la presión venosa.\n• El ventrículo derecho no puede aumentar su gasto cardiaco, lo que explica la ausencia de hipertensión pulmonar."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 50,
+        pregunta: "¿Cuáles son las consecuencias hemodinámicas del impedimento al llenado diastólico del ventrículo izquierdo en la pericarditis constrictiva?",
+        respuesta: "• Hipertensión telediastólica, que puede causar hipertensión venocapilar pulmonar.\n• Disminución del gasto cardiaco con caída de la presión arterial."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 51,
+        pregunta: "¿Qué mecanismo fisiológico ventricular se altera en la pericarditis constrictiva y cuál es su repercusión?",
+        respuesta: "El corazón no puede aumentar su volumen diastólico, por lo que se altera el mecanismo de Starling y no puede aumentar el gasto cardiaco (acompañándose además de alteraciones de la función auricular y ventricular)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 52,
+        pregunta: "¿Cuál es la manifestación clínica predominante de la pericarditis constrictiva y qué signo destaca sobre los edemas?",
+        respuesta: "Aparece insuficiencia cardiaca derecha, destacando típicamente la ascitis sobre los edemas periféricos, junto con síntomas generales frecuentes como astenia, adinamia y anorexia."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 53,
+        pregunta: "¿Qué hallazgos característicos se encuentran en la auscultación y palpación precordial de la pericarditis constrictiva?",
+        respuesta: "• Ausencia de cardiomegalia y soplos.\n• Ritmo de tres tiempos por la aparición de un chasquido protodiastólico pericárdico (de Lyan)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 54,
+        pregunta: "¿Cuáles son los 7 signos de insuficiencia cardiaca congestiva de predominio derecho en la pericarditis constrictiva?",
+        respuesta: "• Ingurgitación yugular y de las venas de la cara.\n• Signo de Kussmaul.\n• Hepatomegalia congestiva dolorosa.\n• Ascitis recidivante.\n• Derrame pleural derecho o bilateral (60 %).\n• Edema de miembros inferiores.\n• Red venosa colateral del abdomen."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 55,
+        pregunta: "¿Cuáles son los 4 signos de bajo gasto cardiaco en la pericarditis constrictiva?",
+        respuesta: "• Pulso de baja amplitud.\n• Disminución de la PAS con PAD normal (disminución de la presión de pulso).\n• Pulso paradójico.\n• Caquexia cardiaca."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 56,
+        pregunta: "¿Cuáles son los hallazgos electrocardiográficos más frecuentes (aunque no patognomónicos) en la pericarditis constrictiva?",
+        respuesta: "• Complejos de bajo voltaje.\n• Alteraciones de la repolarización ventricular (isquemia subepicárdica en derivaciones precordiales).\n• Signos de crecimiento auricular y fibrilación auricular."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 57,
+        pregunta: "¿Qué hallazgo en la radiografía de tórax establece con gran certeza el diagnóstico de pericarditis constrictiva y en qué porcentaje aparece?",
+        respuesta: "La calcificación pericárdica, presente en el 50 % de los casos, que junto a un cuadro clínico sugestivo establece el diagnóstico con gran certeza."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 58,
+        pregunta: "¿Qué utilidad tienen el ecocardiograma y la resonancia magnética (RM) en la pericarditis constrictiva?",
+        respuesta: "• Ecocardiograma: permite el diagnóstico diferencial con la miocardiopatía restrictiva.\n• Resonancia magnética (RM): visualiza con mayor precisión el engrosamiento pericárdico."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 59,
+        pregunta: "¿Qué morfología adopta la curva de presión diastólica ventricular en el cateterismo cardiaco y cómo se diferencia de la miocardiopatía restrictiva?",
+        respuesta: "Presenta una morfología en raíz cuadrada o 'dip-plateau'; dado que este patrón es muy similar al de la miocardiopatía restrictiva, a veces se precisa realizar biopsia para diferenciarlas."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 60,
+        pregunta: "¿Con qué patologías debe hacerse fundamentalmente el diagnóstico diferencial y qué estudios auxiliares son importantes?",
+        respuesta: "Debe hacerse fundamentalmente con la miocardiopatía restrictiva y la insuficiencia cardiaca, empleando como procedimientos auxiliares la radiografía de tórax, TAC, RM, ecocardiograma y cateterismo cardiaco."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Pericarditis Constrictiva",
+        numero: 61,
+        pregunta: "¿En qué consiste el tratamiento definitivo de la pericarditis constrictiva, qué estructura se extirpa y cuál es su mortalidad quirúrgica?",
+        respuesta: "• Procedimiento: pericardiectomía (la pericarditis constrictiva es su indicación más frecuente), extirpando habitualmente el pericardio parietal comprendido entre ambos nervios frénicos; generalmente puede realizarse sin cirugía extracorpórea.\n• Mortalidad quirúrgica: alrededor del 11 %, relacionándose directamente con la clase funcional preoperatoria.\n• Evolución posoperatoria: algunos pacientes mejoran inmediatamente tras la cirugía, mientras que otros tardan semanas o meses en hacerlo debido a cierto grado de atrofia miocárdica."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Definición y Epidemiología (Integración de Infografía)",
+        numero: 62,
+        pregunta: "¿Cuál es la mortalidad global reportada de la pericarditis aguda y los porcentajes específicos de miopericarditis y taponamiento cardiaco según esta fuente?",
+        respuesta: "• Mortalidad: 1.1 %.\n• Miopericarditis: 15 %.\n• Taponamiento cardiaco: 1 a 2 % (mnemotecnia: '15 toca MIO, 1-2 tapa el corazón')."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación (Integración de Infografía)",
+        numero: 63,
+        pregunta: "Además de síntomas respiratorios (IVRA), ¿qué otro antecedente clínico previo suele preceder a la pericarditis viral/idiopática/postviral y cuál es su incidencia reportada en esta fuente?",
+        respuesta: "• Suele seguir a una IVRA o a síntomas gastrointestinales.\n• Incidencia: 30 a 50 %."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación (Integración de Infografía)",
+        numero: 64,
+        pregunta: "¿Qué virus específicos adicionales (más allá de Coxsackie B y Echo) se incluyen dentro de la etiología viral de la pericarditis?",
+        respuesta: "• Coxsackie A9/B1\n• Citomegalovirus (CMV)\n• Virus de Epstein-Barr (EBV)\n• Herpesvirus humano 6 (HHV-6)\n• Sarampión\n• VIH\n• Parvovirus B19"
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación (Integración de Infografía)",
+        numero: 65,
+        pregunta: "¿Qué incidencia global tiene Mycobacterium tuberculosis en esta fuente y en qué contexto epidemiológico específico suele ser la causa más frecuente?",
+        respuesta: "• Incidencia: 5 a 10 % (causa importante en países económicamente emergentes).\n• Contexto clave: en zonas endémicas de VIH, la tuberculosis suele ser la causa más frecuente (mnemotecnia: 'VIH + derrame/pericarditis = piensa en TB')."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación (Integración de Infografía)",
+        numero: 66,
+        pregunta: "¿Cuáles son las causas infecciosas RARAS (bacterianas, fúngicas y parasitarias) de pericarditis?",
+        respuesta: "• Bacterias raras: Coxiella burnetii, Borrelia burgdorferi, neumococo y meningococo.\n• Hongos: histoplasmosis.\n• Parásitos: Toxoplasma, Leishmania y Echinococcus."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación (Integración de Infografía)",
+        numero: 67,
+        pregunta: "¿Cuál es la distribución porcentual específica dentro de las etiologías autoinmunitarias de pericarditis?",
+        respuesta: "• Lupus eritematoso sistémico (LES): > 50 % (líder en este grupo).\n• Artritis reumatoide: 10 a 30 %.\n• Esclerosis sistémica: < 20 %."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación (Integración de Infografía)",
+        numero: 68,
+        pregunta: "Además de la insuficiencia renal (uremia), ¿qué otras dos causas metabólicas provocan pericarditis y con qué frecuencia?",
+        respuesta: "• Mixedema (hipotiroidismo severo): hasta 30 %.\n• Enfermedad de Addison: muy infrecuente."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación (Integración de Infografía)",
+        numero: 69,
+        pregunta: "¿Cuál es el tumor maligno PRIMARIO del pericardio?",
+        respuesta: "El mesotelioma pericárdico (recordando que los secundarios más frecuentes son pulmón, mama y linfomas)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Etiología y Clasificación (Integración de Infografía)",
+        numero: 70,
+        pregunta: "¿Qué porcentaje representa la etiología traumática/iatrogénica y cómo se divide según su inicio temporal?",
+        respuesta: "• Porcentaje: 5 a 20 %.\n• Inicio temprano: por lesión directa o indirecta.\n• Inicio tardío: postinfarto (posteriormente puede relacionarse con síndrome postlesión cardiaca)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Cuadro Clínico y Riesgo de Extensión al Miocardio",
+        numero: 71,
+        pregunta: "¿Qué síntomas respiratorios inespecíficos adicionales pueden asociarse al dolor torácico pericárdico (que también irradia al brazo ipsilateral)?",
+        respuesta: "Tos y fatiga (además de disnea y taquicardia), con irradiación del dolor también hacia el brazo ipsilateral."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Cuadro Clínico y Riesgo de Extensión al Miocardio",
+        numero: 72,
+        pregunta: "¿Cuál es la principal complicación de extensión de la pericarditis y cuáles son los 10 factores de riesgo específicos asociados?",
+        respuesta: "La principal complicación es la miopericarditis, cuyos factores de riesgo son: 1) Adolescente (joven), 2) Sexo masculino, 3) Fiebre, 4) Arritmias, 5) Elevación del segmento ST, 6) Uso temprano de dosis altas de esteroides, 7) Falta de colchicina, 8) Respuesta ineficaz a AINE, 9) PCR ultrasensible elevada y 10) VSG elevada."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Clasificación Temporal de la Pericarditis",
+        numero: 73,
+        pregunta: "¿Cómo se clasifica la pericarditis según su tiempo de evolución y qué frecuencias presentan los hallazgos en la forma aguda?",
+        respuesta: "• Pericarditis aguda (nuevo inicio): dolor precordial hasta 95 %, frote pericárdico 20 a 35 %, cambios en ECG hasta 60 %, derrame pericárdico hasta 60 %, PCR/VSG/leucocitos elevados e inflamación pericárdica por TAC o RM.\n• Pericarditis incesante: síntomas > 4 a 6 semanas y < 3 meses, sin remisión.\n• Pericarditis crónica: duración > 3 meses.\n• Pericarditis recurrente: reaparición después de un primer episodio documentado, con remisión completa y periodo libre de síntomas ≥ 4 a 6 semanas (ocurre en 20 a 50 % de los casos)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Clasificación Temporal de la Pericarditis",
+        numero: 74,
+        pregunta: "¿Cuál es la distribución etiológica de la pericarditis recurrente (mnemotecnia 60-20-5)?",
+        respuesta: "• Idiopática: 60 a 70 %.\n• Infecciosa (generalmente viral): 20 a 30 %.\n• Inflamatoria sistémica / lesión pericárdica: 5 a 10 %."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico y Clasificación del Derrame Pericárdico",
+        numero: 75,
+        pregunta: "¿Cómo se clasifica el derrame pericárdico por su tamaño ecocardiográfico?",
+        respuesta: "• Ligero: < 10 mm.\n• Moderado: 10 a 20 mm.\n• Severo: > 20 mm.\n• Muy severo: > 20 mm + compresión cardiaca."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico y Clasificación del Derrame Pericárdico",
+        numero: 76,
+        pregunta: "¿Cuál es la clasificación ecocardiográfica de Horowitz para el derrame pericárdico?",
+        respuesta: "• Tipo A: sin derrame.\n• Tipo B: separación pericardio-epicardio con líquido 3 a 16 mm.\n• Tipo C1: separación sistólica y diastólica > 16 mm.\n• Tipo C2: separación sistólica y diastólica con disminución de la movilidad del pericardio.\n• Tipo D: separación pronunciada con grandes espacios libres en ecos.\n• Tipo E: engrosamiento pericárdico > 4 mm."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico y Clasificación del Derrame Pericárdico",
+        numero: 77,
+        pregunta: "¿Cuál es el panel de estudios iniciales ante la sospecha de pericarditis aguda y qué estudios etiológicos específicos se solicitan según sospecha?",
+        respuesta: "• Estudios iniciales: ECG, radiografía de tórax PA y lateral, ecocardiograma transtorácico, PCR, VSG, biometría hemática, y CPK/troponinas si hay sospecha de miopericarditis.\n• Estudios etiológicos específicos: sospecha infecciosa → pericardiocentesis + citoquímico/tinciones/cultivos; sospecha de TB pericárdica → Ziehl-Neelsen, BAAR, cultivo, ADA (> 40 U/L); sospecha de autoinmunidad → ANA y otros anticuerpos."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Predictores de Pronóstico Adverso y Seguimiento",
+        numero: 78,
+        pregunta: "¿Cómo se dividen los predictores de pronóstico adverso en criterios mayores y menores, y cuál es la conducta clínica ante la presencia de 1 solo criterio?",
+        respuesta: "La presencia de 1 solo criterio indica alto riesgo → hospitalizar:\n• Criterios mayores (FIS-TA-AINE): Fiebre > 38 °C, Inicio subagudo, Derrame pericárdico severo, Taponamiento cardíaco, Falta de respuesta a AINE después de 1 semana.\n• Criterios menores (MI-I-TA): Miopericarditis, Inmunosupresión, Trauma, Tratamiento con anticoagulantes orales."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Predictores de Pronóstico Adverso y Seguimiento",
+        numero: 79,
+        pregunta: "¿Cuál es el riesgo específico de evolucionar a pericarditis constrictiva según la etiología (mnemotecnia 1-5-30)?",
+        respuesta: "• Bajo (< 1 %): pericarditis viral o idiopática.\n• Intermedio (2 a 5 %): origen autoinmune o neoplásico.\n• Alto (20 a 30 %): pericarditis purulenta bacteriana, especialmente tuberculosis."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Predictores de Pronóstico Adverso y Seguimiento",
+        numero: 80,
+        pregunta: "¿Qué porcentaje de derrames pericárdicos crónicos (> 3 meses) progresan a taponamiento cardíaco y cuáles son las tres causas de muerte en la pericarditis bacteriana sin tratamiento?",
+        respuesta: "• Derrame pericárdico crónico (> 3 meses): hasta 30 % de progresión a taponamiento.\n• Causas de muerte en pericarditis bacteriana no tratada: taponamiento, sepsis o constricción."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Predictores de Pronóstico Adverso y Seguimiento",
+        numero: 81,
+        pregunta: "¿Cuál es el protocolo de seguimiento clínico y paraclínico según el riesgo (alto riesgo, bajo riesgo y pericarditis recurrente)?",
+        respuesta: "• Alto riesgo: hospitalizar, seguimiento cada 7 días con PCR, VSG y leucocitos, y ecocardiograma si hay evolución desfavorable.\n• Bajo riesgo (ambulatorio): evaluar cada 7 días hasta remisión de síntomas y normalización de leucocitos y PCR; leucocitos y PCR a los 30 días (si hay buena respuesta y ECG + ECO + PCR normales, seguimiento a 3 meses y egreso).\n• Pericarditis recurrente (1-2-1): seguimiento a 1 a 2 semanas y 1 mes con leucocitos, creatinina, PCR, marcadores de necrosis miocárdica, transaminasas y ecocardiograma."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico Invasivo y Escalera Terapéutica",
+        numero: 82,
+        pregunta: "¿Cuáles son las tres indicaciones formales de pericardiocentesis (mnemotecnia ETI-TAM-INF) y con qué guía de imagen se realiza?",
+        respuesta: "Se realiza guiada por ecocardiografía o fluoroscopia ante: 1) Derrame pericárdico en que se deba precisar la etiología diagnóstica (incluyendo derrame > 3 meses o derrame moderado/severo sin respuesta médica), 2) Taponamiento cardíaco, 3) Sospecha de pericarditis infecciosa (bacteriana o micobacterias)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico Invasivo y Escalera Terapéutica",
+        numero: 83,
+        pregunta: "¿En qué consiste y cuáles son las indicaciones de la pericardioscopia + biopsia?",
+        respuesta: "Consiste en la toma de biopsia de pericardio visceral o parietal, recomendada cuando debe precisarse con detalle la etiología, y formalmente indicada si no hay respuesta al tratamiento, o si la pericarditis es recurrente o crónica."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico Invasivo y Escalera Terapéutica",
+        numero: 84,
+        pregunta: "¿Cuál es la restricción de actividad física específica en atletas con pericarditis aguda?",
+        respuesta: "Los atletas deben suspender la actividad física competitiva durante al menos 3 meses (en población general se restringe el ejercicio hasta la resolución clínica)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico Invasivo y Escalera Terapéutica",
+        numero: 85,
+        pregunta: "Además de ibuprofeno y aspirina, ¿qué otros AINE son preferidos como primera línea en pericarditis aguda?",
+        respuesta: "Indometacina y naproxeno (esquema agudo: AINE 4 a 6 semanas + colchicina 3 meses)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico Invasivo y Escalera Terapéutica",
+        numero: 86,
+        pregunta: "¿Cuál es la escalera terapéutica de 4 líneas en la pericarditis recurrente (mnemotecnia A-C-E-I-P)?",
+        respuesta: "• Primera línea: aspirina o AINE (semanas a meses) + colchicina (≥ 6 meses).\n• Segunda línea: corticoesteroides a dosis bajas/moderadas siempre como terapia triple (AINE + colchicina + corticoide), nunca como reemplazo (evitar en infección).\n• Tercera línea: azatioprina, anakinra o inmunoglobulina IV.\n• Cuarta línea: pericardiectomía."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico Invasivo y Escalera Terapéutica",
+        numero: 87,
+        pregunta: "¿Qué regla farmacológica rige la retirada de medicamentos tras alcanzar la remisión clínica en la pericarditis recurrente?",
+        respuesta: "Una vez lograda la remisión clínica completa + ECG, ECO y PCR normalizados, se debe reducir un fármaco a la vez, siendo la colchicina el último fármaco en retirarse."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico Invasivo y Escalera Terapéutica",
+        numero: 88,
+        pregunta: "¿Cuál es el manejo específico según escenario clínico en múltiples recurrencias, resistencia a colchicina/dependencia de esteroides y pericarditis constrictiva?",
+        respuesta: "• Múltiples recurrencias: AINE + colchicina + prednisona ≥ 6 meses; iniciar destete si es tolerado.\n• Colchicina resistente o dependiente de esteroides: AINE + colchicina + prednisona ≥ 6 meses; considerar pericardiectomía.\n• Pericarditis constrictiva: intensificar tratamiento médico si hay constricción transitoria/inflamación pericárdica; pericardiectomía si hay afectación crónica importante. El tratamiento antituberculoso disminuye el riesgo de constricción de > 80 % a < 10 %."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Diagnóstico Invasivo y Escalera Terapéutica",
+        numero: 89,
+        pregunta: "¿Cuál es la principal causa, presentación clínica, estudio de elección y manejo farmacológico de la pericarditis en el embarazo?",
+        respuesta: "• Principal causa de pericarditis recurrente en embarazo: lupus eritematoso sistémico (LES, ~50 %).\n• Manifestación más común: derrame pericárdico, más frecuente en 3.er trimestre.\n• Estudio de elección: ecocardiograma.\n• Fármacos permitidos: AINE de primera línea hasta 2.º trimestre (suspender en semana 20); colchicina sí está indicada; inmunoglobulinas IV y ciclosporina.\n• Contraindicados: metotrexato y ciclofosfamida (suspender 3 meses antes del embarazo)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 90,
+        pregunta: "¿Qué es el taponamiento cardiaco?",
+        respuesta: "Es un síndrome producido por un aumento de la presión intracardiaca secundario al acúmulo de líquido en el saco pericárdico que dificulta el llenado de los ventrículos y compromete el gasto cardiaco."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 91,
+        pregunta: "¿Cuáles son las tres causas más frecuentes de taponamiento cardiaco?",
+        respuesta: "• Neoplasias\n• Pericarditis urémica\n• Idiopáticas"
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 92,
+        pregunta: "¿Cuál es la secuencia fisiopatológica del taponamiento cardiaco?",
+        respuesta: "• Impide dilatación diastólica y llenado ventricular → eleva presión venosa sistémica, disminuye precarga y cae el gasto cardiaco.\n• Fase compensada inicial: taquicardia e incremento de resistencias periféricas por reacción adrenérgica.\n• Fase descompensada: colapso circulatorio franco con hipotensión y bajo gasto."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 93,
+        pregunta: "¿Cuáles son los signos de hipertensión venosa sistémica en el taponamiento cardiaco y qué morfología tiene el pulso yugular?",
+        respuesta: "• Ingurgitación yugular (96 %).\n• Plétora de las venas de la cara.\n• Importante elevación de la presión venosa central (PVC).\n• Pulso yugular: con onda 'x' prominente y onda 'y' disminuida o ausente."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 94,
+        pregunta: "¿Qué manifestaciones clínicas producen la hipotensión arterial y la reacción adrenérgica en el taponamiento cardiaco?",
+        respuesta: "• Hipotensión arterial: colapso circulatorio y obnubilación mental.\n• Reacción adrenérgica: taquicardia, sudoración, palidez y oliguria."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 95,
+        pregunta: "¿Qué es el pulso paradójico, qué punto de corte lo define y en qué otras entidades puede aparecer además del taponamiento cardiaco?",
+        respuesta: "Descenso > 10 mmHg en la presión arterial sistólica (PAS) durante la inspiración. También puede aparecer en pericarditis constrictiva, tromboembolia pulmonar (TEP), asma grave y EPOC."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 96,
+        pregunta: "¿Qué relación tiene el signo de Kussmaul con el taponamiento cardiaco?",
+        respuesta: "Aunque es típico de la pericarditis constrictiva, también puede aparecer en el taponamiento cardiaco."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 97,
+        pregunta: "¿Qué valor y limitación diagnóstica tiene la radiografía de tórax en el taponamiento cardiaco?",
+        respuesta: "Muestra un gran aumento de la silueta cardiaca con forma de 'cantimplora', lo que permite sospechar derrame pericárdico, pero no indica si existe o no taponamiento."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 98,
+        pregunta: "¿Cuál es el signo electrocardiográfico típico del derrame pericárdico severo/taponamiento y cómo se manifiesta en el QRS?",
+        respuesta: "• Alternancia eléctrica: alternancia en la amplitud de las ondas P, QRS y T.\n• Disminución de la amplitud del complejo QRS que varía latido a latido."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 99,
+        pregunta: "¿Cuál es el estudio más sensible y específico para confirmar el taponamiento cardiaco y cuáles son sus signos diagnósticos clave?",
+        respuesta: "El ecocardiograma es el estudio más sensible y específico:\n• Colapso telediastólico de la aurícula derecha y colapso diastólico del ventrículo derecho (signos más frecuentes).\n• Movimiento paradójico de la pared septal.\n• Visualización directa del derrame pericárdico."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 100,
+        pregunta: "¿Qué porcentaje de taponamientos cardiacos se resuelve con la pericardiocentesis evacuadora, cuándo se indica la ventana pericárdica y por qué vías se realiza?",
+        respuesta: "• Resolución con punción pericárdica: aproximadamente en el 60 % de los casos.\n• Ventana pericárdica: indicada cuando la pericardiocentesis no es factible técnicamente, es fallida o el derrame recidiva (vía subxifoidea o toracotomía lateral izquierda)."
+      },
+      {
+        tema: "Tema 2: Pericarditis",
+        subtema: "Taponamiento Cardiaco",
+        numero: 101,
+        pregunta: "¿Qué fármacos están ABSOLUTAMENTE contraindicados en el taponamiento cardiaco y cuál es la medida médica complementaria recomendada?",
+        respuesta: "• Absolutamente contraindicados: diuréticos y vasodilatadores, ya que al disminuir la precarga reducen aún más el gasto cardiaco y pueden desencadenar un shock circulatorio.\n• Medida complementaria importante: expandir la volemia con suero salino, sangre o dextrano."
+      },
+
       // =========================================================================
       // TEMA 3: INSUFICIENCIA CARDIACA CRÓNICA Y AGUDA (74 PREGUNTAS)
       // =========================================================================
@@ -1189,10 +2149,12 @@
     ];
 
     const TOPIC_SHORT_LABELS = {
-      "Tema 3: Insuficiencia Cardiaca Crónica y Aguda": "1. Insuficiencia Cardiaca",
-      "Tema 4: Cor Pulmonale Crónico": "2. Cor Pulmonale",
-      "Tema 5: Síndrome Cardiorrenal": "3. Síndrome Cardiorrenal",
-      "Tema 6: Cardiomiopatías y Miocarditis": "4. Cardiomiopatías"
+      "Tema 1: Fiebre Reumática": "1. Fiebre Reumática",
+      "Tema 2: Pericarditis": "2. Pericarditis",
+      "Tema 3: Insuficiencia Cardiaca Crónica y Aguda": "3. Insuficiencia Cardiaca",
+      "Tema 4: Cor Pulmonale Crónico": "4. Cor Pulmonale",
+      "Tema 5: Síndrome Cardiorrenal": "5. Síndrome Cardiorrenal",
+      "Tema 6: Cardiomiopatías y Miocarditis": "6. Cardiomiopatías"
     };
 
     const CARDIO3_PAIRS = cardiologiaDia3.map((item, index) => {
@@ -1436,7 +2398,7 @@
             <div class="arcade-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div class="space-y-1">
                 <h2 class="font-arcade text-xl sm:text-2xl font-bold text-white uppercase">Cardiología 3 • Día 3 ENARM</h2>
-                <p class="text-xs sm:text-sm text-slate-300">Domina las <strong>${CARDIO3_PAIRS.length} tarjetas completas</strong>: Insuficiencia Cardiaca (74), Cor Pulmonale (18), Síndrome Cardiorrenal (16) y Cardiomiopatías/Miocarditis (39) en 5 modos.</p>
+                <p class="text-xs sm:text-sm text-slate-300">Domina las <strong>${CARDIO3_PAIRS.length} tarjetas completas</strong>: Fiebre Reumática (35), Pericarditis (101), Insuficiencia Cardiaca (74), Cor Pulmonale (18), Síndrome Cardiorrenal (16) y Cardiomiopatías/Miocarditis (39) en 5 modos.</p>
               </div>
               <div class="sm:w-56 shrink-0">
                 <div class="flex justify-between font-mono-code text-xs mb-1">
